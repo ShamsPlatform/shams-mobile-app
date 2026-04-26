@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shams_mobile_app/widgets/custom_solid_button.dart'; // استدعاء الزر المخصص
+import 'package:shams_mobile_app/widgets/custom_primary_button.dart'; // استدعاء الزر المخصص
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
