@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:shams_mobile_app/views/home_screen.dart';
+import 'package:shams_mobile_app/views/home.dart';
 
 import 'utils/theme.dart';
 
@@ -56,11 +57,9 @@ class ShamsApp extends StatelessWidget {
         Locale('en', 'US'), // English — fallback
       ],
       localizationsDelegates: const [
-        // Add flutter_localizations delegates when you integrate the
-        // flutter_localizations package:
-        //   GlobalMaterialLocalizations.delegate,
-        //   GlobalWidgetsLocalizations.delegate,
-        //   GlobalCupertinoLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
       ],
 
       // ── Entry Point ─────────────────────────────────────────────
