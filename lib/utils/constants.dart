@@ -12,7 +12,7 @@ class ShamsColors {
   static const Color primaryBlue = Color(0xFF0052CC);
 
   /// Solar yellow — used for highlights, badges, and accents.
-  static const Color solarYellow = Color(0xFFFFB800);
+  static const Color solarYellow = Color(0xFFffc53d);
 
   /// Verified green — used for success states and verification indicators.
   static const Color verifiedGreen = Color(0xFF27AE60);

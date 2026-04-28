@@ -1,6 +1,6 @@
 name: shams_mobile_app
 description: "Shams Platform - A production-ready Flutter application."
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
@@ -8,6 +8,10 @@ environment:
 
 dependencies:
   flutter:
+    sdk: flutter
+
+  # Localizations (required for Arabic RTL support)
+  flutter_localizations:
     sdk: flutter
 
   # Backend
@@ -28,5 +32,9 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/logo
+    - assets/images/post image.png
+    - assets/images/logo/shams texial logo for light mode.png
+    - assets/images/logo/shams logo.png
+    - assets/images/logo/shams texial logo light mode.png
+    - assets/images/logo/shams texial logo for light mode small height.png
     # - assets/icons/
