@@ -2,41 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../utils/constants.dart';
 
-/// WorkshopCard — بطاقة عرض الورشة مع بيانات المستخدم وحالة المتابعة
 class WorkshopCard extends StatefulWidget {
-  /// اسم المستخدم / صاحب الورشة
   final String username;
-
-  /// مسار الصورة الشخصية (asset أو network)
-  final String imagePath;
-
-  /// اسم المدينة
+  final String userHandle; // جديد: معرف المستخدم مثل @techzone_sa
+  final String imagePath; // صورة الملف الشخصي الدائرية
+  final String coverImagePath; // جديد: صورة الغلاف العلوية للورشة
   final String cityName;
-
-  /// تقييم الورشة (من 0.0 إلى 5.0)
   final double rating;
-
-  /// هل المستخدم الحالي يتابع هذه الورشة؟
   final bool isFollowing;
-
-  /// عدد المتابعين (اختياري)
-  final int? followersCount;
-
-  /// callback عند الضغط على زر المتابعة
+  final int? followersCount; // يمكن الاستغناء عنه لاحقاً إذا لم يكن في التصميم
   final ValueChanged<bool>? onFollowToggle;
-
-  /// callback عند الضغط على البطاقة
+  final VoidCallback? onEnterTap; // جديد: أمر الضغط على زر دخول الورشة
   final VoidCallback? onTap;
 
   const WorkshopCard({
     super.key,
     required this.username,
+    required this.userHandle,
     required this.imagePath,
+    required this.coverImagePath,
     required this.cityName,
     required this.rating,
     required this.isFollowing,
     this.followersCount,
     this.onFollowToggle,
+    this.onEnterTap,
     this.onTap,
   }) : assert(rating >= 0.0 && rating <= 5.0, 'rating must be between 0 and 5');
 
@@ -44,8 +34,7 @@ class WorkshopCard extends StatefulWidget {
   State<WorkshopCard> createState() => _WorkshopCardState();
 }
 
-class _WorkshopCardState extends State<WorkshopCard>
-    with SingleTickerProviderStateMixin {
+class _WorkshopCardState extends State<WorkshopCard> with SingleTickerProviderStateMixin {
   late bool _isFollowing;
   late AnimationController _followAnimController;
   late Animation<double> _followScaleAnim;
@@ -56,8 +45,8 @@ class _WorkshopCardState extends State<WorkshopCard>
     _isFollowing = widget.isFollowing;
     _followAnimController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 200),
-      lowerBound: 0.85,
+      duration: const Duration(milliseconds: 150),
+      lowerBound: 0.9,
       upperBound: 1.0,
       value: 1.0,
     );
@@ -85,16 +74,10 @@ class _WorkshopCardState extends State<WorkshopCard>
     widget.onFollowToggle?.call(_isFollowing);
   }
 
-  /// يحدد لون النجوم بناءً على التقييم
-  Color _ratingColor(double rating) {
-    if (rating >= 4.0) return ShamsColors.verifiedGreen;
-    if (rating >= 2.5) return ShamsColors.solarYellow;
-    return const Color(0xFFE53935);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final bool isNetworkImage = widget.imagePath.startsWith('http');
+    final bool isNetworkAvatar = widget.imagePath.startsWith('http');
+    final bool isNetworkCover = widget.coverImagePath.startsWith('http');
 
     return GestureDetector(
       onTap: widget.onTap,
@@ -102,360 +85,210 @@ class _WorkshopCardState extends State<WorkshopCard>
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: ShamsColors.bgWhite,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16), // حواف دائرية أنعم
           boxShadow: [
             BoxShadow(
-              color: ShamsColors.primaryBlue.withOpacity(0.08),
-              blurRadius: 20,
-              offset: const Offset(0, 6),
-            ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── الرأس: خلفية زرقاء متدرجة ──────────────────────────────
-            _buildCardHeader(isNetworkImage),
+            // ── 1. قسم الصور (الغلاف + الدائرية) ─────────────────────────
+            _buildImagesSection(isNetworkCover, isNetworkAvatar),
 
-            // ── محتوى البطاقة ─────────────────────────────────────────
-            _buildCardBody(),
+            // ── 2. قسم النصوص والبيانات ──────────────────────────────────
+            _buildInfoSection(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCardHeader(bool isNetworkImage) {
-    return Container(
-      height: 90,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [ShamsColors.primaryBlue, Color(0xFF1A73E8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+  // بناء قسم الصور (تداخل الصورة الشخصية مع الغلاف)
+  Widget _buildImagesSection(bool isNetworkCover, bool isNetworkAvatar) {
+    return SizedBox(
+      height: 140, // 110 للغلاف + 30 لبروز الصورة الشخصية للأسفل
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // نقاط زخرفية
-          Positioned(
-            top: -10,
-            right: -10,
-            child: _DecorativeDot(size: 80, opacity: 0.08),
-          ),
-          Positioned(
-            top: 20,
-            left: 30,
-            child: _DecorativeDot(size: 40, opacity: 0.06),
-          ),
-
-          // صورة الملف الشخصي (تطل من الأسفل)
-          Positioned(
-            bottom: -36,
-            right: 20,
-            child: _buildAvatar(isNetworkImage),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAvatar(bool isNetworkImage) {
-    return Container(
-      width: 76,
-      height: 76,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: ShamsColors.bgWhite, width: 3),
-        boxShadow: [
-          BoxShadow(
-            color: ShamsColors.primaryBlue.withOpacity(0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipOval(
-        child: isNetworkImage
-            ? Image.network(
-                widget.imagePath,
+          // صورة الغلاف
+          Container(
+            height: 110,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              color: const Color(0xFFEEF0F4), // لون احتياطي
+              image: DecorationImage(
+                image: isNetworkCover 
+                    ? NetworkImage(widget.coverImagePath) as ImageProvider
+                    : AssetImage(widget.coverImagePath),
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _avatarFallback(),
-              )
-            : Image.asset(
-                widget.imagePath,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _avatarFallback(),
               ),
-      ),
-    );
-  }
-
-  Widget _avatarFallback() {
-    return Container(
-      color: const Color(0xFFD6E4FF),
-      child: Center(
-        child: Text(
-          widget.username.isNotEmpty
-              ? widget.username[0].toUpperCase()
-              : '؟',
-          style: GoogleFonts.tajawal(
-            fontSize: 28,
-            fontWeight: FontWeight.w700,
-            color: ShamsColors.primaryBlue,
+            ),
           ),
-        ),
+          // الصورة الشخصية الدائرية (على اليمين وتبرز للأسفل)
+          Positioned(
+            bottom: 0,
+            right: 16,
+            child: Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: ShamsColors.bgWhite, // خلفية بيضاء قبل الصورة
+                border: Border.all(color: ShamsColors.bgWhite, width: 3), // إطار أبيض
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: ClipOval(
+                child: isNetworkAvatar
+                    ? Image.network(widget.imagePath, fit: BoxFit.cover)
+                    : Image.asset(widget.imagePath, fit: BoxFit.cover),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildCardBody() {
+  // بناء قسم النصوص والأزرار
+  Widget _buildInfoSection() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 44, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── الصف العلوي: الاسم + زر المتابعة ────────────────────────
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // اسم المستخدم والمدينة
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.username,
-                      style: GoogleFonts.tajawal(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                        color: ShamsColors.textGray,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.location_on_rounded,
-                          size: 14,
-                          color: ShamsColors.primaryBlue,
-                        ),
-                        const SizedBox(width: 3),
-                        Flexible(
-                          child: Text(
-                            widget.cityName,
-                            style: GoogleFonts.tajawal(
-                              fontSize: 13,
-                              color: ShamsColors.primaryBlue,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(width: 12),
-
-              // زر المتابعة مع أنيميشن
-              ScaleTransition(
-                scale: _followScaleAnim,
-                child: _FollowButton(
-                  isFollowing: _isFollowing,
-                  onTap: _handleFollowTap,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 14),
-          const Divider(color: Color(0xFFF0F4FF), thickness: 1),
-          const SizedBox(height: 12),
-
-          // ── الصف السفلي: التقييم + عدد المتابعين ────────────────────
-          Row(
-            children: [
-              // التقييم
-              _buildRatingChip(),
-
-              if (widget.followersCount != null) ...[
-                const SizedBox(width: 12),
-                _buildFollowersChip(),
-              ],
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRatingChip() {
-    final color = _ratingColor(widget.rating);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.25)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.star_rounded, size: 16, color: color),
-          const SizedBox(width: 4),
           Text(
-            widget.rating.toStringAsFixed(1),
+            widget.username,
             style: GoogleFonts.tajawal(
-              fontSize: 13,
+              fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: color,
+              color: ShamsColors.textGray,
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFollowersChip() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF0F4FF),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFD6E4FF)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.people_alt_rounded,
-              size: 15, color: ShamsColors.primaryBlue),
-          const SizedBox(width: 4),
           Text(
-            _formatCount(widget.followersCount!),
+            widget.userHandle,
             style: GoogleFonts.tajawal(
               fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: ShamsColors.primaryBlue,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF9EA3B0),
             ),
+          ),
+          const SizedBox(height: 12),
+          
+          Row(
+            children: [
+              const Icon(Icons.location_on_outlined, size: 16, color: Color(0xFF9EA3B0)),
+              const SizedBox(width: 4),
+              Text(
+                widget.cityName,
+                style: GoogleFonts.tajawal(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF9EA3B0),
+                ),
+              ),
+              const SizedBox(width: 16), 
+              const Icon(Icons.star_rounded, size: 16, color: ShamsColors.solarYellow),
+              const SizedBox(width: 4),
+              Text(
+                '${widget.rating}/5',
+                style: GoogleFonts.tajawal(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: ShamsColors.solarYellow, 
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // ── صف الأزرار الجديد والمضمون ──
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween, // يضمن توزيع المساحات
+            children: [
+          
+              
+              // هذه هي المسافة الإجبارية الفاصلة بين الزرين
+             
+              
+              Expanded(
+                child: ScaleTransition(
+                  scale: _followScaleAnim,
+                  child: _ActionBtn(
+                    label: _isFollowing ? 'إلغاء المتابعة' : 'متابعة',
+                    isPrimary: !_isFollowing, 
+                    onTap: _handleFollowTap,
+                  ),
+                ),
+              ),
+               const SizedBox(width: 16), 
+                  Expanded(
+                child: _ActionBtn(
+                  label: 'دخول الورشة',
+                  isPrimary: true, 
+                  onTap: widget.onEnterTap ?? () {},
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
-  }
-
-  String _formatCount(int count) {
-    if (count >= 1000000) return '${(count / 1000000).toStringAsFixed(1)}M';
-    if (count >= 1000) return '${(count / 1000).toStringAsFixed(1)}K';
-    return count.toString();
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// زر المتابعة المنفصل
+// زر الإجراءات الموحد (Action Button) - مصمم ليطابق التصميم الأصفر
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _FollowButton extends StatelessWidget {
-  final bool isFollowing;
+class _ActionBtn extends StatelessWidget {
+  final String label;
+  final bool isPrimary;
   final VoidCallback onTap;
 
-  const _FollowButton({required this.isFollowing, required this.onTap});
+  const _ActionBtn({
+    required this.label,
+    required this.isPrimary,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        duration: const Duration(milliseconds: 200),
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(vertical: 8), // تم تصغير الزر ليكون أنيقاً
         decoration: BoxDecoration(
-          color: isFollowing ? ShamsColors.bgWhite : ShamsColors.primaryBlue,
-          borderRadius: BorderRadius.circular(10),
+          color: isPrimary ? ShamsColors.solarYellow : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isFollowing
-                ? const Color(0xFFD0D5DD)
-                : ShamsColors.primaryBlue,
+            color: isPrimary ? ShamsColors.solarYellow : const Color(0xFFD0D5DD),
             width: 1.5,
           ),
-          boxShadow: isFollowing
-              ? []
-              : [
-                  BoxShadow(
-                    color: ShamsColors.primaryBlue.withOpacity(0.30),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: Icon(
-                isFollowing
-                    ? Icons.check_rounded
-                    : Icons.add_rounded,
-                key: ValueKey(isFollowing),
-                size: 16,
-                color: isFollowing
-                    ? ShamsColors.textGray
-                    : ShamsColors.bgWhite,
-              ),
-            ),
-            const SizedBox(width: 5),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: Text(
-                isFollowing ? 'متابَع' : 'متابعة',
-                key: ValueKey(isFollowing),
-                style: GoogleFonts.tajawal(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: isFollowing
-                      ? ShamsColors.textGray
-                      : ShamsColors.bgWhite,
-                ),
-              ),
-            ),
-          ],
+        child: Text(
+          label,
+          style: GoogleFonts.tajawal(
+            fontSize: 13.5, 
+            fontWeight: FontWeight.w700,
+            color: isPrimary ? ShamsColors.bgWhite : const Color(0xFF9EA3B0),
+          ),
         ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// دائرة زخرفية مساعدة
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _DecorativeDot extends StatelessWidget {
-  final double size;
-  final double opacity;
-
-  const _DecorativeDot({required this.size, required this.opacity});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white.withOpacity(opacity),
       ),
     );
   }
