@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shams_mobile_app/views/home.dart';
+import 'package:shams_mobile_app/views/workshops/workshops_list_screen.dart';
 
 import 'utils/theme.dart';
 
@@ -64,7 +65,7 @@ class ShamsApp extends StatelessWidget {
 
       // ── Entry Point ─────────────────────────────────────────────
       // home: const Scaffold(body: Center(child: Text('شمس — جاهز للبناء 🌟'))),
-      home: const HomeScreen(),
+      home: const WorkshopsListScreen(),
     );
     // );
   }
