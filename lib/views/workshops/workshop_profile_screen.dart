@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../utils/constants.dart';
 import '../../widgets/post_card.dart';
 import '../../widgets/primary_button.dart';
+import '/views/chat/chat_conversation_screen.dart';
 
 class WorkshopProfile extends StatefulWidget {
   final String workshopName;
@@ -89,7 +90,18 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
           padding: const EdgeInsets.symmetric(horizontal: 50),
           child: CustomSolidButton(
             title: 'طلب خدمة صيانة الآن',
-            onPressed: () {},
+            onPressed: () {
+              // 💡 كود الانتقال إلى شاشة المحادثة التي صممها المهندس عمر!
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatConversationScreen(
+                    workshopName: widget.workshopName,
+                    workshopAvatar: widget.logoPath,
+                  ),
+                ),
+              );
+            },
           ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
