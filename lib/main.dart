@@ -21,10 +21,15 @@ Future<void> main() async {
   // Initialize Supabase.
   // TODO: Replace with your actual Supabase project URL and anon key,
   // ideally loaded from environment variables or a .env file via --dart-define.
-  await Supabase.initialize(
-    url: const String.fromEnvironment('SUPABASE_URL'),
-    anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
-  );
+  try {
+    await Supabase.initialize(
+      url: const String.fromEnvironment('SUPABASE_URL'),
+      anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
+    );
+  } catch (e) {
+    debugPrint('Supabase initialization failed: $e');
+    debugPrint('Continuing in offline mode for UI testing.');
+  }
 
   runApp(const ShamsApp());
 }

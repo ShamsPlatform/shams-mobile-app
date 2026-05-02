@@ -3,10 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 
 // استدعاءات "المكعبات" الجاهزة
 import '../../utils/constants.dart';
-import '../../widgets/appbar.dart'; 
-import '../../widgets/shams_bottom_nav_bar.dart'; 
-import '../../widgets/city_filter.dart'; 
-import '../../widgets/workshop_card.dart'; 
+import '../../widgets/appbar.dart';
+import '../../widgets/shams_bottom_nav_bar.dart';
+import '../../widgets/city_filter.dart';
+import '../../widgets/workshop_card.dart';
+import 'workshop_profile_screen.dart';
 
 class WorkshopsListScreen extends StatefulWidget {
   const WorkshopsListScreen({super.key});
@@ -64,16 +65,16 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
   Widget build(BuildContext context) {
     // 3. محرك الفلترة الذكي
     final filteredWorkshops = _selectedCities.isEmpty
-        ? _dummyWorkshops 
+        ? _dummyWorkshops
         : _dummyWorkshops.where((workshop) {
             return _selectedCities.contains(workshop['cityName']);
-          }).toList(); 
+          }).toList();
 
     return Directionality(
-      textDirection: TextDirection.rtl, 
+      textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: const Color(0xFFF5F7FF),
-        
+
         // ── الشريط العلوي ──
         appBar: ShamsPlatformAppBar(
           hasUnreadNotifications: false,
@@ -108,11 +109,18 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
                   child: Row(
                     children: [
                       const SizedBox(width: 14),
-                      const Icon(Icons.search_rounded, size: 20, color: Color(0xFF9EA3B0)),
+                      const Icon(
+                        Icons.search_rounded,
+                        size: 20,
+                        color: Color(0xFF9EA3B0),
+                      ),
                       const SizedBox(width: 10),
                       Text(
                         'ابحث عن الورشة المفضلة...',
-                        style: GoogleFonts.tajawal(fontSize: 13.5, color: const Color(0xFF9EA3B0)),
+                        style: GoogleFonts.tajawal(
+                          fontSize: 13.5,
+                          color: const Color(0xFF9EA3B0),
+                        ),
                       ),
                     ],
                   ),
@@ -142,7 +150,10 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
                   ? Center(
                       child: Text(
                         'لا توجد ورش في المحافظات المحددة.',
-                        style: GoogleFonts.tajawal(fontSize: 16, color: ShamsColors.textGray),
+                        style: GoogleFonts.tajawal(
+                          fontSize: 16,
+                          color: ShamsColors.textGray,
+                        ),
                       ),
                     )
                   : ListView.builder(
@@ -151,7 +162,6 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
                       itemBuilder: (context, index) {
                         final workshop = filteredWorkshops[index];
                         return WorkshopCard(
-                          // تمرير كل المتغيرات الجديدة للبطاقة المحدثة
                           username: workshop['username'],
                           userHandle: workshop['userHandle'],
                           imagePath: workshop['imagePath'],
@@ -160,10 +170,34 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
                           rating: workshop['rating'],
                           isFollowing: workshop['isFollowing'],
                           onFollowToggle: (isFollowing) {
-                            debugPrint('تم تغيير متابعة ${workshop['username']} إلى $isFollowing');
+                            setState(() {
+                              workshop['isFollowing'] = isFollowing;
+                            });
                           },
-                          onEnterTap: () {
-                            debugPrint('جاري الدخول إلى ورشة: ${workshop['username']}');
+                          onEnterTap: () async {
+                            final bool? newFollowState =
+                                await Navigator.push<bool>(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => WorkshopProfile(
+                                      workshopName: workshop['username'],
+                                      userHandle: workshop['userHandle'],
+                                      location: workshop['cityName'],
+                                      rating: workshop['rating'],
+                                      logoPath: workshop['imagePath'],
+                                      coverImagePath:
+                                          workshop['coverImagePath'],
+                                      initialFollowing: workshop['isFollowing'],
+                                    ),
+                                  ),
+                                );
+
+                            if (newFollowState != null &&
+                                newFollowState != workshop['isFollowing']) {
+                              setState(() {
+                                workshop['isFollowing'] = newFollowState;
+                              });
+                            }
                           },
                         );
                       },
