@@ -14,7 +14,7 @@ class WorkshopCard extends StatefulWidget {
   final ValueChanged<bool>? onFollowToggle;
   final VoidCallback? onEnterTap; // جديد: أمر الضغط على زر دخول الورشة
   final VoidCallback? onTap;
-
+ 
   const WorkshopCard({
     super.key,
     required this.username,
@@ -34,7 +34,8 @@ class WorkshopCard extends StatefulWidget {
   State<WorkshopCard> createState() => _WorkshopCardState();
 }
 
-class _WorkshopCardState extends State<WorkshopCard> with SingleTickerProviderStateMixin {
+class _WorkshopCardState extends State<WorkshopCard>
+    with SingleTickerProviderStateMixin {
   late bool _isFollowing;
   late AnimationController _followAnimController;
   late Animation<double> _followScaleAnim;
@@ -121,10 +122,12 @@ class _WorkshopCardState extends State<WorkshopCard> with SingleTickerProviderSt
             height: 110,
             width: double.infinity,
             decoration: BoxDecoration(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
               color: const Color(0xFFEEF0F4), // لون احتياطي
               image: DecorationImage(
-                image: isNetworkCover 
+                image: isNetworkCover
                     ? NetworkImage(widget.coverImagePath) as ImageProvider
                     : AssetImage(widget.coverImagePath),
                 fit: BoxFit.cover,
@@ -141,7 +144,10 @@ class _WorkshopCardState extends State<WorkshopCard> with SingleTickerProviderSt
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: ShamsColors.bgWhite, // خلفية بيضاء قبل الصورة
-                border: Border.all(color: ShamsColors.bgWhite, width: 3), // إطار أبيض
+                border: Border.all(
+                  color: ShamsColors.bgWhite,
+                  width: 3,
+                ), // إطار أبيض
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -186,10 +192,14 @@ class _WorkshopCardState extends State<WorkshopCard> with SingleTickerProviderSt
             ),
           ),
           const SizedBox(height: 12),
-          
+
           Row(
             children: [
-              const Icon(Icons.location_on_outlined, size: 16, color: Color(0xFF9EA3B0)),
+              const Icon(
+                Icons.location_on_outlined,
+                size: 16,
+                color: Color(0xFF9EA3B0),
+              ),
               const SizedBox(width: 4),
               Text(
                 widget.cityName,
@@ -199,46 +209,47 @@ class _WorkshopCardState extends State<WorkshopCard> with SingleTickerProviderSt
                   color: const Color(0xFF9EA3B0),
                 ),
               ),
-              const SizedBox(width: 16), 
-              const Icon(Icons.star_rounded, size: 16, color: ShamsColors.solarYellow),
+              const SizedBox(width: 16),
+              const Icon(
+                Icons.star_rounded,
+                size: 16,
+                color: ShamsColors.solarYellow,
+              ),
               const SizedBox(width: 4),
               Text(
                 '${widget.rating}/5',
                 style: GoogleFonts.tajawal(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: ShamsColors.solarYellow, 
+                  color: ShamsColors.solarYellow,
                 ),
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // ── صف الأزرار الجديد والمضمون ──
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween, // يضمن توزيع المساحات
+            mainAxisAlignment:
+                MainAxisAlignment.spaceBetween, // يضمن توزيع المساحات
             children: [
-          
-              
               // هذه هي المسافة الإجبارية الفاصلة بين الزرين
-             
-              
               Expanded(
                 child: ScaleTransition(
                   scale: _followScaleAnim,
                   child: _ActionBtn(
                     label: _isFollowing ? 'إلغاء المتابعة' : 'متابعة',
-                    isPrimary: !_isFollowing, 
+                    isPrimary: !_isFollowing,
                     onTap: _handleFollowTap,
                   ),
                 ),
               ),
-               const SizedBox(width: 16), 
-                  Expanded(
+              const SizedBox(width: 16),
+              Expanded(
                 child: _ActionBtn(
                   label: 'دخول الورشة',
-                  isPrimary: true, 
+                  isPrimary: true,
                   onTap: widget.onEnterTap ?? () {},
                 ),
               ),
@@ -272,19 +283,23 @@ class _ActionBtn extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(vertical: 8), // تم تصغير الزر ليكون أنيقاً
+        padding: const EdgeInsets.symmetric(
+          vertical: 8,
+        ), // تم تصغير الزر ليكون أنيقاً
         decoration: BoxDecoration(
           color: isPrimary ? ShamsColors.solarYellow : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isPrimary ? ShamsColors.solarYellow : const Color(0xFFD0D5DD),
+            color: isPrimary
+                ? ShamsColors.solarYellow
+                : const Color(0xFFD0D5DD),
             width: 1.5,
           ),
         ),
         child: Text(
           label,
           style: GoogleFonts.tajawal(
-            fontSize: 13.5, 
+            fontSize: 13.5,
             fontWeight: FontWeight.w700,
             color: isPrimary ? ShamsColors.bgWhite : const Color(0xFF9EA3B0),
           ),
