@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:provider/provider.dart';
+// import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shams_mobile_app/views/home.dart';
 import 'package:shams_mobile_app/views/workshops/workshops_list_screen.dart';
+import 'package:shams_mobile_app/views/user_profile/user_profile_screen.dart';
 
 import 'utils/theme.dart';
 
@@ -19,8 +20,6 @@ Future<void> main() async {
   ]);
 
   // Initialize Supabase.
-  // TODO: Replace with your actual Supabase project URL and anon key,
-  // ideally loaded from environment variables or a .env file via --dart-define.
   try {
     await Supabase.initialize(
       url: const String.fromEnvironment('SUPABASE_URL'),
@@ -40,15 +39,7 @@ class ShamsApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return
-    // MultiProvider(
-    //   // Register your controllers/providers here as the app grows.
-    //   // Example:
-    //   //   ChangeNotifierProvider(create: (_) => AuthController()),
-    //   //   ChangeNotifierProvider(create: (_) => HomeController()),
-    //   providers: const [],
-    //   child:
-    MaterialApp(
+    return MaterialApp(
       // ── App Identity ────────────────────────────────────────────
       title: 'شمس',
       debugShowCheckedModeBanner: false,
@@ -69,9 +60,7 @@ class ShamsApp extends StatelessWidget {
       ],
 
       // ── Entry Point ─────────────────────────────────────────────
-      // home: const Scaffold(body: Center(child: Text('شمس — جاهز للبناء 🌟'))),
-      home: const WorkshopsListScreen(),
+      home: const UserProfileScreen(),
     );
-    // );
   }
 }
