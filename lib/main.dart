@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shams_mobile_app/views/main_screen.dart';
 import 'views/auth/welcome.dart';
+import 'package:shams_mobile_app/views/workshops/workshop_dashboard_screen.dart';
 
 import 'utils/theme.dart';
 
@@ -59,7 +60,7 @@ class ShamsApp extends StatelessWidget {
       ],
 
       // ── Entry Point ─────────────────────────────────────────────
-      home: const MainScreen(),
+      home: const WorkshopDashboardScreen(),
     );
   }
 }
