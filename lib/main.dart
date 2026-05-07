@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 // import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shams_mobile_app/views/main_screen.dart';
+import 'views/auth/welcome.dart';
 
 import 'utils/theme.dart';
 

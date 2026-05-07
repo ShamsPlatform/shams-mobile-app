@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../utils/constants.dart';
 import '../../widgets/chat_tile.dart';
 import '../../widgets/search_bar.dart';
-import '../../widgets/shams_bottom_nav_bar.dart';
 import 'chat_conversation_screen.dart'; // مسار شاشة الدردشة
 
 class ChatListScreen extends StatefulWidget {
@@ -51,9 +50,30 @@ class _ChatListScreenState extends State<ChatListScreen> {
       'isOnline': false,
       'unreadCount': 0,
     },
+    {
+      'name': 'سارة خالد',
+      'lastMessage': 'متى سيتوفر الشاحن القادم؟',
+      'time': '15 مارس',
+      'isOnline': false,
+      'unreadCount': 0,
+    },
+    {
+      'name': 'سارة خالد',
+      'lastMessage': 'متى سيتوفر الشاحن القادم؟',
+      'time': '15 مارس',
+      'isOnline': false,
+      'unreadCount': 0,
+    },
+    {
+      'name': 'سارة خالد',
+      'lastMessage': 'متى سيتوفر الشاحن القادم؟',
+      'time': '15 مارس',
+      'isOnline': false,
+      'unreadCount': 0,
+    },
   ];
 
-  int _currentIndex = 2; // مؤشر شريط التنقل السفلي لقسم "المحادثات"
+  // int _currentIndex = 2; // مؤشر شريط التنقل السفلي لقسم "المحادثات"
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +84,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
         appBar: AppBar(
           backgroundColor: ShamsColors.primaryBlue,
           elevation: 0,
-          title: Text('المحادثات', style: GoogleFonts.tajawal(fontWeight: FontWeight.bold, fontSize: 18)),
+          title: Text(
+            'المحادثات',
+            style: GoogleFonts.tajawal(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
           actions: [
             IconButton(
               icon: const Icon(Icons.search_rounded),
@@ -73,7 +99,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 showSearch(
                   context: context,
                   delegate: ShamsSearchDelegate(
-                    searchSuggestions: _chats.map((c) => c['name'] as String).toList(),
+                    searchSuggestions: _chats
+                        .map((c) => c['name'] as String)
+                        .toList(),
                   ),
                 );
               },
@@ -87,13 +115,18 @@ class _ChatListScreenState extends State<ChatListScreen> {
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
               child: Text(
                 'المحادثات الأخيرة',
-                style: GoogleFonts.tajawal(fontSize: 16, fontWeight: FontWeight.bold, color: ShamsColors.textGray),
+                style: GoogleFonts.tajawal(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: ShamsColors.textGray,
+                ),
               ),
             ),
             Expanded(
               child: ListView.separated(
                 itemCount: _chats.length,
-                separatorBuilder: (context, index) => Divider(color: Colors.grey.shade100, height: 1),
+                separatorBuilder: (context, index) =>
+                    Divider(color: Colors.grey.shade100, height: 1),
                 itemBuilder: (context, index) {
                   final chat = _chats[index];
                   return ChatTile(
@@ -103,13 +136,14 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     isOnline: chat['isOnline'],
                     unreadCount: chat['unreadCount'],
                     avatarPath: '', // المسار وهمي حالياً
-                   onTap: () {
+                    onTap: () {
                       // 💡 الانتقال لشاشة المحادثة الفردية مع تمرير اسم الورشة
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => ChatConversationScreen(
-                            workshopName: chat['name'], // نرسل الاسم ليظهر في الـ AppBar
+                            workshopName:
+                                chat['name'], // نرسل الاسم ليظهر في الـ AppBar
                           ),
                         ),
                       );
@@ -119,12 +153,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
               ),
             ),
           ],
-        ),
-        bottomNavigationBar: ShamsBottomNavBar(
-          currentIndex: _currentIndex,
-          onTap: (index) {
-            setState(() => _currentIndex = index);
-          },
         ),
       ),
     );

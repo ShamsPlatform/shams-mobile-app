@@ -3,6 +3,7 @@ import '../widgets/shams_bottom_nav_bar.dart';
 import 'home.dart';
 import 'workshops/workshops_list_screen.dart';
 import 'user_profile/user_profile_screen.dart';
+import 'chat/chat_list_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class MainScreen extends StatefulWidget {
@@ -20,7 +21,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _pages = const [
     HomeScreen(),
     WorkshopsListScreen(),
-    _PlaceholderScreen(title: 'المتابعة'), // Following screen not implemented
+    ChatListScreen(), // Following screen not implemented
     UserProfileScreen(),
   ];
 
@@ -33,10 +34,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: ShamsBottomNavBar(
         currentIndex: _currentIndex,
         onTap: (index) {
