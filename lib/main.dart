@@ -61,7 +61,7 @@ class ShamsApp extends StatelessWidget {
       ],
 
       // ── Entry Point ─────────────────────────────────────────────
-      home: const WorkshopDashboardScreen(),
+      home: const MainScreen(),
     );
   }
 }
