@@ -72,6 +72,7 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
+        
         backgroundColor: Colors.white,
 
         appBar: AppBar(
