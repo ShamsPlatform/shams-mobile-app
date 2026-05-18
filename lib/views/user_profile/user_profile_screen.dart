@@ -8,6 +8,9 @@ import 'add_workshop_screen.dart';
 import 'privacy_security_screen.dart';
 import 'about_shams_screen.dart';
 import '../workshops/workshop_dashboard_screen.dart';
+import '../auth/welcome.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // UserProfileScreen — شاشة الملف الشخصي للمستخدم
@@ -411,7 +414,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 icon: Icons.headset_mic_outlined,
                 title: 'تواصل مع الدعم',
                 showDivider: true,
-                onTap: () {},
+                onTap: _showSupportMenu,
               ),
               _buildSettingTile(
                 icon: Icons.info_outline_rounded,
@@ -535,13 +538,22 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Widget _buildShareButton() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
-      child: CustomSolidButton(title: 'مشاركة التطبيق', onPressed: () {}),
+      child: CustomSolidButton(
+        title: 'مشاركة التطبيق', 
+        onPressed: () {
+          SharePlus.instance.share(
+            ShareParams(
+              text: 'حمّل تطبيق شمس وانضم إلينا الآن!\nhttps://shams.app/download',
+            ),
+          );
+        }
+      ),
     );
   }
 
   Widget _buildLogoutButton() {
     return TextButton.icon(
-      onPressed: () {},
+      onPressed: _showLogoutConfirmation,
       icon: const Icon(Icons.logout_rounded, color: Colors.red, size: 20),
       label: Text(
         'تسجيل الخروج',
@@ -549,6 +561,180 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           color: Colors.red,
           fontWeight: FontWeight.bold,
           fontSize: 14,
+        ),
+      ),
+    );
+  }
+
+  // --- نافذة تواصل مع الدعم ---
+  void _showSupportMenu() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+          ),
+          padding: const EdgeInsets.fromLTRB(25, 15, 25, 30),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'تواصل مع الدعم',
+                style: GoogleFonts.tajawal(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              ListTile(
+                leading: const Icon(Icons.chat_bubble_outline_rounded, color: Color(0xFF25D366)),
+                title: Text('واتساب', style: GoogleFonts.tajawal(fontSize: 16)),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final Uri url = Uri.parse('https://wa.me/967776434968');
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url);
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.phone_in_talk_outlined, color: ShamsColors.primaryBlue),
+                title: Text('اتصال هاتفي', style: GoogleFonts.tajawal(fontSize: 16)),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final Uri url = Uri.parse('tel:+967776434968');
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url);
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.email_outlined, color: Colors.orange),
+                title: Text('إيميل', style: GoogleFonts.tajawal(fontSize: 16)),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final Uri url = Uri.parse('mailto:codyvex1@gmail.com');
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url);
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // --- نافذة تأكيد تسجيل الخروج ---
+  void _showLogoutConfirmation() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+          ),
+          padding: const EdgeInsets.fromLTRB(25, 15, 25, 30),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'تسجيل الخروج',
+                style: GoogleFonts.tajawal(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: ShamsColors.dangerRed,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'هل أنت متأكد أنك تريد تسجيل الخروج؟',
+                style: GoogleFonts.tajawal(
+                  fontSize: 15,
+                  color: ShamsColors.textGray,
+                ),
+              ),
+              const SizedBox(height: 25),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: const BorderSide(color: Colors.grey),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'إلغاء',
+                        style: GoogleFonts.tajawal(
+                          fontSize: 16,
+                          color: Colors.grey.shade700,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+                          (Route<dynamic> route) => false,
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ShamsColors.dangerRed,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'تسجيل الخروج',
+                        style: GoogleFonts.tajawal(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
