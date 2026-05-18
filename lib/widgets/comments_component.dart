@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../utils/constants.dart';
 
@@ -140,13 +141,16 @@ class _CommentsComponentState extends State<CommentsComponent> {
                         indent: 70,
                       ),
                       itemBuilder: (context, index) {
-                        return _CommentTile(
-                          comment: _comments[index],
-                          onLikeTap: () => setState(() {
-                            final c = _comments[index];
-                            c.isLiked = !c.isLiked;
-                            c.likesCount += c.isLiked ? 1 : -1;
-                          }),
+                        return InkWell(
+                          onTap: () => _showCommentMenu(context, index),
+                          child: _CommentTile(
+                            comment: _comments[index],
+                            onLikeTap: () => setState(() {
+                              final c = _comments[index];
+                              c.isLiked = !c.isLiked;
+                              c.likesCount += c.isLiked ? 1 : -1;
+                            }),
+                          ),
                         );
                       },
                     ),
@@ -310,6 +314,68 @@ class _CommentsComponentState extends State<CommentsComponent> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showCommentMenu(BuildContext context, int index) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+          ),
+          padding: const EdgeInsets.fromLTRB(25, 15, 25, 30),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ListTile(
+                leading: const Icon(Icons.copy_rounded, color: ShamsColors.textGray),
+                title: Text('نسخ النص', style: GoogleFonts.tajawal(fontSize: 16)),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await Clipboard.setData(ClipboardData(text: _comments[index].text));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'تم نسخ التعليق',
+                          style: GoogleFonts.tajawal(fontSize: 14, color: Colors.white),
+                        ),
+                        backgroundColor: ShamsColors.textGray,
+                        duration: const Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete_outline_rounded, color: ShamsColors.dangerRed),
+                title: Text('حذف التعليق', style: GoogleFonts.tajawal(fontSize: 16, color: ShamsColors.dangerRed)),
+                onTap: () {
+                  Navigator.pop(context);
+                  setState(() {
+                    _comments.removeAt(index);
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
