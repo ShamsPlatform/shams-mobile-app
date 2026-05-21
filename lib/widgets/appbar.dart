@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/utils/constants.dart';
+import 'package:shams_mobile_app/providers/notification_provider.dart';
 
 /// ShamsPlatformAppBar — شريط التطبيق الرئيسي لمنصة شمس
 ///
@@ -40,6 +42,8 @@ class ShamsPlatformAppBar extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
+    final unreadCount = context.watch<NotificationProvider>().unreadCount;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Container(
@@ -88,19 +92,32 @@ class ShamsPlatformAppBar extends StatelessWidget
                             icon: Icons.notifications_outlined,
                             onTap: onNotificationTap,
                           ),
-                          if (hasUnreadNotifications)
+                          if (unreadCount > 0)
                             Positioned(
-                              top: -2,
-                              left: -2,
+                              top: -4,
+                              left: -6,
                               child: Container(
-                                width: 8,
-                                height: 8,
+                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFE53935),
-                                  shape: BoxShape.circle,
+                                  borderRadius: BorderRadius.circular(10),
                                   border: Border.all(
                                     color: ShamsColors.solarYellow,
                                     width: 1.5,
+                                  ),
+                                ),
+                                constraints: const BoxConstraints(
+                                  minWidth: 16,
+                                  minHeight: 16,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    '$unreadCount',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ),
