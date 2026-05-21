@@ -28,6 +28,10 @@ Future<void> showCommentsSheet(
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CommentsComponent — نافذة التعليقات
+//
+// • Uses context.watch<FeedProvider>() instead of Consumer<FeedProvider>.
+// • All mutations (addComment, deleteComment, toggleCommentLike) use
+//   context.read<FeedProvider>() inside callbacks — never inside build().
 // ─────────────────────────────────────────────────────────────────────────────
 
 class CommentsComponent extends StatefulWidget {
@@ -45,11 +49,6 @@ class CommentsComponent extends StatefulWidget {
 class _CommentsComponentState extends State<CommentsComponent> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void dispose() {
@@ -82,6 +81,14 @@ class _CommentsComponentState extends State<CommentsComponent> {
     final screenH = MediaQuery.of(context).size.height;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
+    // ── Single source of truth — no Consumer wrapper needed ──────────────────
+    final feed = context.watch<FeedProvider>();
+    final post = feed.posts.firstWhere(
+      (p) => p.id == widget.postId,
+      orElse: () => feed.posts.first,
+    );
+    final currentComments = post.comments;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Container(
@@ -95,47 +102,40 @@ class _CommentsComponentState extends State<CommentsComponent> {
             // ── مقبض ───────────────────────────────────────────────
             _buildHandle(),
 
-            // ── عنوان ─────────────────────────────────────────────
-            Consumer<FeedProvider>(
-              builder: (context, feed, child) {
-                final post = feed.posts.firstWhere((p) => p.id == widget.postId, 
-                    orElse: () => feed.posts.first);
-                final currentComments = post.comments;
-
-                return Expanded(
-                  child: Column(
-                    children: [
-                      _buildTitle(currentComments.length),
-                      const Divider(height: 1, thickness: 1, color: ShamsColors.borderLight),
-                      Expanded(
-                        child: currentComments.isEmpty
-                            ? _buildEmpty()
-                            : ListView.separated(
-                                padding: const EdgeInsets.symmetric(vertical: 8),
-                                itemCount: currentComments.length,
-                                separatorBuilder: (_, _) => const Divider(
-                                  height: 1,
-                                  thickness: 1,
-                                  color: ShamsColors.dividerLight,
-                                  indent: 70,
+            // ── عنوان + قائمة التعليقات ────────────────────────────
+            Expanded(
+              child: Column(
+                children: [
+                  _buildTitle(currentComments.length),
+                  const Divider(height: 1, thickness: 1, color: ShamsColors.borderLight),
+                  Expanded(
+                    child: currentComments.isEmpty
+                        ? _buildEmpty()
+                        : ListView.separated(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            itemCount: currentComments.length,
+                            separatorBuilder: (_, _) => const Divider(
+                              height: 1,
+                              thickness: 1,
+                              color: ShamsColors.dividerLight,
+                              indent: 70,
+                            ),
+                            itemBuilder: (context, index) {
+                              final comment = currentComments[index];
+                              return InkWell(
+                                onTap: () => _showCommentMenu(context, index, currentComments),
+                                child: _CommentTile(
+                                  comment: comment,
+                                  onLikeTap: () => context
+                                      .read<FeedProvider>()
+                                      .toggleCommentLike(widget.postId, comment.id),
                                 ),
-                                itemBuilder: (context, index) {
-                                  return InkWell(
-                                    onTap: () => _showCommentMenu(context, index, currentComments),
-                                    child: _CommentTile(
-                                      comment: currentComments[index],
-                                      onLikeTap: () {
-                                        // TODO: Implement comment like toggle in FeedProvider
-                                      },
-                                    ),
-                                  );
-                                },
-                              ),
-                      ),
-                    ],
+                              );
+                            },
+                          ),
                   ),
-                );
-              },
+                ],
+              ),
             ),
 
             const Divider(height: 1, thickness: 1, color: ShamsColors.borderLight),
@@ -238,7 +238,6 @@ class _CommentsComponentState extends State<CommentsComponent> {
               ),
               child: Row(
                 children: [
-                  // const SizedBox(width: 12),
                   GestureDetector(
                     onTap: () {},
                     child: const Padding(
@@ -272,8 +271,6 @@ class _CommentsComponentState extends State<CommentsComponent> {
                       onSubmitted: (_) => _sendComment(),
                     ),
                   ),
-
-                  // أيقونة الإيموجي
                 ],
               ),
             ),
@@ -301,6 +298,7 @@ class _CommentsComponentState extends State<CommentsComponent> {
   }
 
   void _showCommentMenu(BuildContext context, int index, List<CommentModel> currentComments) {
+    final comment = currentComments[index];
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -329,7 +327,7 @@ class _CommentsComponentState extends State<CommentsComponent> {
                 title: Text('نسخ النص', style: GoogleFonts.tajawal(fontSize: 16)),
                 onTap: () async {
                   Navigator.pop(context);
-                  await Clipboard.setData(ClipboardData(text: currentComments[index].text));
+                  await Clipboard.setData(ClipboardData(text: comment.text));
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -347,10 +345,16 @@ class _CommentsComponentState extends State<CommentsComponent> {
               ),
               ListTile(
                 leading: const Icon(Icons.delete_outline_rounded, color: ShamsColors.dangerRed),
-                title: Text('حذف التعليق', style: GoogleFonts.tajawal(fontSize: 16, color: ShamsColors.dangerRed)),
+                title: Text(
+                  'حذف التعليق',
+                  style: GoogleFonts.tajawal(fontSize: 16, color: ShamsColors.dangerRed),
+                ),
                 onTap: () {
                   Navigator.pop(context);
-                  // TODO: Implement deleteComment in FeedProvider
+                  // context.read() in a callback — correct usage.
+                  context
+                      .read<FeedProvider>()
+                      .deleteComment(widget.postId, comment.id);
                 },
               ),
             ],
@@ -450,18 +454,18 @@ class _CommentTile extends StatelessWidget {
 
                 const SizedBox(height: 6),
 
-                // زر الإعجاب
+                // زر الإعجاب — reactive via comment.isLiked
                 GestureDetector(
                   onTap: onLikeTap,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        false // comment.isLiked
+                        comment.isLiked
                             ? Icons.favorite_rounded
                             : Icons.favorite_border_rounded,
                         size: 15,
-                        color: false // comment.isLiked
+                        color: comment.isLiked
                             ? ShamsColors.dangerRed
                             : ShamsColors.textHint,
                       ),
@@ -473,7 +477,7 @@ class _CommentTile extends StatelessWidget {
                         style: GoogleFonts.tajawal(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
-                          color: false // comment.isLiked
+                          color: comment.isLiked
                               ? ShamsColors.dangerRed
                               : ShamsColors.textHint,
                         ),

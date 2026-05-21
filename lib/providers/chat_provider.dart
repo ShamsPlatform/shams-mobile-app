@@ -122,4 +122,19 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
     return chatId;
   }
+
+  /// Clears all messages in [chatId] while keeping the chat visible in the list.
+  void clearChat(String chatId) {
+    final index = _chats.indexWhere((c) => c.chatId == chatId);
+    if (index != -1) {
+      _chats[index] = _chats[index].copyWith(messages: []);
+      notifyListeners();
+    }
+  }
+
+  /// Permanently removes the chat with [chatId] from the inbox.
+  void deleteChat(String chatId) {
+    _chats.removeWhere((c) => c.chatId == chatId);
+    notifyListeners();
+  }
 }

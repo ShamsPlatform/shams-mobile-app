@@ -6,6 +6,7 @@ class CommentModel {
   final UserModel user;
   final String text;
   final int likesCount;
+  final bool isLiked;
   final DateTime timestamp;
 
   const CommentModel({
@@ -14,6 +15,7 @@ class CommentModel {
     required this.user,
     required this.text,
     this.likesCount = 0,
+    this.isLiked = false,
     required this.timestamp,
   });
 
@@ -23,6 +25,7 @@ class CommentModel {
     UserModel? user,
     String? text,
     int? likesCount,
+    bool? isLiked,
     DateTime? timestamp,
   }) {
     return CommentModel(
@@ -31,6 +34,7 @@ class CommentModel {
       user: user ?? this.user,
       text: text ?? this.text,
       likesCount: likesCount ?? this.likesCount,
+      isLiked: isLiked ?? this.isLiked,
       timestamp: timestamp ?? this.timestamp,
     );
   }
@@ -42,6 +46,7 @@ class CommentModel {
       'user': user.toMap(),
       'text': text,
       'likesCount': likesCount,
+      'isLiked': isLiked,
       'timestamp': timestamp.toIso8601String(),
     };
   }
@@ -53,8 +58,9 @@ class CommentModel {
       user: UserModel.fromMap(map['user'] ?? {}),
       text: map['text'] ?? '',
       likesCount: map['likesCount']?.toInt() ?? 0,
-      timestamp: map['timestamp'] != null 
-          ? DateTime.parse(map['timestamp']) 
+      isLiked: map['isLiked'] as bool? ?? false,
+      timestamp: map['timestamp'] != null
+          ? DateTime.parse(map['timestamp'])
           : DateTime.now(),
     );
   }

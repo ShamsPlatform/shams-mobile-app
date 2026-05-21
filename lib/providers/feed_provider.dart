@@ -7,7 +7,8 @@ class FeedProvider extends ChangeNotifier {
   final List<PostModel> _posts = [
     PostModel(
       id: 'p1',
-      textDetails: 'تم الانتهاء اليوم من تركيب منظومة طاقة شمسية بقدرة 5 كيلو واط مع عاكس [مكس/JA] قياسي واط في صنعاء، تم استخدام الألواح الأداء ممتازة من غاز عبر.',
+      textDetails:
+          'تم الانتهاء اليوم من تركيب منظومة طاقة شمسية بقدرة 5 كيلو واط مع عاكس [مكس/JA] قياسي واط في صنعاء، تم استخدام الألواح الأداء ممتازة من غاز عبر.',
       images: ['assets/images/post image.jpg'],
       createdAt: 'منذ ساعتين',
       likesCount: 124,
@@ -36,7 +37,8 @@ class FeedProvider extends ChangeNotifier {
     ),
     PostModel(
       id: 'p2',
-      textDetails: 'مشروع جديد في الرياض! تركيب ألواح شمسية على مبنى تجاري بقدرة 20 كيلو واط. النتائج مبهرة والكفاءة عالية جداً.',
+      textDetails:
+          'مشروع جديد في الرياض! تركيب ألواح شمسية على مبنى تجاري بقدرة 20 كيلو واط. النتائج مبهرة والكفاءة عالية جداً.',
       images: ['assets/images/post image.jpg'],
       createdAt: 'منذ يوم',
       likesCount: 89,
@@ -66,8 +68,10 @@ class FeedProvider extends ChangeNotifier {
     if (index != -1) {
       final post = _posts[index];
       final newIsLiked = !post.isLiked;
-      final newLikesCount = newIsLiked ? post.likesCount + 1 : post.likesCount - 1;
-      
+      final newLikesCount = newIsLiked
+          ? post.likesCount + 1
+          : post.likesCount - 1;
+
       _posts[index] = post.copyWith(
         isLiked: newIsLiked,
         likesCount: newLikesCount,
@@ -80,12 +84,43 @@ class FeedProvider extends ChangeNotifier {
     final index = _posts.indexWhere((p) => p.id == postId);
     if (index != -1) {
       final post = _posts[index];
-      final updatedComments = List<CommentModel>.from(post.comments)..add(newComment);
-      
-      _posts[index] = post.copyWith(
-        comments: updatedComments,
-      );
+      final updatedComments = List<CommentModel>.from(post.comments)
+        ..add(newComment);
+
+      _posts[index] = post.copyWith(comments: updatedComments);
       notifyListeners();
     }
+  }
+
+  void deleteComment(String postId, String commentId) {
+    final index = _posts.indexWhere((p) => p.id == postId);
+    if (index != -1) {
+      final post = _posts[index];
+      final updated = post.comments.where((c) => c.id != commentId).toList();
+      _posts[index] = post.copyWith(comments: updated);
+      notifyListeners();
+    }
+  }
+
+  /// Toggles the like state for a single comment inside [postId].
+  void toggleCommentLike(String postId, String commentId) {
+    final pi = _posts.indexWhere((p) => p.id == postId);
+    if (pi == -1) return;
+    final post = _posts[pi];
+    final updatedComments = post.comments.map((c) {
+      if (c.id != commentId) return c;
+      return c.copyWith(
+        isLiked: !c.isLiked,
+        likesCount: c.isLiked ? c.likesCount - 1 : c.likesCount + 1,
+      );
+    }).toList();
+    _posts[pi] = post.copyWith(comments: updatedComments);
+    notifyListeners();
+  }
+
+  /// Inserts [post] at the top of the feed (newest-first).
+  void addPost(PostModel post) {
+    _posts.insert(0, post);
+    notifyListeners();
   }
 }
