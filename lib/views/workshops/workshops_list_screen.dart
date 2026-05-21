@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
-// استدعاءات "المكعبات" الجاهزة
 import '../../utils/constants.dart';
 import '../../widgets/appbar.dart';
 import '../../widgets/city_filter.dart';
 import '../../widgets/workshop_card.dart';
 import '../../widgets/inline_search_bar.dart';
+import '../../providers/workshop_provider.dart';
 import 'workshop_profile_screen.dart';
 import '../notifications/notifications_screen.dart';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WorkshopsListScreen — قائمة الورش العامة
+//
+// • Reads live data from WorkshopProvider via context.watch() in build().
+// • All mutations (toggleFollow) use context.read() inside callbacks.
+// • No Consumer widgets used anywhere.
+// ─────────────────────────────────────────────────────────────────────────────
 
 class WorkshopsListScreen extends StatefulWidget {
   const WorkshopsListScreen({super.key});
@@ -18,57 +27,21 @@ class WorkshopsListScreen extends StatefulWidget {
 }
 
 class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
-  // 1. ذاكرة الشاشة: المدن المختارة حالياً
+  // Local UI state — search query and selected city filters.
   List<String> _selectedCities = [];
   String _searchQuery = '';
 
-  // 2. البيانات الوهمية المحدثة لتطابق التصميم الجديد للبطاقة
-  final List<Map<String, dynamic>> _dummyWorkshops = [
-    {
-      'username': 'مركز المجد للطاقة الشمسية',
-      'userHandle': '@al_majd_solar',
-      'imagePath': 'assets/images/logo/shams logo.png',
-      'coverImagePath': 'assets/images/post image.jpg',
-      'cityName': 'تعز',
-      'rating': 4.5,
-      'isFollowing': true,
-    },
-    {
-      'username': 'نور المستقبل لأنظمة الطاقة',
-      'userHandle': '@future_light_energy',
-      'imagePath': 'assets/images/logo/shams logo.png',
-      'coverImagePath': 'assets/images/post image.jpg',
-      'cityName': 'تعز',
-      'rating': 4.8,
-      'isFollowing': false,
-    },
-    {
-      'username': 'رواد الطاقة البديلة',
-      'userHandle': '@alt_energy_pioneers',
-      'imagePath': 'assets/images/logo/shams logo.png',
-      'coverImagePath': 'assets/images/post image.jpg',
-      'cityName': 'صنعاء',
-      'rating': 4.9,
-      'isFollowing': false,
-    },
-    {
-      'username': 'عدن للطاقة المتجددة',
-      'userHandle': '@aden_renewable',
-      'imagePath': 'assets/images/logo/shams logo.png',
-      'coverImagePath': 'assets/images/post image.jpg',
-      'cityName': 'عدن',
-      'rating': 3.9,
-      'isFollowing': false,
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
-    // 3. محرك الفلترة الذكي
-    final filteredWorkshops = _dummyWorkshops.where((workshop) {
-      final matchesCity = _selectedCities.isEmpty || _selectedCities.contains(workshop['cityName']);
-      final matchesSearch = _searchQuery.isEmpty || 
-          (workshop['username'] as String).toLowerCase().contains(_searchQuery.toLowerCase());
+    // ── Single source of truth: watch provider for live updates ──────────────
+    final workshops = context.watch<WorkshopProvider>().publicWorkshops;
+
+    // ── Smart filter: apply city + search query ───────────────────────────────
+    final filteredWorkshops = workshops.where((workshop) {
+      final matchesCity =
+          _selectedCities.isEmpty || _selectedCities.contains(workshop.city);
+      final matchesSearch = _searchQuery.isEmpty ||
+          workshop.name.toLowerCase().contains(_searchQuery.toLowerCase());
       return matchesCity && matchesSearch;
     }).toList();
 
@@ -77,14 +50,15 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
       child: Scaffold(
         backgroundColor: const Color(0xFFF5F7FF),
 
-        // ── الشريط العلوي ──
+        // ── الشريط العلوي ──────────────────────────────────────────────────
         appBar: ShamsPlatformAppBar(
           hasUnreadNotifications: false,
           onMenuTap: () {},
           onNotificationTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+              MaterialPageRoute(
+                  builder: (context) => const NotificationsScreen()),
             );
           },
           onDarkModeTap: () {},
@@ -92,7 +66,7 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
 
         body: Column(
           children: [
-            // ── شريط البحث الوهمي ──
+            // ── شريط البحث ──────────────────────────────────────────────────
             InlineSearchBar(
               hintText: 'ابحث عن الورشة المفضلة...',
               onChanged: (val) {
@@ -102,7 +76,7 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
               },
             ),
 
-            // ── منطقة الفلتر (المدن) ──
+            // ── فلتر المدن ──────────────────────────────────────────────────
             Container(
               width: double.infinity,
               color: ShamsColors.bgWhite,
@@ -118,7 +92,7 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
 
             const Divider(height: 1, thickness: 1, color: Color(0xFFF0F4FF)),
 
-            // ── قائمة الورش ──
+            // ── قائمة الورش ────────────────────────────────────────────────
             Expanded(
               child: filteredWorkshops.isEmpty
                   ? Center(
@@ -136,43 +110,25 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
                       itemBuilder: (context, index) {
                         final workshop = filteredWorkshops[index];
                         return WorkshopCard(
-                          username: workshop['username'],
-                          userHandle: workshop['userHandle'],
-                          imagePath: workshop['imagePath'],
-                          coverImagePath: workshop['coverImagePath'],
-                          cityName: workshop['cityName'],
-                          rating: workshop['rating'],
-                          isFollowing: workshop['isFollowing'],
-                          onFollowToggle: (isFollowing) {
-                            setState(() {
-                              workshop['isFollowing'] = isFollowing;
-                            });
-                          },
-                          onEnterTap: () async {
-                            final bool? newFollowState =
-                                await Navigator.push<bool>(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => WorkshopProfile(
-                                      workshopName: workshop['username'],
-                                      userHandle: workshop['userHandle'],
-                                      location: workshop['cityName'],
-                                      rating: workshop['rating'],
-                                      logoPath: workshop['imagePath'],
-                                      coverImagePath:
-                                          workshop['coverImagePath'],
-                                      initialFollowing: workshop['isFollowing'],
-                                    ),
-                                  ),
-                                );
-
-                            if (newFollowState != null &&
-                                newFollowState != workshop['isFollowing']) {
-                              setState(() {
-                                workshop['isFollowing'] = newFollowState;
-                              });
-                            }
-                          },
+                          username: workshop.name,
+                          userHandle: workshop.handle,
+                          imagePath: workshop.logoPath,
+                          coverImagePath: workshop.coverImagePath,
+                          cityName: workshop.city,
+                          rating: workshop.rating,
+                          // isFollowing reflects live provider state via watch()
+                          isFollowing: workshop.isFollowing,
+                          // context.read() inside callback — correct usage.
+                          onFollowToggle: (_) => context
+                              .read<WorkshopProvider>()
+                              .toggleFollow(workshop.id),
+                          onEnterTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  WorkshopProfile(workshopId: workshop.id),
+                            ),
+                          ),
                         );
                       },
                     ),

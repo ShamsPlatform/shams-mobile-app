@@ -66,4 +66,26 @@ class ChatProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// Get an existing chat conversation between currentUser and otherUser, or create a new one.
+  String getOrCreateChat(UserModel currentUser, UserModel otherUser) {
+    final existingIndex = _chats.indexWhere((c) =>
+        c.participants.any((p) => p.id == currentUser.id) &&
+        c.participants.any((p) => p.id == otherUser.id));
+
+    if (existingIndex != -1) {
+      return _chats[existingIndex].chatId;
+    } else {
+      final newChatId = 'ch_${DateTime.now().millisecondsSinceEpoch}';
+      final newChat = ChatModel(
+        chatId: newChatId,
+        participants: [currentUser, otherUser],
+        messages: [],
+        lastMessageTime: DateTime.now(),
+      );
+      _chats.add(newChat);
+      notifyListeners();
+      return newChatId;
+    }
+  }
 }
