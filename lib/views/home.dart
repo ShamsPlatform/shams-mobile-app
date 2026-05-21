@@ -8,6 +8,7 @@ import 'posts/post_detail_screen.dart';
 import '../widgets/comments_component.dart';
 import 'package:provider/provider.dart';
 import '../providers/feed_provider.dart';
+import '../providers/notification_provider.dart';
 import 'notifications/notifications_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -40,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
           hasUnreadNotifications: true,
           onMenuTap: () {},
           onNotificationTap: () {
+            context.read<NotificationProvider>().markAllAsRead();
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const NotificationsScreen()),

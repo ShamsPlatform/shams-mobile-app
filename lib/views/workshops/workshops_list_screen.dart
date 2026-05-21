@@ -8,6 +8,7 @@ import '../../widgets/city_filter.dart';
 import '../../widgets/workshop_card.dart';
 import '../../widgets/inline_search_bar.dart';
 import '../../providers/workshop_provider.dart';
+import '../../providers/notification_provider.dart';
 import 'workshop_profile_screen.dart';
 import '../notifications/notifications_screen.dart';
 
@@ -55,6 +56,7 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
           hasUnreadNotifications: false,
           onMenuTap: () {},
           onNotificationTap: () {
+            context.read<NotificationProvider>().markAllAsRead();
             Navigator.push(
               context,
               MaterialPageRoute(

@@ -9,6 +9,7 @@ import 'providers/workshop_provider.dart';
 import 'providers/user_provider.dart';
 import 'providers/feed_provider.dart';
 import 'providers/chat_provider.dart';
+import 'providers/notification_provider.dart';
 import 'utils/theme.dart';
 import 'package:shams_mobile_app/views/user_profile/edit_profile_screen.dart';
 
@@ -40,6 +41,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => FeedProvider()),
         ChangeNotifierProvider(create: (_) => ChatProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
       child: const ShamsApp(),
     ),
