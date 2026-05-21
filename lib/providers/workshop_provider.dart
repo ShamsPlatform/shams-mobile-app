@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import '../models/post_model.dart';
+import '../models/public_workshop_model.dart';
 
-/// WorkshopProvider — state manager for the workshop's post list.
+/// WorkshopProvider — state manager for all workshop data.
 ///
-/// Initialized with 3 realistic dummy posts so the dashboard looks
-/// populated immediately. All CRUD operations call [notifyListeners]
-/// so every [Consumer<WorkshopProvider>] rebuilds automatically.
+/// Manages:
+///   • [_posts]           — the logged-in user's own workshop posts (dashboard).
+///   • [_publicWorkshops] — the public directory of all workshops.
+///
+/// All mutations call [notifyListeners] so every context.watch() subscriber
+/// rebuilds automatically. No Consumer widgets needed.
 class WorkshopProvider extends ChangeNotifier {
-  // ── Dummy seed data ────────────────────────────────────────────────────────
+  // ── My Workshop Posts (owner's dashboard) ──────────────────────────────────
 
   final List<PostModel> _posts = [
     PostModel(
@@ -45,15 +49,164 @@ class WorkshopProvider extends ChangeNotifier {
     ),
   ];
 
+  // ── Public Workshops Directory ─────────────────────────────────────────────
+
+  final List<PublicWorkshopModel> _publicWorkshops = [
+    PublicWorkshopModel(
+      id: 'w1',
+      name: 'مركز المجد للطاقة الشمسية',
+      handle: '@al_majd_solar',
+      city: 'تعز',
+      rating: 4.5,
+      reviewCount: 320,
+      description:
+          'متخصصون في تركيب وصيانة أنظمة الطاقة الشمسية لأكثر من 10 سنوات. '
+          'نقدم حلولاً متكاملة للقطاعين السكني والتجاري.',
+      logoPath: 'assets/images/logo/shams logo.png',
+      coverImagePath: 'assets/images/post image.jpg',
+      isFollowing: true,
+      posts: [
+        PostModel(
+          id: 'w1_p1',
+          textDetails:
+              'صيانة شاملة لنظام ألواح شمسية بقدرة 10 كيلوواط مع تنظيف الألواح لزيادة الكفاءة.',
+          images: ['assets/images/post image.jpg'],
+          createdAt: 'منذ يومين',
+        ),
+        PostModel(
+          id: 'w1_p2',
+          textDetails:
+              'فحص وتبديل محول العاكس (Inverter) لنظام طاقة شمسية منزلي واستعادة النظام للعمل.',
+          images: ['assets/images/post image.jpg'],
+          createdAt: 'الأسبوع الماضي',
+        ),
+        PostModel(
+          id: 'w1_p3',
+          textDetails:
+              'حل مشكلة ضعف شحن البطاريات وتغيير التوصيلات التالفة لنظام الطاقة الشمسية.',
+          images: ['assets/images/post image.jpg'],
+          createdAt: 'منذ أسبوعين',
+        ),
+      ],
+    ),
+    PublicWorkshopModel(
+      id: 'w2',
+      name: 'نور المستقبل لأنظمة الطاقة',
+      handle: '@future_light_energy',
+      city: 'تعز',
+      rating: 4.8,
+      reviewCount: 510,
+      description:
+          'شركة رائدة في حلول الطاقة الشمسية المتجددة. '
+          'نوفر أفضل الأنظمة بأسعار منافسة مع ضمان شامل.',
+      logoPath: 'assets/images/logo/shams logo.png',
+      coverImagePath: 'assets/images/post image.jpg',
+      isFollowing: false,
+      posts: [
+        PostModel(
+          id: 'w2_p1',
+          textDetails:
+              'تركيب منظومة طاقة شمسية بقدرة 5 كيلوواط في منزل سكني بتعز.',
+          images: ['assets/images/post image.jpg'],
+          createdAt: 'منذ 3 أيام',
+        ),
+        PostModel(
+          id: 'w2_p2',
+          textDetails:
+              'توريد وتركيب بطاريات ليثيوم عالية الجودة لنظام طاقة شمسية.',
+          images: ['assets/images/post image.jpg'],
+          createdAt: 'منذ أسبوع',
+        ),
+      ],
+    ),
+    PublicWorkshopModel(
+      id: 'w3',
+      name: 'رواد الطاقة البديلة',
+      handle: '@alt_energy_pioneers',
+      city: 'صنعاء',
+      rating: 4.9,
+      reviewCount: 870,
+      description:
+          'من الرواد في مجال الطاقة البديلة باليمن. '
+          'خبرة تمتد لأكثر من 15 عاماً في تصميم وتنفيذ المشاريع الكبرى.',
+      logoPath: 'assets/images/logo/shams logo.png',
+      coverImagePath: 'assets/images/post image.jpg',
+      isFollowing: false,
+      posts: [
+        PostModel(
+          id: 'w3_p1',
+          textDetails:
+              'تنفيذ مشروع طاقة شمسية ضخم لمصنع في صنعاء بقدرة 50 كيلوواط.',
+          images: ['assets/images/post image.jpg'],
+          createdAt: 'منذ يوم',
+        ),
+        PostModel(
+          id: 'w3_p2',
+          textDetails:
+              'تركيب منظومة طاقة شمسية كاملة لمجمع سكني في صنعاء — 80 لوحاً شمسياً.',
+          images: ['assets/images/post image.jpg'],
+          createdAt: 'منذ 4 أيام',
+        ),
+      ],
+    ),
+    PublicWorkshopModel(
+      id: 'w4',
+      name: 'عدن للطاقة المتجددة',
+      handle: '@aden_renewable',
+      city: 'عدن',
+      rating: 3.9,
+      reviewCount: 145,
+      description:
+          'نقدم خدمات تركيب وصيانة أنظمة الطاقة الشمسية في عدن والمناطق المجاورة.',
+      logoPath: 'assets/images/logo/shams logo.png',
+      coverImagePath: 'assets/images/post image.jpg',
+      isFollowing: false,
+      posts: [
+        PostModel(
+          id: 'w4_p1',
+          textDetails: 'تركيب نظام مضخة مياه شمسية لمزرعة في لحج.',
+          images: ['assets/images/post image.jpg'],
+          createdAt: 'منذ 5 أيام',
+        ),
+      ],
+    ),
+  ];
+
   // ── Public API ─────────────────────────────────────────────────────────────
 
-  /// Unmodifiable view of the posts list.
+  /// Unmodifiable view of the owner's posts list (for dashboard).
   List<PostModel> get posts => List.unmodifiable(_posts);
 
   /// Total number of published posts.
   int get postCount => _posts.length;
 
-  /// Add a new post at the top of the list.
+  /// Live list of all publicly listed workshops.
+  List<PublicWorkshopModel> get publicWorkshops =>
+      List.unmodifiable(_publicWorkshops);
+
+  /// Returns the workshop with [id], or null if not found.
+  PublicWorkshopModel? getWorkshopById(String id) {
+    try {
+      return _publicWorkshops.firstWhere((w) => w.id == id);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Toggle the follow state for the workshop with [workshopId].
+  void toggleFollow(String workshopId) {
+    final index = _publicWorkshops.indexWhere((w) => w.id == workshopId);
+    if (index != -1) {
+      _publicWorkshops[index] = _publicWorkshops[index].copyWith(
+        isFollowing: !_publicWorkshops[index].isFollowing,
+      );
+      notifyListeners();
+    }
+  }
+
+  // ── Owner's Post Management (dashboard) ───────────────────────────────────
+
+  /// Add a new post at the top of the owner's list.
   void addPost(PostModel newPost) {
     _posts.insert(0, newPost);
     notifyListeners();

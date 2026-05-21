@@ -1,35 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../utils/constants.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/inline_search_bar.dart';
-import '/views/chat/chat_conversation_screen.dart';
+import '../../views/chat/chat_conversation_screen.dart';
+import '../../providers/workshop_provider.dart';
+import '../../providers/chat_provider.dart';
+import '../../providers/user_provider.dart';
+import '../../models/user_model.dart';
+import '../../models/public_workshop_model.dart';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WorkshopProfile — صفحة الملف الشخصي للورشة
+//
+// • Accepts [workshopId] in its constructor.
+// • Watches [WorkshopProvider] for live updates to the workshop details and follow status.
+// • Dynamically connects to ChatProvider to get or create a chat on button press.
+// ─────────────────────────────────────────────────────────────────────────────
 
 class WorkshopProfile extends StatefulWidget {
-  final String workshopName;
-  final String userHandle;
-  final String location;
-  final double rating;
-  final String logoPath;
-  final String coverImagePath;
-  final int reviewCount;
-  final String description;
-  final bool initialFollowing;
-  final Function(bool)? onFollowChanged;
+  final String workshopId;
 
   const WorkshopProfile({
     super.key,
-    this.workshopName = 'كراج المجد التقني',
-    this.userHandle = '@al_majd_tech',
-    this.location = 'صنعاء، اليمن',
-    this.rating = 4.8,
-    this.logoPath = 'assets/images/logo/shams logo.png',
-    this.coverImagePath = 'assets/images/post image.',
-    this.reviewCount = 1250,
-    this.description =
-        'نبذة عن الورشة وخدماتها المتميزة في مجال حلول الطاقة المتجددة وصيانة الأنظمة الشمسية.',
-    this.initialFollowing = false,
-    this.onFollowChanged,
+    required this.workshopId,
   });
 
   @override
@@ -37,34 +32,51 @@ class WorkshopProfile extends StatefulWidget {
 }
 
 class _WorkshopProfileState extends State<WorkshopProfile> {
-  late bool _isFollowing;
   bool _isSearching = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _isFollowing = widget.initialFollowing;
-  }
-
   void _toggleFollow() {
-    setState(() {
-      _isFollowing = !_isFollowing;
-    });
-    if (widget.onFollowChanged != null) {
-      widget.onFollowChanged!(_isFollowing);
-    }
+    context.read<WorkshopProvider>().toggleFollow(widget.workshopId);
   }
 
   @override
   Widget build(BuildContext context) {
+    // ── Single source of truth: watch provider for live updates ──────────────
+    final workshopProvider = context.watch<WorkshopProvider>();
+    final workshop = workshopProvider.getWorkshopById(widget.workshopId);
+
+    if (workshop == null) {
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: Scaffold(
+          backgroundColor: const Color(0xFFF8F9FE),
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0.5,
+            iconTheme: const IconThemeData(color: ShamsColors.textGray),
+          ),
+          body: Center(
+            child: Text(
+              'الورشة المطلوبة غير متوفرة حالياً.',
+              style: GoogleFonts.tajawal(
+                fontSize: 16,
+                color: ShamsColors.textGray,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final isFollowing = workshop.isFollowing;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: const Color(0xFFF8F9FE),
-        extendBodyBehindAppBar: false, // نجعل الـ AppBar منفصلاً بخلفية بيضاء
+        extendBodyBehindAppBar: false,
         appBar: AppBar(
           title: Text(
-            '',
+            workshop.name,
             style: GoogleFonts.tajawal(
               color: ShamsColors.textGray,
               fontWeight: FontWeight.bold,
@@ -89,9 +101,11 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
                 value: 'search',
                 child: Row(
                   children: [
-                    const Icon(Icons.search_rounded, size: 20, color: ShamsColors.textGray),
+                    const Icon(Icons.search_rounded,
+                        size: 20, color: ShamsColors.textGray),
                     const SizedBox(width: 8),
-                    Text('بحث', style: GoogleFonts.tajawal(color: ShamsColors.textGray)),
+                    Text('بحث',
+                        style: GoogleFonts.tajawal(color: ShamsColors.textGray)),
                   ],
                 ),
               ),
@@ -100,7 +114,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
           actions: [
             IconButton(
               icon: const Icon(Icons.arrow_forward),
-              onPressed: () => Navigator.pop(context, _isFollowing),
+              onPressed: () => Navigator.pop(context),
             ),
             const SizedBox(width: 8),
           ],
@@ -110,12 +124,24 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
           child: CustomSolidButton(
             title: 'طلب خدمة صيانة الآن',
             onPressed: () {
-              // 💡 كود الانتقال إلى شاشة المحادثة التي صممها المهندس عمر!
+              // ── Connect directly to the chat system dynamically ─────────────
+              final currentUser = context.read<UserProvider>().currentUser;
+              final otherUser = UserModel(
+                id: workshop.id,
+                name: workshop.name,
+                email: '${workshop.handle.replaceFirst('@', '')}@shams.com',
+                profileImageUrl: workshop.logoPath,
+              );
+
+              final chatId = context
+                  .read<ChatProvider>()
+                  .getOrCreateChat(currentUser, otherUser);
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const ChatConversationScreen(
-                    chatId: 'chat_1',
+                  builder: (context) => ChatConversationScreen(
+                    chatId: chatId,
                   ),
                 ),
               );
@@ -139,14 +165,12 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
                     },
                   ),
                 ),
-              _buildHeader(context),
+              _buildHeader(context, workshop),
               const SizedBox(height: 55),
-              _buildWorkshopInfo(),
+              _buildWorkshopInfo(workshop, isFollowing),
               const SizedBox(height: 25),
-              _buildWorkLogSection(),
-              const SizedBox(
-                height: 120,
-              ), // مساحة لضمان عدم اختفاء المحتوى خلف الزر
+              _buildWorkLogSection(workshop),
+              const SizedBox(height: 120),
             ],
           ),
         ),
@@ -154,7 +178,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, PublicWorkshopModel workshop) {
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -164,7 +188,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
           width: double.infinity,
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage(widget.coverImagePath),
+              image: AssetImage(workshop.coverImagePath),
               fit: BoxFit.cover,
             ),
           ),
@@ -198,7 +222,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
               ),
               child: CircleAvatar(
                 radius: 45,
-                backgroundImage: AssetImage(widget.logoPath),
+                backgroundImage: AssetImage(workshop.logoPath),
               ),
             ),
           ),
@@ -207,11 +231,11 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
     );
   }
 
-  Widget _buildWorkshopInfo() {
+  Widget _buildWorkshopInfo(PublicWorkshopModel workshop, bool isFollowing) {
     return Column(
       children: [
         Text(
-          widget.workshopName,
+          workshop.name,
           style: GoogleFonts.tajawal(
             fontSize: 22,
             fontWeight: FontWeight.bold,
@@ -220,7 +244,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
         ),
         const SizedBox(height: 2),
         Text(
-          widget.userHandle,
+          workshop.handle,
           style: GoogleFonts.tajawal(fontSize: 13, color: Colors.grey.shade500),
         ),
         const SizedBox(height: 10),
@@ -230,7 +254,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
             const Icon(Icons.location_on_rounded, size: 14, color: Colors.grey),
             const SizedBox(width: 4),
             Text(
-              widget.location,
+              workshop.city,
               style: GoogleFonts.tajawal(
                 fontSize: 13,
                 color: Colors.grey.shade700,
@@ -244,14 +268,35 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
             ),
             const SizedBox(width: 4),
             Text(
-              '${widget.rating}/5',
+              '${workshop.rating}/5',
               style: GoogleFonts.tajawal(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: ShamsColors.textGray,
               ),
             ),
+            const SizedBox(width: 12),
+            Text(
+              '(${workshop.reviewCount} تقييم)',
+              style: GoogleFonts.tajawal(
+                fontSize: 12,
+                color: Colors.grey.shade500,
+              ),
+            ),
           ],
+        ),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Text(
+            workshop.description,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.tajawal(
+              fontSize: 13.5,
+              height: 1.5,
+              color: Colors.grey.shade600,
+            ),
+          ),
         ),
         const SizedBox(height: 20),
         // Social icons and Follow button row
@@ -266,14 +311,13 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
                   child: ElevatedButton(
                     onPressed: _toggleFollow,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _isFollowing
-                          ? Colors.white
-                          : ShamsColors.solarYellow,
-                      foregroundColor: _isFollowing
+                      backgroundColor:
+                          isFollowing ? Colors.white : ShamsColors.solarYellow,
+                      foregroundColor: isFollowing
                           ? const Color(0xFF9EA3B0)
                           : Colors.white,
                       elevation: 0,
-                      side: _isFollowing
+                      side: isFollowing
                           ? const BorderSide(
                               color: Color(0xFFD0D5DD),
                               width: 1.5,
@@ -284,7 +328,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
                       ),
                     ),
                     child: Text(
-                      _isFollowing ? 'الغاء المتابعة' : 'متابعة',
+                      isFollowing ? 'الغاء المتابعة' : 'متابعة',
                       style: GoogleFonts.tajawal(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -311,7 +355,6 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
         ),
         const SizedBox(height: 10),
         Divider(color: Colors.grey.shade300, thickness: 1),
-        // const SizedBox(height: 10),
       ],
     );
   }
@@ -329,7 +372,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
     );
   }
 
-  Widget _buildWorkLogSection() {
+  Widget _buildWorkLogSection(PublicWorkshopModel workshop) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -358,21 +401,25 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
           ),
         ),
         const SizedBox(height: 10),
-        _buildWorkLogCard(
-          'منذ يومين',
-          'صيانة شاملة لنظام ألواح شمسية بقدرة 10 كيلوواط مع تنظيف الألواح لزيادة الكفاءة',
-          ['assets/images/post image.jpg', 'assets/images/post image.jpg'],
-        ),
-        _buildWorkLogCard(
-          'الأسبوع الماضي',
-          'فحص وتبديل محول العاكس (Inverter) لنظام طاقة شمسية منزلي واستعادة النظام للعمل',
-          ['assets/images/post image.jpg', 'assets/images/post image.jpg'],
-        ),
-        _buildWorkLogCard(
-          'منذ أسبوعين',
-          'حل مشكلة ضعف شحن البطاريات وتغيير التوصيلات التالفة لنظام الطاقة الشمسية',
-          ['assets/images/post image.jpg', 'assets/images/post image.jpg'],
-        ),
+        if (workshop.posts.isEmpty)
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: Text(
+                'لا توجد أعمال في هذا السجل حالياً.',
+                style: GoogleFonts.tajawal(
+                  fontSize: 14,
+                  color: ShamsColors.textHint,
+                ),
+              ),
+            ),
+          )
+        else
+          ...workshop.posts.map((post) => _buildWorkLogCard(
+                post.createdAt,
+                post.textDetails,
+                post.images,
+              )),
       ],
     );
   }
@@ -436,51 +483,52 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
           ),
           const SizedBox(height: 12),
           // Simple Horizontal Image List (matches swiping behavior)
-          SizedBox(
-            height: 200,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: PageView.builder(
-                physics: const BouncingScrollPhysics(),
-                itemCount: images.length,
-                itemBuilder: (context, index) {
-                  return Stack(
-                    children: [
-                      Image.asset(
-                        images[index],
-                        width: double.infinity,
-                        height: 200,
-                        fit: BoxFit.cover,
-                      ),
-                      // 1/2 indicator
-                      if (images.length > 1)
-                        Positioned(
-                          bottom: 10,
-                          left: 10,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.6),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              '${index + 1}/${images.length}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
+          if (images.isNotEmpty)
+            SizedBox(
+              height: 200,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: PageView.builder(
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: images.length,
+                  itemBuilder: (context, index) {
+                    return Stack(
+                      children: [
+                        Image.asset(
+                          images[index],
+                          width: double.infinity,
+                          height: 200,
+                          fit: BoxFit.cover,
+                        ),
+                        // 1/2 indicator
+                        if (images.length > 1)
+                          Positioned(
+                            bottom: 10,
+                            left: 10,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.6),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '${index + 1}/${images.length}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                    ],
-                  );
-                },
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

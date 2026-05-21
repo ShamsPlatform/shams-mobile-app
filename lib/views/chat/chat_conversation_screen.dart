@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shams_mobile_app/models/chat_model.dart';
 import '../../widgets/message_bubble.dart';
 import '../../widgets/chat_input_field.dart';
 import '../../widgets/inline_search_bar.dart';
@@ -42,7 +43,12 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
     final currentUser = context.watch<UserProvider>().currentUser;
     final chat = chatProvider.chats.firstWhere(
       (c) => c.chatId == widget.chatId,
-      orElse: () => chatProvider.chats.first,
+      orElse: () => ChatModel(
+        chatId: widget.chatId,
+        participants: const [],
+        messages: const [],
+        lastMessageTime: DateTime.now(),
+      ),
     );
     final otherParticipant = chat.participants.firstWhere(
       (p) => p.id != currentUser.id,
