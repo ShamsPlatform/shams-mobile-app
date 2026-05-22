@@ -26,14 +26,30 @@ class SignUpProfileScreen extends StatefulWidget {
 
 class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
   final _nameController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _bioController = TextEditingController();
 
+  String? _selectedLocation;
   File? _profileImage;
   String? _nameError;
   bool _isLoading = false;
 
   final ImagePicker _picker = ImagePicker();
+
+  // قائمة الـ 21 محافظة يمنية المطلوبة
+  final List<String> _cities = [
+    'صنعاء', 'عدن', 'تعز', 'الحديدة', 'إب', 'حضرموت', 'ذمار', 'عمران',
+    'الضالع', 'لحج', 'أبين', 'المهرة', 'شبوة', 'البيضاء', 'مأرب', 'الجوف',
+    'صعدة', 'المحويت', 'حجة', 'ريمة', 'سقطرى',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _usernameController.text = widget.email.split('@').first;
+    _selectedLocation = 'صنعاء'; // قيمة افتراضية
+  }
 
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(
@@ -49,8 +65,10 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
 
   Future<void> _handleCreateAccount() async {
     final name = _nameController.text.trim();
+    final username = _usernameController.text.trim();
     final phone = _phoneController.text.trim();
     final bio = _bioController.text.trim();
+    final location = _selectedLocation;
 
     setState(() {
       _nameError = name.isEmpty ? 'يرجى إدخال اسمك الكامل' : null;
@@ -100,11 +118,19 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
 
           // 3. Update profile row
           try {
-            await Supabase.instance.client.from('profiles').update({
-              if (phone.isNotEmpty) 'phone': phone,
-              if (bio.isNotEmpty) 'bio': bio,
-              if (imageUrl != null) 'profile_image_url': imageUrl,
-            }).eq('id', res.user!.id);
+            final Map<String, dynamic> updates = {
+              'name': name,
+              'username': username,
+              'location': location,
+            };
+            if (phone.isNotEmpty) updates['phone'] = phone;
+            if (bio.isNotEmpty) updates['bio'] = bio;
+            if (imageUrl != null) updates['profile_image_url'] = imageUrl;
+
+            await Supabase.instance.client
+                .from('profiles')
+                .update(updates)
+                .eq('id', res.user!.id);
           } catch (e) {
             debugPrint('Profile update failed: $e');
             if (mounted) {
@@ -161,6 +187,7 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _usernameController.dispose();
     _phoneController.dispose();
     _bioController.dispose();
     super.dispose();
@@ -192,7 +219,7 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white, 
                   borderRadius: BorderRadius.circular(20), 
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 20)],
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 20)],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,9 +256,19 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
                     _inputLabel('الاسم الكامل *'),
                     CustomTextField(hintText: 'أدخل اسمك الكامل', prefixIcon: Icons.person_outline, controller: _nameController, errorText: _nameError),
                     const SizedBox(height: 16),
+
+                    _inputLabel('اسم المستخدم *'),
+                    CustomTextField(hintText: 'أدخل اسم المستخدم', prefixIcon: Icons.alternate_email, controller: _usernameController),
+                    const SizedBox(height: 16),
+
+                    _inputLabel('الموقع *'),
+                    _buildDropdownField(),
+                    const SizedBox(height: 16),
+
                     _inputLabel('رقم الهاتف (اختياري)'),
                     CustomTextField(hintText: '05xxxxxxxx', prefixIcon: Icons.phone_outlined, controller: _phoneController),
                     const SizedBox(height: 16),
+
                     _inputLabel('نبذة شخصية (اختياري)'),
                     CustomTextField(hintText: 'مهتم بالطاقة المتجددة...', prefixIcon: Icons.info_outline, controller: _bioController),
                     const SizedBox(height: 32),
@@ -254,4 +291,40 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
   }
 
   Widget _inputLabel(String label) => Padding(padding: const EdgeInsets.only(bottom: 8), child: Text(label, style: GoogleFonts.tajawal(fontSize: 13, fontWeight: FontWeight.w600, color: ShamsColors.textGray)));
+
+  Widget _buildDropdownField() {
+    return DropdownButtonFormField<String>(
+      initialValue: _selectedLocation,
+      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF9EA3B0)),
+      decoration: InputDecoration(
+        prefixIcon: const Icon(Icons.location_on_outlined, color: Color(0xFF9EA3B0), size: 22),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: ShamsColors.solarYellow, width: 1.5),
+        ),
+      ),
+      items: _cities.map((city) {
+        return DropdownMenuItem(
+          value: city,
+          child: Text(city, style: GoogleFonts.tajawal(fontSize: 15)),
+        );
+      }).toList(),
+      onChanged: (value) {
+        setState(() {
+          _selectedLocation = value;
+        });
+      },
+    );
+  }
 }

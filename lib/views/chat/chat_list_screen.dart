@@ -65,24 +65,57 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 });
               },
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-              child: Text(
-                'المحادثات الأخيرة',
-                style: GoogleFonts.tajawal(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: ShamsColors.textGray,
+            if (_searchQuery.isEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+                child: Text(
+                  'المحادثات الأخيرة',
+                  style: GoogleFonts.tajawal(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: ShamsColors.textGray,
+                  ),
                 ),
               ),
-            ),
             Expanded(
               child: filteredChats.isEmpty
                   ? Center(
-                      child: Text(
-                        'لا توجد محادثات تطابق "$_searchQuery"',
-                        style: GoogleFonts.tajawal(color: ShamsColors.textHint, fontSize: 16),
-                      ),
+                      child: _searchQuery.isEmpty
+                          ? Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.chat_bubble_outline_rounded,
+                                  size: 56,
+                                  color: ShamsColors.textHint.withValues(alpha: 0.35),
+                                ),
+                                const SizedBox(height: 14),
+                                Text(
+                                  'لا توجد محادثات بعد',
+                                  style: GoogleFonts.tajawal(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: ShamsColors.textGray,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  'ابدأ محادثة من صفحة ورشة لطلب الصيانة',
+                                  style: GoogleFonts.tajawal(
+                                    fontSize: 13,
+                                    color: ShamsColors.textHint,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Text(
+                              'لا توجد محادثات تطابق "$_searchQuery"',
+                              style: GoogleFonts.tajawal(
+                                color: ShamsColors.textHint,
+                                fontSize: 15,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                     )
                   : ListView.separated(
                       itemCount: filteredChats.length,
@@ -107,6 +140,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                           unreadCount: unreadCount,
                           avatarPath: otherParticipant.profileImageUrl ?? 'assets/images/logo/shams logo.png',
                           onTap: () {
+                            final chatProvider = context.read<ChatProvider>();
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -115,10 +149,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                 ),
                               ),
                             ).then((_) {
-                              if (mounted) {
-                                // Mark messages as read when returning
-                                context.read<ChatProvider>().markAsRead(chat.chatId);
-                              }
+                              chatProvider.markAsRead(chat.chatId);
                             });
                           },
                         );

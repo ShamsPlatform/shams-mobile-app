@@ -1,4 +1,6 @@
 import 'post_model.dart';
+import 'review_model.dart';
+import 'user_model.dart';
 
 /// PublicWorkshopModel — نموذج بيانات الورشة العامة
 ///
@@ -38,6 +40,26 @@ class PublicWorkshopModel {
   /// Work-log posts displayed on the profile
   final List<PostModel> posts;
 
+  // ── Domain-specific fields ────────────────────────────────────────────────
+
+  /// Services offered (from [ShamsConstants.solarServiceTypes])
+  final List<String> serviceTypes;
+
+  /// Contact phone number
+  final String? phone;
+
+  /// WhatsApp number (may differ from phone)
+  final String? whatsapp;
+
+  /// Years of experience
+  final int yearsOfExperience;
+
+  /// Whether this workshop is platform-verified
+  final bool isVerified;
+
+  /// User reviews for this workshop
+  final List<ReviewModel> reviews;
+
   const PublicWorkshopModel({
     required this.id,
     required this.name,
@@ -50,6 +72,12 @@ class PublicWorkshopModel {
     this.coverImagePath = 'assets/images/post image.jpg',
     this.isFollowing = false,
     this.posts = const [],
+    this.serviceTypes = const [],
+    this.phone,
+    this.whatsapp,
+    this.yearsOfExperience = 0,
+    this.isVerified = false,
+    this.reviews = const [],
   });
 
   PublicWorkshopModel copyWith({
@@ -64,6 +92,12 @@ class PublicWorkshopModel {
     String? coverImagePath,
     bool? isFollowing,
     List<PostModel>? posts,
+    List<String>? serviceTypes,
+    String? phone,
+    String? whatsapp,
+    int? yearsOfExperience,
+    bool? isVerified,
+    List<ReviewModel>? reviews,
   }) {
     return PublicWorkshopModel(
       id: id ?? this.id,
@@ -77,6 +111,22 @@ class PublicWorkshopModel {
       coverImagePath: coverImagePath ?? this.coverImagePath,
       isFollowing: isFollowing ?? this.isFollowing,
       posts: posts ?? this.posts,
+      serviceTypes: serviceTypes ?? this.serviceTypes,
+      phone: phone ?? this.phone,
+      whatsapp: whatsapp ?? this.whatsapp,
+      yearsOfExperience: yearsOfExperience ?? this.yearsOfExperience,
+      isVerified: isVerified ?? this.isVerified,
+      reviews: reviews ?? this.reviews,
+    );
+  }
+
+  /// Converts this workshop to a [UserModel] suitable for use in chat participants.
+  UserModel toUserModel() {
+    return UserModel(
+      id: id,
+      name: name,
+      email: '${handle.replaceFirst('@', '')}@shams.com',
+      profileImageUrl: logoPath,
     );
   }
 }

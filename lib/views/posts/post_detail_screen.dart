@@ -4,10 +4,10 @@ import 'package:provider/provider.dart';
 import '../../utils/constants.dart';
 import '../../widgets/post_card.dart';
 import '../../widgets/comments_component.dart';
-import '../../models/comment_model.dart';
 
 import '../../providers/feed_provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import '../workshops/workshop_profile_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PostDetailScreen — شاشة تفاصيل المنشور
@@ -93,6 +93,16 @@ class PostDetailScreen extends StatelessWidget {
                 onCommentTap: () => _openCommentsSheet(context),
                 onShareTap: () => _onShare(context),
                 onMenuTap: () => _showMenu(context),
+                onUserTap: () {
+                  if (post.author != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => WorkshopProfile(workshopId: post.author!.id),
+                      ),
+                    );
+                  }
+                },
               ),
 
               const SizedBox(height: 8),

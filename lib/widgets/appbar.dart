@@ -26,15 +26,11 @@ class ShamsPlatformAppBar extends StatelessWidget
   /// callback عند الضغط على أيقونة الوضع الليلي
   final VoidCallback? onDarkModeTap;
 
-  /// هل توجد إشعارات غير مقروءة؟
-  final bool hasUnreadNotifications;
-
   const ShamsPlatformAppBar({
     super.key,
     this.onMenuTap,
     this.onNotificationTap,
     this.onDarkModeTap,
-    this.hasUnreadNotifications = false,
   });
 
   @override

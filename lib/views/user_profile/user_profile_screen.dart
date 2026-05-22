@@ -7,7 +7,6 @@ import 'add_workshop_screen.dart';
 import 'privacy_security_screen.dart';
 import 'about_shams_screen.dart';
 import '../workshops/workshop_dashboard_screen.dart';
-import '../auth/welcome.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:provider/provider.dart';
@@ -30,6 +29,14 @@ class UserProfileScreen extends StatefulWidget {
 class _UserProfileScreenState extends State<UserProfileScreen> {
   bool _isNotificationsEnabled = true;
   String _selectedLanguage = 'ar';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UserProvider>().fetchUserData();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,17 +104,22 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 child: CircleAvatar(
                   radius: 40,
                   backgroundColor: Colors.white,
-                  backgroundImage: (currentUser.profileImageUrl != null && currentUser.profileImageUrl!.isNotEmpty)
-                      ? NetworkImage(currentUser.profileImageUrl!) as ImageProvider
+                  backgroundImage:
+                      (currentUser.profileImageUrl != null &&
+                          currentUser.profileImageUrl!.isNotEmpty)
+                      ? NetworkImage(currentUser.profileImageUrl!)
+                            as ImageProvider
                       : const AssetImage('assets/images/logo/shams logo.png'),
                 ),
               ),
-     // زر تعديل الملف (يسار)
+              // زر تعديل الملف (يسار)
               GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const EditProfileScreen(),
+                    ),
                   );
                 },
                 child: Container(
@@ -173,15 +185,23 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     color: Colors.grey.shade600,
                   ),
                 ),
-                if (currentUser.phone != null && currentUser.phone!.isNotEmpty) ...[
+                if (currentUser.phone != null &&
+                    currentUser.phone!.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.phone_outlined, size: 14, color: ShamsColors.solarYellow),
+                      const Icon(
+                        Icons.phone_outlined,
+                        size: 14,
+                        color: ShamsColors.solarYellow,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         currentUser.phone!,
-                        style: GoogleFonts.tajawal(fontSize: 12, color: Colors.grey.shade600),
+                        style: GoogleFonts.tajawal(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
                     ],
                   ),
@@ -190,7 +210,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    if (currentUser.bio != null && currentUser.bio!.isNotEmpty) ...[
+                    if (currentUser.bio != null &&
+                        currentUser.bio!.isNotEmpty) ...[
                       const Icon(
                         Icons.info_outline_rounded,
                         size: 14,
@@ -215,13 +236,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         color: ShamsColors.solarYellow,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        'الرياض، المملكة العربية السعودية',
-                        style: GoogleFonts.tajawal(
-                          fontSize: 12,
-                          color: Colors.grey.shade500,
-                        ),
-                      ),
                     ],
                   ],
                 ),
@@ -250,7 +264,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   // ─── Dynamic Workshop Tile ───────────────────────────────────────────
 
   Widget _buildWorkshopTile() {
-    final bool hasWorkshop = context.watch<UserProvider>().currentUser.hasWorkshop;
+    final bool hasWorkshop = context
+        .watch<UserProvider>()
+        .currentUser
+        .hasWorkshop;
 
     return InkWell(
       onTap: hasWorkshop ? _openWorkshopDashboard : _openAddWorkshop,
@@ -329,16 +346,24 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const AddWorkshopScreen()),
-    );
+    ).then((_) {
+      if (mounted) {
+        final hasWorkshop = context
+            .read<UserProvider>()
+            .currentUser
+            .hasWorkshop;
+        if (hasWorkshop) {
+          _showWorkshopCreatedSnackBar();
+        }
+      }
+    });
   }
 
   /// Navigates to the workshop dashboard.
   void _openWorkshopDashboard() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => const WorkshopDashboardScreen(),
-      ),
+      MaterialPageRoute(builder: (_) => const WorkshopDashboardScreen()),
     );
   }
 
@@ -548,14 +573,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
       child: CustomSolidButton(
-        title: 'مشاركة التطبيق', 
+        title: 'مشاركة التطبيق',
         onPressed: () {
           SharePlus.instance.share(
             ShareParams(
-              text: 'حمّل تطبيق شمس وانضم إلينا الآن!\nhttps://shams.app/download',
+              text:
+                  'حمّل تطبيق شمس وانضم إلينا الآن!\nhttps://shams.app/download',
             ),
           );
-        }
+        },
       ),
     );
   }
@@ -571,6 +597,26 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           fontWeight: FontWeight.bold,
           fontSize: 14,
         ),
+      ),
+    );
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: GoogleFonts.tajawal(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: isError ? ShamsColors.dangerRed : ShamsColors.verifiedGreen,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 3),
       ),
     );
   }
@@ -609,24 +655,55 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ),
               const SizedBox(height: 20),
               ListTile(
-                leading: const Icon(Icons.chat_bubble_outline_rounded, color: Color(0xFF25D366)),
+                leading: const Icon(
+                  Icons.chat_bubble_outline_rounded,
+                  color: Color(0xFF25D366),
+                ),
                 title: Text('واتساب', style: GoogleFonts.tajawal(fontSize: 16)),
                 onTap: () async {
                   Navigator.pop(context);
                   final Uri url = Uri.parse('https://wa.me/967776434968');
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url);
+                  try {
+                    final success = await launchUrl(
+                      url,
+                      mode: LaunchMode.externalApplication,
+                    );
+                    if (!success) {
+                      _showSnackBar(
+                        'لم نتمكن من فتح تطبيق واتساب. يرجى التأكد من تثبيت التطبيق.',
+                        isError: true,
+                      );
+                    }
+                  } catch (_) {
+                    _showSnackBar(
+                      'لم نتمكن من فتح تطبيق واتساب. يرجى التأكد من تثبيت التطبيق.',
+                      isError: true,
+                    );
                   }
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.phone_in_talk_outlined, color: ShamsColors.primaryBlue),
-                title: Text('اتصال هاتفي', style: GoogleFonts.tajawal(fontSize: 16)),
+                leading: const Icon(
+                  Icons.phone_in_talk_outlined,
+                  color: ShamsColors.primaryBlue,
+                ),
+                title: Text(
+                  'اتصال هاتفي',
+                  style: GoogleFonts.tajawal(fontSize: 16),
+                ),
                 onTap: () async {
                   Navigator.pop(context);
                   final Uri url = Uri.parse('tel:+967776434968');
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url);
+                  try {
+                    final success = await launchUrl(
+                      url,
+                      mode: LaunchMode.externalApplication,
+                    );
+                    if (!success) {
+                      _showSnackBar('تعذر إجراء الاتصال الهاتفي حالياً.', isError: true);
+                    }
+                  } catch (_) {
+                    _showSnackBar('تعذر إجراء الاتصال الهاتفي حالياً.', isError: true);
                   }
                 },
               ),
@@ -636,8 +713,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 onTap: () async {
                   Navigator.pop(context);
                   final Uri url = Uri.parse('mailto:codyvex1@gmail.com');
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url);
+                  try {
+                    final success = await launchUrl(
+                      url,
+                      mode: LaunchMode.externalApplication,
+                    );
+                    if (!success) {
+                      _showSnackBar('لم نتمكن من فتح تطبيق البريد الإلكتروني.', isError: true);
+                    }
+                  } catch (_) {
+                    _showSnackBar('لم نتمكن من فتح تطبيق البريد الإلكتروني.', isError: true);
                   }
                 },
               ),
@@ -724,7 +809,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           // 3. Navigate to AuthGate to reset the app state
                           Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(builder: (context) => const AuthGate()),
+                            MaterialPageRoute(
+                              builder: (context) => const AuthGate(),
+                            ),
                             (Route<dynamic> route) => false,
                           );
                         }
@@ -796,8 +883,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   child: _buildLangOption('عربي (AR)', tempLang == 'ar'),
                 ),
                 GestureDetector(
-                  onTap: () => setModalState(() => tempLang = 'en'),
-                  child: _buildLangOption('English (EN)', tempLang == 'en'),
+                  onTap: () {}, // Disabled
+                  child: _buildLangOption(
+                    'English (EN)',
+                    false,
+                    badgeText: 'قريباً',
+                  ),
                 ),
                 const SizedBox(height: 25),
                 CustomSolidButton(
@@ -815,12 +906,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  Widget _buildLangOption(String label, bool selected) {
+  Widget _buildLangOption(String label, bool selected, {String? badgeText}) {
+    final bool isDisabled = badgeText != null;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: selected ? const Color(0xFFFFF9E7) : const Color(0xFFF9FAFB),
+        color: selected
+            ? const Color(0xFFFFF9E7)
+            : (isDisabled ? Colors.grey.shade100 : const Color(0xFFF9FAFB)),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: selected ? ShamsColors.solarYellow : Colors.transparent,
@@ -829,16 +923,45 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: GoogleFonts.tajawal(
-              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-            ),
+          Row(
+            children: [
+              Text(
+                label,
+                style: GoogleFonts.tajawal(
+                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                  color: isDisabled ? Colors.grey.shade400 : Colors.black87,
+                ),
+              ),
+              if (badgeText != null) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: ShamsColors.solarYellow.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    badgeText,
+                    style: GoogleFonts.tajawal(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: ShamsColors.solarYellow,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
           if (selected)
             const Icon(Icons.check_box, color: ShamsColors.solarYellow)
           else
-            const Icon(Icons.check_box_outline_blank, color: Colors.grey),
+            Icon(
+              Icons.check_box_outline_blank,
+              color: isDisabled ? Colors.grey.shade300 : Colors.grey,
+            ),
         ],
       ),
     );

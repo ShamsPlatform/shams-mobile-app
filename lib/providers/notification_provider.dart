@@ -12,6 +12,8 @@ class NotificationProvider extends ChangeNotifier {
       isRead: false,
       icon: Icons.favorite_rounded,
       color: ShamsColors.dangerRed,
+      type: NotificationType.like,
+      targetId: 'p1',
     ),
     NotificationModel(
       id: '2',
@@ -21,6 +23,8 @@ class NotificationProvider extends ChangeNotifier {
       isRead: false,
       icon: Icons.local_offer_rounded,
       color: ShamsColors.verifiedGreen,
+      type: NotificationType.workshopUpdate,
+      targetId: 'w1',
     ),
     NotificationModel(
       id: '3',
@@ -30,6 +34,19 @@ class NotificationProvider extends ChangeNotifier {
       isRead: true,
       icon: Icons.reply_rounded,
       color: ShamsColors.primaryBlue,
+      type: NotificationType.reply,
+      targetId: 'p2',
+    ),
+    NotificationModel(
+      id: '4',
+      title: 'تم قبول طلب الصيانة الخاص بك',
+      message: 'ورشة رواد الطاقة البديلة قبلت طلبك. تابع المحادثة.',
+      timestamp: DateTime.now().subtract(const Duration(hours: 5)),
+      isRead: false,
+      icon: Icons.build_circle_rounded,
+      color: ShamsColors.solarYellow,
+      type: NotificationType.maintenanceStatus,
+      targetId: null,
     ),
   ];
 
@@ -46,6 +63,14 @@ class NotificationProvider extends ChangeNotifier {
       }
     }
     if (changed) {
+      notifyListeners();
+    }
+  }
+
+  void markAsRead(String id) {
+    final index = _notifications.indexWhere((n) => n.id == id);
+    if (index != -1 && !_notifications[index].isRead) {
+      _notifications[index] = _notifications[index].copyWith(isRead: true);
       notifyListeners();
     }
   }

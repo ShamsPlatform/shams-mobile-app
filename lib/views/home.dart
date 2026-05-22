@@ -8,8 +8,8 @@ import 'posts/post_detail_screen.dart';
 import '../widgets/comments_component.dart';
 import 'package:provider/provider.dart';
 import '../providers/feed_provider.dart';
-import '../providers/notification_provider.dart';
 import 'notifications/notifications_screen.dart';
+import 'workshops/workshop_profile_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // (أُزيلت البيانات الوهمية، يتم جلبها الآن من FeedProvider)
@@ -38,10 +38,8 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: ShamsColors.backgroundLight,
         // ── AppBar المُعاد استخدامه من widgets/appbar.dart ──────────
         appBar: ShamsPlatformAppBar(
-          hasUnreadNotifications: true,
           onMenuTap: () {},
           onNotificationTap: () {
-            context.read<NotificationProvider>().markAllAsRead();
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const NotificationsScreen()),
@@ -109,10 +107,31 @@ class _HomeScreenState extends State<HomeScreen> {
         if (filteredPosts.isEmpty)
           SliverFillRemaining(
             child: Center(
-              child: Text(
-                'لا توجد نتائج لـ "$_searchQuery"',
-                style: GoogleFonts.tajawal(color: ShamsColors.textHint, fontSize: 16),
-              ),
+              child: _searchQuery.isEmpty
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.article_outlined,
+                          size: 60,
+                          color: ShamsColors.textHint.withValues(alpha: 0.3),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'لا توجد منشورات حتى الآن',
+                          style: GoogleFonts.tajawal(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: ShamsColors.textGray,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Text(
+                      'لا توجد نتائج لـ "$_searchQuery"',
+                      style: GoogleFonts.tajawal(
+                          color: ShamsColors.textHint, fontSize: 16),
+                    ),
             ),
           )
         else
@@ -150,12 +169,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   onShareTap: () => _onShare(context),
                   onMenuTap: () => _showPostMenu(context),
-                  onUserTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => PostDetailScreen(postId: post.id),
-                    ),
-                  ),
+                  onUserTap: () {
+                    // Navigate to Workshop Profile (Fix #10)
+                    if (post.author != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => WorkshopProfile(workshopId: post.author!.id),
+                        ),
+                      );
+                    }
+                  },
                 ),
               );
             }, childCount: filteredPosts.length),

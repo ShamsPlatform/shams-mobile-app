@@ -246,7 +246,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: _attachments.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        separatorBuilder: (context, index) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           return _EditAttachmentThumbnail(
             media: _attachments[index],
@@ -391,7 +391,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
           Switch(
             value: _isHighlighted,
             onChanged: (val) => setState(() => _isHighlighted = val),
-            activeColor: ShamsColors.solarYellow,
+            activeThumbColor: ShamsColors.solarYellow,
           ),
         ],
       ),
@@ -520,14 +520,14 @@ class _EditAttachmentThumbnail extends StatelessWidget {
       return Image.asset(
         media.path,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) =>
+        errorBuilder: (context, error, stackTrace) =>
             const Icon(Icons.broken_image, color: Colors.grey),
       );
     }
     return Image.file(
       File(media.path),
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) =>
+      errorBuilder: (context, error, stackTrace) =>
           const Icon(Icons.broken_image, color: Colors.grey),
     );
   }

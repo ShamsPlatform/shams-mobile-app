@@ -22,7 +22,7 @@ class PrivacySecurityScreen extends StatelessWidget {
           automaticallyImplyLeading: false,
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(1.0),
-            child: Container(color: Colors.grey.withOpacity(0.1), height: 1.0),
+            child: Container(color: Colors.grey.withValues(alpha: 0.1), height: 1.0),
           ),
           title: Text(
             'الخصوصية والأمان',
@@ -140,7 +140,7 @@ class PrivacySecurityScreen extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: ShamsColors.solarYellow.withOpacity(0.15),
+                color: ShamsColors.solarYellow.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, size: 18, color: ShamsColors.solarYellow),
@@ -168,7 +168,7 @@ class PrivacySecurityScreen extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         // خط فاصل خفيف
-        Divider(color: Colors.grey.withOpacity(0.15), thickness: 1),
+        Divider(color: Colors.grey.withValues(alpha: 0.15), thickness: 1),
       ],
     );
   }

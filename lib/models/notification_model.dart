@@ -1,5 +1,26 @@
 import 'package:flutter/material.dart';
 
+/// Notification type — determines where tapping a notification navigates.
+enum NotificationType {
+  /// Someone liked the user's post → navigate to post
+  like,
+
+  /// Someone commented on the user's post → navigate to post
+  comment,
+
+  /// Someone replied to the user's comment → navigate to post
+  reply,
+
+  /// A followed workshop published a new post → navigate to workshop profile
+  workshopUpdate,
+
+  /// Maintenance request status changed → navigate to chat
+  maintenanceStatus,
+
+  /// Generic / system notification
+  system,
+}
+
 class NotificationModel {
   final String id;
   final String title;
@@ -9,6 +30,13 @@ class NotificationModel {
   final IconData? icon;
   final Color? color;
 
+  /// Determines the navigation destination on tap.
+  final NotificationType type;
+
+  /// The ID of the target resource (postId, workshopId, chatId, etc.).
+  /// May be null for generic system notifications.
+  final String? targetId;
+
   const NotificationModel({
     required this.id,
     required this.title,
@@ -17,6 +45,8 @@ class NotificationModel {
     this.isRead = false,
     this.icon,
     this.color,
+    this.type = NotificationType.system,
+    this.targetId,
   });
 
   NotificationModel copyWith({
@@ -27,6 +57,8 @@ class NotificationModel {
     bool? isRead,
     IconData? icon,
     Color? color,
+    NotificationType? type,
+    String? targetId,
   }) {
     return NotificationModel(
       id: id ?? this.id,
@@ -36,6 +68,8 @@ class NotificationModel {
       isRead: isRead ?? this.isRead,
       icon: icon ?? this.icon,
       color: color ?? this.color,
+      type: type ?? this.type,
+      targetId: targetId ?? this.targetId,
     );
   }
 }

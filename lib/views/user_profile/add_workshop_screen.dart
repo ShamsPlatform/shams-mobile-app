@@ -13,6 +13,8 @@ import '../../widgets/username_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/workshop_provider.dart';
+import '../../models/workshop_data.dart';
 
 class AddWorkshopScreen extends StatefulWidget {
   const AddWorkshopScreen({super.key});
@@ -39,29 +41,9 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
   final _picker = ImagePicker();
   bool _isLoading = false;
 
-  final List<String> _cities = [
-    'صنعاء',
-    'عدن',
-    'تعز',
-    'الحديدة',
-    'إب',
-    'حضرموت',
-    'ذمار',
-    'عمران',
-    'الضالع',
-    'لحج',
-    'أبين',
-    'المهرة',
-    'شبوة',
-    'البيضاء',
-    'مأرب',
-    'الجوف',
-    'صعدة',
-    'المحويت',
-    'حجة',
-    'ريمة',
-    'سقطرى',
-  ];
+  // City list is sourced from ShamsConstants (single source of truth)
+  // ignore: prefer_const_declarations
+  final List<String> _cities = ShamsConstants.yemeniCities;
 
   @override
   void dispose() {
@@ -102,6 +84,7 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
     final name = _nameController.text.trim();
     final username = _usernameController.text.trim();
     final description = _descriptionController.text.trim();
+    final years = int.tryParse(_yearsController.text.trim()) ?? 0;
 
     // Validate required text fields
     if (name.isEmpty || description.isEmpty || _selectedCity == null) {
@@ -136,9 +119,23 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
         'has_workshop': true,
       }).eq('id', user.id);
 
+      // Create WorkshopData instance
+      final newWorkshop = WorkshopData(
+        name: name,
+        username: username,
+        city: _selectedCity!,
+        description: description,
+        yearsOfExperience: years,
+        profileImage: _profileImage,
+        coverImage: _coverImage,
+        extraImages: List.from(_images),
+      );
+
       // 3. Update local state
       if (mounted) {
+        context.read<WorkshopProvider>().setMyWorkshop(newWorkshop);
         context.read<UserProvider>().updateWorkshopStatus(true);
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('تم إضافة الورشة بنجاح!', style: GoogleFonts.tajawal()),

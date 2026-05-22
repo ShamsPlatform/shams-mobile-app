@@ -53,8 +53,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   /// دالة لاختيار الصور أو الفيديوهات
   Future<void> _pickMedia() async {
-    print("Attempting to pick media..."); // رسالة للتأكد من وصول النقرة
-
     // لإظهار الخيارات بشكل سريع وبسيط
     showDialog(
       context: context,
@@ -106,7 +104,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   Future<void> _handlePick(ImageSource source, bool isVideo) async {
     Navigator.pop(context);
-    print("Picking ${isVideo ? 'Video' : 'Image'} from $source");
 
     try {
       XFile? file;
@@ -117,15 +114,12 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       }
 
       if (file != null) {
-        print("File picked: ${file.path}");
         setState(() {
           _attachments.add(MediaFile(path: file!.path, isVideo: isVideo));
         });
-      } else {
-        print("No file selected.");
       }
     } catch (e) {
-      print("Error during picking: $e");
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -329,7 +323,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: _attachments.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        separatorBuilder: (context, index) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           return _AttachmentThumbnail(
             media: _attachments[index],
@@ -409,7 +403,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           Switch(
             value: _isHighlighted,
             onChanged: (val) => setState(() => _isHighlighted = val),
-            activeColor: ShamsColors.solarYellow,
+            activeThumbColor: ShamsColors.solarYellow,
           ),
         ],
       ),

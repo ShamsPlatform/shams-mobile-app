@@ -5,6 +5,8 @@ class UserModel {
   final String? profileImageUrl;
   final String? bio;
   final String? phone;
+  final String? username;
+  final String? location;
   final bool isVerified;
   final bool hasWorkshop;
 
@@ -15,6 +17,8 @@ class UserModel {
     this.profileImageUrl,
     this.bio,
     this.phone,
+    this.username,
+    this.location,
     this.isVerified = false,
     this.hasWorkshop = false,
   });
@@ -26,6 +30,8 @@ class UserModel {
     String? profileImageUrl,
     String? bio,
     String? phone,
+    String? username,
+    String? location,
     bool? isVerified,
     bool? hasWorkshop,
   }) {
@@ -36,6 +42,8 @@ class UserModel {
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
       bio: bio ?? this.bio,
       phone: phone ?? this.phone,
+      username: username ?? this.username,
+      location: location ?? this.location,
       isVerified: isVerified ?? this.isVerified,
       hasWorkshop: hasWorkshop ?? this.hasWorkshop,
     );
@@ -49,6 +57,8 @@ class UserModel {
       'profile_image_url': profileImageUrl,
       'bio': bio,
       'phone': phone,
+      'username': username,
+      'location': location,
       'is_verified': isVerified,
       'has_workshop': hasWorkshop,
     };
@@ -62,6 +72,8 @@ class UserModel {
       profileImageUrl: map['profile_image_url'],
       bio: map['bio'],
       phone: map['phone'],
+      username: map['username'],
+      location: map['location'],
       isVerified: map['is_verified'] ?? false,
       hasWorkshop: map['has_workshop'] ?? false,
     );
