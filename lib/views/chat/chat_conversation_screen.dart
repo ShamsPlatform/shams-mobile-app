@@ -31,6 +31,7 @@ class ChatConversationScreen extends StatefulWidget {
 class _ChatConversationScreenState extends State<ChatConversationScreen> {
   bool _isSearching = false;
   String _searchQuery = '';
+  bool _isMuted = false;
 
   void _addNewMessage(String text) {
     if (text.trim().isEmpty) return;
@@ -134,6 +135,22 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
               onSelected: (value) {
                 if (value == 'search') {
                   setState(() => _isSearching = true);
+                } else if (value == 'mute') {
+                  setState(() => _isMuted = !_isMuted);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        _isMuted ? 'تم كتم إشعارات هذه المحادثة' : 'تم تفعيل إشعارات هذه المحادثة',
+                        style: GoogleFonts.tajawal(color: Colors.white),
+                      ),
+                      backgroundColor: ShamsColors.textGray,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
                 } else if (value == 'clear') {
                   // Show confirmation dialog before clearing
                   _showClearChatDialog();
@@ -154,9 +171,15 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                   value: 'mute',
                   child: Row(
                     children: [
-                      const Icon(Icons.notifications_off_rounded, size: 20),
+                      Icon(
+                        _isMuted ? Icons.notifications_active_rounded : Icons.notifications_off_rounded,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
-                      Text('كتم الإشعارات', style: GoogleFonts.tajawal()),
+                      Text(
+                        _isMuted ? 'تفعيل الإشعارات' : 'كتم الإشعارات',
+                        style: GoogleFonts.tajawal(),
+                      ),
                     ],
                   ),
                 ),

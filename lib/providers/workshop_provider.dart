@@ -1,16 +1,28 @@
 import 'package:flutter/material.dart';
 import '../models/post_model.dart';
 import '../models/public_workshop_model.dart';
+import '../models/workshop_data.dart';
 
 /// WorkshopProvider — state manager for all workshop data.
 ///
 /// Manages:
 ///   • [_posts]           — the logged-in user's own workshop posts (dashboard).
 ///   • [_publicWorkshops] — the public directory of all workshops.
+///   • [_myWorkshop]      — the logged-in user's own workshop data (details).
 ///
 /// All mutations call [notifyListeners] so every context.watch() subscriber
 /// rebuilds automatically. No Consumer widgets needed.
 class WorkshopProvider extends ChangeNotifier {
+  // ── My Workshop Details (for Owner's Dashboard) ──────────────────────────
+  WorkshopData? _myWorkshop;
+
+  WorkshopData? get myWorkshop => _myWorkshop;
+
+  void setMyWorkshop(WorkshopData data) {
+    _myWorkshop = data;
+    notifyListeners();
+  }
+
   // ── My Workshop Posts (owner's dashboard) ──────────────────────────────────
 
   final List<PostModel> _posts = [

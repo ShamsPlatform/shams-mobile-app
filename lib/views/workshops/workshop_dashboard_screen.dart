@@ -42,14 +42,29 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    final d = widget.workshopData;
+    final d = widget.workshopData ?? context.read<WorkshopProvider>().myWorkshop;
     _coverImage = d?.coverImage;
     _profileImage = d?.profileImage;
     _extraImages = List.from(d?.extraImages ?? []);
     _workshopName = d?.name ?? 'ورشتي على شمس';
     _workshopHandle =
-        d?.username != null ? '@${d!.username}' : '@workshop';
-    _workshopCity = d?.city ?? 'صنعاء، اليمن';
+        d?.username != null && d!.username.isNotEmpty ? '@${d.username}' : '@workshop';
+    _workshopCity = d?.city ?? 'صنعاء';
+  }
+
+  void _updateProviderWorkshop() {
+    final currentWorkshop = context.read<WorkshopProvider>().myWorkshop;
+    final updatedWorkshop = WorkshopData(
+      name: _workshopName,
+      username: _workshopHandle.replaceFirst('@', ''),
+      city: _workshopCity,
+      description: currentWorkshop?.description ?? widget.workshopData?.description ?? '',
+      yearsOfExperience: currentWorkshop?.yearsOfExperience ?? widget.workshopData?.yearsOfExperience ?? 0,
+      profileImage: _profileImage,
+      coverImage: _coverImage,
+      extraImages: List.from(_extraImages),
+    );
+    context.read<WorkshopProvider>().setMyWorkshop(updatedWorkshop);
   }
 
   // ── Image pickers ─────────────────────────────────────────────────────────
@@ -57,18 +72,21 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
   Future<void> _pickCoverImage() async {
     _showImageSourceSheet(onPicked: (file) {
       setState(() => _coverImage = file);
+      _updateProviderWorkshop();
     });
   }
 
   Future<void> _pickProfileImage() async {
     _showImageSourceSheet(onPicked: (file) {
       setState(() => _profileImage = file);
+      _updateProviderWorkshop();
     });
   }
 
   Future<void> _pickAndAddImage() async {
     _showImageSourceSheet(onPicked: (file) {
       setState(() => _extraImages.add(file));
+      _updateProviderWorkshop();
     });
   }
 
@@ -165,13 +183,8 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
     );
   }
 
-  // ── Cities list (mirrors AddWorkshopScreen) ─────────────────────────────
-
-  static const List<String> _cities = [
-    'أمانة العاصمة', 'صنعاء', 'عدن', 'تعز', 'الحديدة', 'إب', 'حضرموت', 'ذمار',
-    'عمران', 'الضالع', 'لحج', 'أبين', 'المهرة', 'شبوة', 'البيضاء', 'مأرب',
-    'الجوف', 'صعدة', 'المحويت', 'حجة', 'ريمة', 'سقطرى',
-  ];
+  // ── City list — sourced from ShamsConstants (single source of truth) ────
+  static List<String> get _cities => ShamsConstants.yemeniCities;
 
   // ── Edit workshop info bottom sheet ──────────────────────────────────────
 
@@ -313,6 +326,7 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
                           _workshopCity = selectedCity!;
                         }
                       });
+                      _updateProviderWorkshop();
                       Navigator.pop(ctx);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -514,7 +528,10 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
                 child: ScrollableImagePicker(
                   images: _extraImages,
                   onAddTap: _pickAndAddImage,
-                  onRemoveTap: (i) => setState(() => _extraImages.removeAt(i)),
+                  onRemoveTap: (i) {
+                    setState(() => _extraImages.removeAt(i));
+                    _updateProviderWorkshop();
+                  },
                 ),
               ),
               const SizedBox(height: 24),

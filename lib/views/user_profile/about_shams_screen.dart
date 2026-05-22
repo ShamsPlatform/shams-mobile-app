@@ -22,7 +22,7 @@ class AboutShamsScreen extends StatelessWidget {
           automaticallyImplyLeading: false,
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(1.0),
-            child: Container(color: Colors.grey.withOpacity(0.1), height: 1.0),
+            child: Container(color: Colors.grey.withValues(alpha: 0.1), height: 1.0),
           ),
           actions: [
             Padding(
@@ -195,7 +195,7 @@ class AboutShamsScreen extends StatelessWidget {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: ShamsColors.solarYellow.withOpacity(0.2),
+                color: ShamsColors.solarYellow.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -274,7 +274,7 @@ class AboutShamsScreen extends StatelessWidget {
           width: 54,
           height: 54,
           decoration: BoxDecoration(
-            color: ShamsColors.solarYellow.withOpacity(0.12),
+            color: ShamsColors.solarYellow.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: ShamsColors.solarYellow, size: 26),

@@ -123,4 +123,25 @@ class FeedProvider extends ChangeNotifier {
     _posts.insert(0, post);
     notifyListeners();
   }
+
+  /// Replaces the post with the same [id] with [updatedPost].
+  /// No-op if the post is not found (e.g. it belongs to another source).
+  void updatePost(PostModel updatedPost) {
+    final index = _posts.indexWhere((p) => p.id == updatedPost.id);
+    if (index != -1) {
+      _posts[index] = updatedPost;
+      notifyListeners();
+    }
+  }
+
+  /// Permanently removes [postId] from the feed.
+  void deletePost(String postId) {
+    _posts.removeWhere((p) => p.id == postId);
+    notifyListeners();
+  }
+
+  /// Hides [postId] from the local feed without deleting it server-side.
+  /// Implemented as a delete for local state; the DB integration will use a
+  /// "hidden_posts" table instead.
+  void hidePost(String postId) => deletePost(postId);
 }

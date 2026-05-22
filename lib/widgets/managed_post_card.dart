@@ -51,7 +51,7 @@ class _ManagedPostCardState extends State<ManagedPostCard> {
         border: Border.all(color: const Color(0xFFF0F2F5)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -167,13 +167,13 @@ class _ManagedPostCardState extends State<ManagedPostCard> {
                               ? Image.file(
                                   File(path),
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) =>
+                                  errorBuilder: (context, error, stackTrace) =>
                                       _buildPlaceholder(),
                                 )
                               : Image.asset(
                                   path,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) =>
+                                  errorBuilder: (context, error, stackTrace) =>
                                       _buildPlaceholder(),
                                 );
                         },
@@ -190,7 +190,7 @@ class _ManagedPostCardState extends State<ManagedPostCard> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.6),
+                              color: Colors.black.withValues(alpha: 0.6),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -214,7 +214,7 @@ class _ManagedPostCardState extends State<ManagedPostCard> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.6),
+                            color: Colors.black.withValues(alpha: 0.6),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(

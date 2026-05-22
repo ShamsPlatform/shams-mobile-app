@@ -30,6 +30,7 @@ class WorkshopsListScreen extends StatefulWidget {
 class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
   // Local UI state — search query and selected city filters.
   List<String> _selectedCities = [];
+  final List<String> _selectedServices = [];
   String _searchQuery = '';
 
   @override
@@ -43,7 +44,9 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
           _selectedCities.isEmpty || _selectedCities.contains(workshop.city);
       final matchesSearch = _searchQuery.isEmpty ||
           workshop.name.toLowerCase().contains(_searchQuery.toLowerCase());
-      return matchesCity && matchesSearch;
+      final matchesService = _selectedServices.isEmpty ||
+          workshop.serviceTypes.any((s) => _selectedServices.contains(s));
+      return matchesCity && matchesSearch && matchesService;
     }).toList();
 
     return Directionality(
@@ -53,7 +56,6 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
 
         // ── الشريط العلوي ──────────────────────────────────────────────────
         appBar: ShamsPlatformAppBar(
-          hasUnreadNotifications: false,
           onMenuTap: () {},
           onNotificationTap: () {
             context.read<NotificationProvider>().markAllAsRead();
@@ -89,6 +91,57 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
                     _selectedCities = selectedCities;
                   });
                 },
+              ),
+            ),
+
+            // ── فلتر الخدمات ────────────────────────────────────────────────
+            Container(
+              width: double.infinity,
+              color: ShamsColors.bgWhite,
+              padding: const EdgeInsets.only(bottom: 12),
+              child: SizedBox(
+                height: 40,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: ShamsConstants.solarServiceTypes.length,
+                  itemBuilder: (context, index) {
+                    final service = ShamsConstants.solarServiceTypes[index];
+                    final isSelected = _selectedServices.contains(service);
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: FilterChip(
+                        label: Text(
+                          service,
+                          style: GoogleFonts.tajawal(
+                            fontSize: 13,
+                            color: isSelected ? Colors.black87 : ShamsColors.textHint,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                        selected: isSelected,
+                        onSelected: (bool selected) {
+                          setState(() {
+                            if (selected) {
+                              _selectedServices.add(service);
+                            } else {
+                              _selectedServices.remove(service);
+                            }
+                          });
+                        },
+                        selectedColor: ShamsColors.solarYellow,
+                        backgroundColor: ShamsColors.bgWhite,
+                        checkmarkColor: Colors.black87,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: BorderSide(
+                            color: isSelected ? ShamsColors.solarYellow : const Color(0xFFEEF0F4),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
 

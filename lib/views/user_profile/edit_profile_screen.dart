@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import '../../utils/constants.dart'; // تأكد من استيراد ملف الألوان والثوابت
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../providers/user_provider.dart';
-import '../../models/user_model.dart';
+
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -17,6 +17,8 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _bioController = TextEditingController();
   
   String? _selectedLocation;
   File? _selectedImage;
@@ -35,15 +37,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     // تهيئة البيانات المسبقة من الـ Provider
     final currentUser = context.read<UserProvider>().currentUser;
     _nameController.text = currentUser.name;
-    // استخراج اسم مستخدم افتراضي
-    _usernameController.text = currentUser.email.split('@').first; 
-    _selectedLocation = 'صنعاء'; // قيمة افتراضية
+    _usernameController.text = currentUser.username ?? currentUser.email.split('@').first; 
+    _selectedLocation = currentUser.location ?? 'صنعاء';
+    _phoneController.text = currentUser.phone ?? '';
+    _bioController.text = currentUser.bio ?? '';
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _usernameController.dispose();
+    _phoneController.dispose();
+    _bioController.dispose();
     super.dispose();
   }
 
@@ -57,27 +62,55 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  // دالة الحفظ وإرسال البيانات للـ Provider
-  void _saveChanges() {
+  // دالة الحفظ وإرسال البيانات للـ Provider و Supabase
+  Future<void> _saveChanges() async {
     final provider = context.read<UserProvider>();
     final currentUser = provider.currentUser;
 
-    // تحديث الموديل (مثال على تحديث الاسم)
+    final name = _nameController.text.trim();
+    final username = _usernameController.text.trim();
+    final phone = _phoneController.text.trim();
+    final bio = _bioController.text.trim();
+    final location = _selectedLocation;
+
+    // 1. تحديث الموديل محلياً في الـ Provider
     final updatedUser = currentUser.copyWith(
-      name: _nameController.text.trim(),
+      name: name,
+      username: username,
+      phone: phone,
+      bio: bio,
+      location: location,
     );
 
     provider.updateProfile(updatedUser);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('تم تحديث الملف الشخصي بنجاح', style: GoogleFonts.tajawal()),
-        backgroundColor: const Color(0xFF2CC069), // لون أخضر للنجاح
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    // 2. تحديث البيانات في قاعدة البيانات إن وجدت جلسة نشطة
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user != null) {
+        await Supabase.instance.client.from('profiles').update({
+          'name': name,
+          'username': username,
+          'phone': phone,
+          'bio': bio,
+          'location': location,
+        }).eq('id', user.id);
+      }
+    } catch (e) {
+      debugPrint('Error updating profiles in database: $e');
+    }
 
-    Navigator.pop(context);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('تم تحديث الملف الشخصي بنجاح', style: GoogleFonts.tajawal()),
+          backgroundColor: const Color(0xFF2CC069), // لون أخضر للنجاح
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -183,6 +216,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               _buildInputLabel('الموقع'),
               const SizedBox(height: 8),
               _buildDropdownField(),
+              const SizedBox(height: 24),
+
+              // حقل رقم الهاتف
+              _buildInputLabel('رقم الهاتف'),
+              const SizedBox(height: 8),
+              _buildCustomTextField(
+                controller: _phoneController,
+                hintText: 'أدخل رقم الهاتف',
+                icon: Icons.phone_outlined,
+              ),
+              const SizedBox(height: 24),
+
+              // حقل نبذة شخصية
+              _buildInputLabel('نبذة شخصية'),
+              const SizedBox(height: 8),
+              _buildCustomTextField(
+                controller: _bioController,
+                hintText: 'مهتم بالطاقة المتجددة...',
+                icon: Icons.info_outline_rounded,
+              ),
               const SizedBox(height: 48),
 
               // ── زر الحفظ (Save Button) ──
@@ -265,7 +318,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   // ويدجت مساعدة لبناء قائمة الموقع المنسدلة بنفس تصميم الحدود
   Widget _buildDropdownField() {
     return DropdownButtonFormField<String>(
-      value: _selectedLocation,
+      initialValue: _selectedLocation,
       icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF9EA3B0)),
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.location_on_outlined, color: Color(0xFF9EA3B0), size: 22),

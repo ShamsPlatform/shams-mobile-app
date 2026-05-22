@@ -119,6 +119,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         });
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -322,7 +323,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: _attachments.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        separatorBuilder: (context, index) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           return _AttachmentThumbnail(
             media: _attachments[index],
@@ -402,7 +403,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           Switch(
             value: _isHighlighted,
             onChanged: (val) => setState(() => _isHighlighted = val),
-            activeColor: ShamsColors.solarYellow,
+            activeThumbColor: ShamsColors.solarYellow,
           ),
         ],
       ),
