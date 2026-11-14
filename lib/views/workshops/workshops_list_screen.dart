@@ -4,15 +4,15 @@ import 'package:provider/provider.dart';
 
 import 'package:shams_mobile_app/core/constants/app_constants.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import '../../widgets/appbar.dart';
-import '../../widgets/city_filter.dart';
-import '../../widgets/workshop_card.dart';
-import '../../widgets/inline_search_bar.dart';
-import '../../providers/workshop_provider.dart';
-import '../../providers/notification_provider.dart';
-import 'workshop_profile_screen.dart';
-import '../notifications/notifications_screen.dart';
-import '../../widgets/shams_drawer.dart';
+import 'package:shams_mobile_app/core/widgets/appbar.dart';
+import 'package:shams_mobile_app/core/widgets/city_filter.dart';
+import 'package:shams_mobile_app/widgets/workshop_card.dart';
+import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
+import 'package:shams_mobile_app/providers/workshop_provider.dart';
+import 'package:shams_mobile_app/providers/notification_provider.dart';
+import 'package:shams_mobile_app/views/workshops/workshop_profile_screen.dart';
+import 'package:shams_mobile_app/views/notifications/notifications_screen.dart';
+import 'package:shams_mobile_app/widgets/shams_drawer.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WorkshopsListScreen — قائمة الورش العامة

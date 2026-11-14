@@ -1,4 +1,4 @@
-import 'user_model.dart';
+import 'package:shams_mobile_app/models/user_model.dart';
 
 class CommentModel {
   final String id;

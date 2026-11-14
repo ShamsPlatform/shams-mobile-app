@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../providers/user_provider.dart';
+import 'package:shams_mobile_app/providers/user_provider.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 class EditProfileScreen extends StatefulWidget {

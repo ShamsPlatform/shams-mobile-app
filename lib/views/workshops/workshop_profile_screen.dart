@@ -4,15 +4,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/core/constants/app_constants.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import '../../widgets/primary_button.dart';
-import '../../widgets/inline_search_bar.dart';
-import '../../views/chat/chat_conversation_screen.dart';
-import '../../providers/workshop_provider.dart';
-import '../../providers/chat_provider.dart';
-import '../../providers/user_provider.dart';
-import '../../providers/feed_provider.dart';
-import '../../models/user_model.dart';
-import '../../models/public_workshop_model.dart';
+import 'package:shams_mobile_app/core/widgets/primary_button.dart';
+import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
+import 'package:shams_mobile_app/views/chat/chat_conversation_screen.dart';
+import 'package:shams_mobile_app/providers/workshop_provider.dart';
+import 'package:shams_mobile_app/providers/chat_provider.dart';
+import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/providers/feed_provider.dart';
+import 'package:shams_mobile_app/models/user_model.dart';
+import 'package:shams_mobile_app/models/public_workshop_model.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WorkshopProfile — صفحة الملف الشخصي للورشة

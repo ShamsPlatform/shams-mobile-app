@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'storage_service.dart';
+import 'package:shams_mobile_app/services/storage_service.dart';
 
 class PostService {
   static final _db = Supabase.instance.client;

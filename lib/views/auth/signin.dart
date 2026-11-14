@@ -2,15 +2,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import '../../widgets/text_field.dart';
-import '../../widgets/primary_button.dart';
-import '../../widgets/outlined_button.dart';
-import 'signup.dart';
+import 'package:shams_mobile_app/core/widgets/text_field.dart';
+import 'package:shams_mobile_app/core/widgets/primary_button.dart';
+import 'package:shams_mobile_app/core/widgets/outlined_button.dart';
+import 'package:shams_mobile_app/views/auth/signup.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
-import '../../providers/user_provider.dart';
+import 'package:shams_mobile_app/providers/user_provider.dart';
 import 'package:shams_mobile_app/app/auth_gate.dart';
-import '../../services/local_storage_service.dart';
+import 'package:shams_mobile_app/services/local_storage_service.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/post_model.dart';
-import '../models/comment_model.dart';
-import '../services/post_service.dart';
+import 'package:shams_mobile_app/models/post_model.dart';
+import 'package:shams_mobile_app/models/comment_model.dart';
+import 'package:shams_mobile_app/services/post_service.dart';
 
 class FeedProvider extends ChangeNotifier {
   final List<PostModel> _posts = [];

@@ -3,15 +3,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../providers/user_provider.dart';
-import '../providers/notification_provider.dart';
-import '../providers/chat_provider.dart';
-import '../providers/feed_provider.dart';
+import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/providers/notification_provider.dart';
+import 'package:shams_mobile_app/providers/chat_provider.dart';
+import 'package:shams_mobile_app/providers/feed_provider.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/app/main_screen.dart';
-import '../views/user_profile/edit_profile_screen.dart';
-import '../views/user_profile/about_shams_screen.dart';
-import '../views/workshops/workshop_dashboard_screen.dart';
+import 'package:shams_mobile_app/views/user_profile/edit_profile_screen.dart';
+import 'package:shams_mobile_app/views/user_profile/about_shams_screen.dart';
+import 'package:shams_mobile_app/views/workshops/workshop_dashboard_screen.dart';
 import 'package:shams_mobile_app/app/auth_gate.dart';
 
 class ShamsDrawer extends StatelessWidget {

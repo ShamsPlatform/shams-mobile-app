@@ -1,5 +1,5 @@
-import 'user_model.dart';
-import 'message_model.dart';
+import 'package:shams_mobile_app/models/user_model.dart';
+import 'package:shams_mobile_app/models/message_model.dart';
 
 class ChatModel {
   final String chatId;

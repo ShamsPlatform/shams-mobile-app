@@ -1,6 +1,6 @@
 import 'dart:io'; // [dart:io] مكتبة Dart للتعامل مع نظام الملفات - نحتاجها لـ FileImage لعرض صور الجهاز المحلية
 import 'package:flutter/material.dart'; // توفر ChangeNotifier لإدارة الحالة + NetworkImage/FileImage للتعامل مع كاش الصور
-import '../models/user_model.dart'; // نموذج بيانات المستخدم الذي نخزّنه ونُحوّل إليه البيانات القادمة من Supabase
+import 'package:shams_mobile_app/models/user_model.dart'; // نموذج بيانات المستخدم الذي نخزّنه ونُحوّل إليه البيانات القادمة من Supabase
 import 'package:supabase_flutter/supabase_flutter.dart'; // للوصول إلى Auth وقاعدة البيانات عبر Supabase
 
 // أي widget يستخدم context.watch<UserProvider>() سيُعاد بناؤه تلقائياً عند استدعاء notifyListeners()

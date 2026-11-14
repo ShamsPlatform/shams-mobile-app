@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import '../../widgets/primary_button.dart';
-import '../../widgets/outlined_button.dart';
-import 'signin.dart';
-import 'signup.dart';
+import 'package:shams_mobile_app/core/widgets/primary_button.dart';
+import 'package:shams_mobile_app/core/widgets/outlined_button.dart';
+import 'package:shams_mobile_app/views/auth/signin.dart';
+import 'package:shams_mobile_app/views/auth/signup.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});

@@ -1,6 +1,6 @@
-import 'post_model.dart';
-import 'review_model.dart';
-import 'user_model.dart';
+import 'package:shams_mobile_app/models/post_model.dart';
+import 'package:shams_mobile_app/models/review_model.dart';
+import 'package:shams_mobile_app/models/user_model.dart';
 
 /// PublicWorkshopModel — نموذج بيانات الورشة العامة
 ///

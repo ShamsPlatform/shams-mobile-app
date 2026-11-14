@@ -5,19 +5,19 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-import '../../models/post_model.dart';
-import '../../models/workshop_data.dart';
-import '../../providers/workshop_provider.dart';
-import '../../providers/user_provider.dart';
-import '../../services/storage_service.dart';
-import '../../services/workshop_service.dart';
+import 'package:shams_mobile_app/models/post_model.dart';
+import 'package:shams_mobile_app/models/workshop_data.dart';
+import 'package:shams_mobile_app/providers/workshop_provider.dart';
+import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/services/storage_service.dart';
+import 'package:shams_mobile_app/services/workshop_service.dart';
 import 'package:shams_mobile_app/core/constants/app_constants.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import '../../widgets/managed_post_card.dart';
-import '../../widgets/primary_button.dart';
-import '../../widgets/scrollable_image_picker.dart';
-import 'create_post_screen.dart';
-import 'edit_post_screen.dart';
+import 'package:shams_mobile_app/widgets/managed_post_card.dart';
+import 'package:shams_mobile_app/core/widgets/primary_button.dart';
+import 'package:shams_mobile_app/core/widgets/scrollable_image_picker.dart';
+import 'package:shams_mobile_app/views/workshops/create_post_screen.dart';
+import 'package:shams_mobile_app/views/workshops/edit_post_screen.dart';
 
 class WorkshopDashboardScreen extends StatefulWidget {
   /// Optional workshop data passed from the Add Workshop form.

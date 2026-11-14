@@ -1,5 +1,5 @@
-import 'user_model.dart';
-import 'comment_model.dart';
+import 'package:shams_mobile_app/models/user_model.dart';
+import 'package:shams_mobile_app/models/comment_model.dart';
 
 /// PostModel — نموذج بيانات منشور الورشة
 ///

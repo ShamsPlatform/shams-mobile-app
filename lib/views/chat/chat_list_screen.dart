@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import '../../widgets/chat_tile.dart';
-import '../../widgets/inline_search_bar.dart';
-import 'chat_conversation_screen.dart'; // مسار شاشة الدردشة
+import 'package:shams_mobile_app/widgets/chat_tile.dart';
+import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
+import 'package:shams_mobile_app/views/chat/chat_conversation_screen.dart'; // مسار شاشة الدردشة
 import 'package:provider/provider.dart';
-import '../../providers/chat_provider.dart';
-import '../../providers/user_provider.dart';
-import '../../providers/workshop_provider.dart';
-import '../../models/user_model.dart';
+import 'package:shams_mobile_app/providers/chat_provider.dart';
+import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/providers/workshop_provider.dart';
+import 'package:shams_mobile_app/models/user_model.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class ChatListScreen extends StatefulWidget {

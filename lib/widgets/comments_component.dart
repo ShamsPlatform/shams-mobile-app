@@ -5,9 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 import 'package:provider/provider.dart';
-import '../models/comment_model.dart';
-import '../providers/feed_provider.dart';
-import '../providers/user_provider.dart';
+import 'package:shams_mobile_app/models/comment_model.dart';
+import 'package:shams_mobile_app/providers/feed_provider.dart';
+import 'package:shams_mobile_app/providers/user_provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 // ─────────────────────────────────────────────────────────────────────────────

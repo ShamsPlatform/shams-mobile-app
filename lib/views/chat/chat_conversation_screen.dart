@@ -2,18 +2,18 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shams_mobile_app/models/chat_model.dart';
-import '../../widgets/message_bubble.dart';
-import '../../widgets/chat_input_field.dart';
-import '../../widgets/inline_search_bar.dart';
+import 'package:shams_mobile_app/widgets/message_bubble.dart';
+import 'package:shams_mobile_app/widgets/chat_input_field.dart';
+import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:provider/provider.dart';
-import '../../providers/chat_provider.dart';
-import '../../providers/user_provider.dart';
-import '../../providers/workshop_provider.dart';
-import '../../models/message_model.dart';
-import '../../models/user_model.dart';
+import 'package:shams_mobile_app/providers/chat_provider.dart';
+import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/providers/workshop_provider.dart';
+import 'package:shams_mobile_app/models/message_model.dart';
+import 'package:shams_mobile_app/models/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../services/chat_service.dart';
+import 'package:shams_mobile_app/services/chat_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ChatConversationScreen — شاشة المحادثة الفردية

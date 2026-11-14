@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/post_model.dart';
-import '../models/comment_model.dart';
-import '../models/public_workshop_model.dart';
-import '../models/workshop_data.dart';
-import '../services/workshop_service.dart';
-import '../services/post_service.dart';
+import 'package:shams_mobile_app/models/post_model.dart';
+import 'package:shams_mobile_app/models/comment_model.dart';
+import 'package:shams_mobile_app/models/public_workshop_model.dart';
+import 'package:shams_mobile_app/models/workshop_data.dart';
+import 'package:shams_mobile_app/services/workshop_service.dart';
+import 'package:shams_mobile_app/services/post_service.dart';
 
 /// WorkshopProvider — state manager for all workshop data.
 ///

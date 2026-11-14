@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/notification_model.dart';
-import '../services/notification_service.dart';
+import 'package:shams_mobile_app/models/notification_model.dart';
+import 'package:shams_mobile_app/services/notification_service.dart';
 
 class NotificationProvider extends ChangeNotifier {
   final List<NotificationModel> _notifications = [];

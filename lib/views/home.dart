@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import '../widgets/appbar.dart';
-import '../widgets/post_card.dart';
-import '../widgets/inline_search_bar.dart';
-import 'posts/post_detail_screen.dart';
-import '../widgets/comments_component.dart';
+import 'package:shams_mobile_app/core/widgets/appbar.dart';
+import 'package:shams_mobile_app/widgets/post_card.dart';
+import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
+import 'package:shams_mobile_app/views/posts/post_detail_screen.dart';
+import 'package:shams_mobile_app/widgets/comments_component.dart';
 import 'package:provider/provider.dart';
-import '../providers/feed_provider.dart';
-import '../providers/workshop_provider.dart';
-import '../models/public_workshop_model.dart';
-import 'notifications/notifications_screen.dart';
-import 'workshops/workshop_profile_screen.dart';
-import '../widgets/shams_drawer.dart';
+import 'package:shams_mobile_app/providers/feed_provider.dart';
+import 'package:shams_mobile_app/providers/workshop_provider.dart';
+import 'package:shams_mobile_app/models/public_workshop_model.dart';
+import 'package:shams_mobile_app/views/notifications/notifications_screen.dart';
+import 'package:shams_mobile_app/views/workshops/workshop_profile_screen.dart';
+import 'package:shams_mobile_app/widgets/shams_drawer.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // (أُزيلت البيانات الوهمية، يتم جلبها الآن من FeedProvider)

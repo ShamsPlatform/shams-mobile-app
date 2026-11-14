@@ -7,16 +7,16 @@ import 'package:image_picker/image_picker.dart';
 
 import 'package:shams_mobile_app/core/constants/app_constants.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import '../../widgets/image_source_sheet.dart';
-import '../../widgets/primary_button.dart';
-import '../../widgets/scrollable_image_picker.dart';
-import '../../widgets/username_field.dart';
+import 'package:shams_mobile_app/core/widgets/image_source_sheet.dart';
+import 'package:shams_mobile_app/core/widgets/primary_button.dart';
+import 'package:shams_mobile_app/core/widgets/scrollable_image_picker.dart';
+import 'package:shams_mobile_app/widgets/username_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
-import '../../providers/user_provider.dart';
-import '../../providers/workshop_provider.dart';
-import '../../models/workshop_data.dart';
-import '../../services/workshop_service.dart';
+import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/providers/workshop_provider.dart';
+import 'package:shams_mobile_app/models/workshop_data.dart';
+import 'package:shams_mobile_app/services/workshop_service.dart';
 
 class AddWorkshopScreen extends StatefulWidget {
   const AddWorkshopScreen({super.key});

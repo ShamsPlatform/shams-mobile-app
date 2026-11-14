@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import '../../models/post_model.dart';
-import '../../providers/workshop_provider.dart';
-import '../../providers/feed_provider.dart';
-import '../../services/post_service.dart';
+import 'package:shams_mobile_app/models/post_model.dart';
+import 'package:shams_mobile_app/providers/workshop_provider.dart';
+import 'package:shams_mobile_app/providers/feed_provider.dart';
+import 'package:shams_mobile_app/services/post_service.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import 'create_post_screen.dart'; // إعادة استخدام MediaFile و _AttachmentThumbnail
+import 'package:shams_mobile_app/views/workshops/create_post_screen.dart'; // إعادة استخدام MediaFile و _AttachmentThumbnail
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EditPostScreen — شاشة تعديل المنشور

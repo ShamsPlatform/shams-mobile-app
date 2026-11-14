@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/chat_model.dart';
-import '../models/message_model.dart';
-import '../models/user_model.dart';
-import '../services/chat_service.dart';
-import '../services/maintenance_service.dart';
+import 'package:shams_mobile_app/models/chat_model.dart';
+import 'package:shams_mobile_app/models/message_model.dart';
+import 'package:shams_mobile_app/models/user_model.dart';
+import 'package:shams_mobile_app/services/chat_service.dart';
+import 'package:shams_mobile_app/services/maintenance_service.dart';
 
 /// كلاس إدارة حالة المحادثات في التطبيق باستخدام ChangeNotifier لتحديث واجهة المستخدم تلقائياً
 class ChatProvider extends ChangeNotifier {

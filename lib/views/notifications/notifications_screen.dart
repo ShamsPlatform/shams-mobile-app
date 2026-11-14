@@ -3,11 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import '../../models/notification_model.dart';
-import '../../providers/notification_provider.dart';
-import '../posts/post_detail_screen.dart';
-import '../workshops/workshop_profile_screen.dart';
-import '../chat/chat_conversation_screen.dart';
+import 'package:shams_mobile_app/models/notification_model.dart';
+import 'package:shams_mobile_app/providers/notification_provider.dart';
+import 'package:shams_mobile_app/views/posts/post_detail_screen.dart';
+import 'package:shams_mobile_app/views/workshops/workshop_profile_screen.dart';
+import 'package:shams_mobile_app/views/chat/chat_conversation_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // NotificationsScreen — شاشة الإشعارات

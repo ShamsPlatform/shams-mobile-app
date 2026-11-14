@@ -9,7 +9,7 @@ import 'package:shams_mobile_app/views/chat/chat_list_screen.dart';
 import 'package:shams_mobile_app/views/home.dart';
 import 'package:shams_mobile_app/views/user_profile/user_profile_screen.dart';
 import 'package:shams_mobile_app/views/workshops/workshops_list_screen.dart';
-import 'package:shams_mobile_app/widgets/shams_bottom_nav_bar.dart';
+import 'package:shams_mobile_app/core/widgets/shams_bottom_nav_bar.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
