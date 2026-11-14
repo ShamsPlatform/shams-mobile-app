@@ -72,3 +72,15 @@ lib/
 
 ---
 
+## ⚙️ Running the App | تشغيل التطبيق
+1. Copy `env/example.json` to `env/dev.json` and fill in your Supabase credentials.
+2. Run or build using `--dart-define-from-file`:
+   ```powershell
+   flutter run --dart-define-from-file=env/dev.json
+   ```
+   ```powershell
+   flutter build apk --debug --dart-define-from-file=env/dev.json
+   ```
+
+---
+
