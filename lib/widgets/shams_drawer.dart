@@ -8,11 +8,11 @@ import '../providers/notification_provider.dart';
 import '../providers/chat_provider.dart';
 import '../providers/feed_provider.dart';
 import '../utils/constants.dart';
-import '../views/main_screen.dart';
+import 'package:shams_mobile_app/app/main_screen.dart';
 import '../views/user_profile/edit_profile_screen.dart';
 import '../views/user_profile/about_shams_screen.dart';
 import '../views/workshops/workshop_dashboard_screen.dart';
-import '../widgets/auth_gate.dart';
+import 'package:shams_mobile_app/app/auth_gate.dart';
 
 class ShamsDrawer extends StatelessWidget {
   final int activeIndex;

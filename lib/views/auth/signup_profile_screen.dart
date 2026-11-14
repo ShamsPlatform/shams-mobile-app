@@ -8,7 +8,7 @@ import '../../utils/constants.dart';
 import '../../widgets/text_field.dart';
 import '../../widgets/primary_button.dart';
 import '../../providers/user_provider.dart';
-import '../../widgets/auth_gate.dart';
+import 'package:shams_mobile_app/app/auth_gate.dart';
 import '../../services/local_storage_service.dart';
 
 class SignUpProfileScreen extends StatefulWidget {

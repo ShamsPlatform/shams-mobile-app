@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/user_provider.dart';
-import '../providers/workshop_provider.dart';
-import '../providers/notification_provider.dart';
-import '../providers/chat_provider.dart';
-import '../providers/feed_provider.dart';
-import '../widgets/shams_bottom_nav_bar.dart';
-import 'home.dart';
-import 'workshops/workshops_list_screen.dart';
-import 'user_profile/user_profile_screen.dart';
-import 'chat/chat_list_screen.dart';
+import 'package:shams_mobile_app/providers/chat_provider.dart';
+import 'package:shams_mobile_app/providers/feed_provider.dart';
+import 'package:shams_mobile_app/providers/notification_provider.dart';
+import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/providers/workshop_provider.dart';
+import 'package:shams_mobile_app/views/chat/chat_list_screen.dart';
+import 'package:shams_mobile_app/views/home.dart';
+import 'package:shams_mobile_app/views/user_profile/user_profile_screen.dart';
+import 'package:shams_mobile_app/views/workshops/workshops_list_screen.dart';
+import 'package:shams_mobile_app/widgets/shams_bottom_nav_bar.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -70,4 +70,3 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
-

@@ -1,96 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:provider/provider.dart';
+import 'package:shams_mobile_app/app/app.dart';
+import 'package:shams_mobile_app/app/app_providers.dart';
+import 'package:shams_mobile_app/core/config/env.dart';
+import 'package:shams_mobile_app/core/di/injection.dart';
+import 'package:shams_mobile_app/providers/theme_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:shams_mobile_app/widgets/auth_gate.dart';
-
-import 'providers/workshop_provider.dart';
-import 'providers/user_provider.dart';
-import 'providers/feed_provider.dart';
-import 'providers/chat_provider.dart';
-import 'providers/notification_provider.dart';
-import 'providers/theme_provider.dart';
-import 'utils/theme.dart';
 
 Future<void> main() async {
-  // Ensure Flutter engine is fully initialized before calling native code.
   WidgetsFlutterBinding.ensureInitialized();
-  // Lock orientation to portrait for a consistent mobile experience.
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-
-  // Initialize Supabase.
+  Env.validate();
   try {
-    await Supabase.initialize(
-      url: 'https://txnxxrpyiofnjmpmgvkr.supabase.co',
-      anonKey: 'sb_publishable_-RY8Ton1b2fSjR2tU20q-w_gAAZRJ72',
-    );
+    await Supabase.initialize(url: Env.supabaseUrl, anonKey: Env.supabaseAnonKey);
   } catch (e) {
     debugPrint('Supabase initialization failed: $e');
     debugPrint('Continuing in offline mode for UI testing.');
   }
-
-  // Load persisted theme preference before rendering the first frame.
+  await initDependencies();
   final themeProvider = ThemeProvider();
   await themeProvider.loadSavedTheme();
-
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: themeProvider),
-        ChangeNotifierProvider(create: (_) => WorkshopProvider()),
-        ChangeNotifierProvider(create: (_) => UserProvider()),
-        ChangeNotifierProxyProvider<WorkshopProvider, FeedProvider>(
-          create: (_) => FeedProvider(),
-          update: (_, workshopProvider, feedProvider) {
-            final fp = feedProvider ?? FeedProvider();
-            fp.initializeFromWorkshops(workshopProvider.publicWorkshops);
-            return fp;
-          },
-        ),
-        ChangeNotifierProvider(create: (_) => ChatProvider()),
-        ChangeNotifierProvider(create: (_) => NotificationProvider()),
-      ],
-      child: const ShamsApp(),
-    ),
-  );
-}
-
-/// Root widget of the Shams Platform application.
-class ShamsApp extends StatelessWidget {
-  const ShamsApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final themeProvider = context.watch<ThemeProvider>();
-
-    return MaterialApp(
-      // ── App Identity ────────────────────────────────────────────
-      title: 'شمس',
-      debugShowCheckedModeBanner: false,
-
-      // ── Theme ───────────────────────────────────────────────────
-      theme: ShamsTheme.light,
-      darkTheme: ShamsTheme.dark,
-      themeMode: themeProvider.themeMode,
-
-      // ── Locale & RTL ────────────────────────────────────────────
-      locale: const Locale('ar', 'SA'),
-      supportedLocales: const [
-        Locale('ar', 'SA'), // Arabic (Saudi Arabia) — primary
-        Locale('en', 'US'), // English — fallback
-      ],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-
-      // ── Entry Point ─────────────────────────────────────────────
-      home: const AuthGate(),
-    );
-  }
+  runApp(AppProviders(themeProvider: themeProvider, child: const ShamsApp()));
 }

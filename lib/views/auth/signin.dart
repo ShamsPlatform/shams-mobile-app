@@ -9,7 +9,7 @@ import 'signup.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
-import '../../widgets/auth_gate.dart';
+import 'package:shams_mobile_app/app/auth_gate.dart';
 import '../../services/local_storage_service.dart';
 
 class SignInScreen extends StatefulWidget {

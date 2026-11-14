@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/post_model.dart';
 import '../models/comment_model.dart';
-import '../models/public_workshop_model.dart';
 import '../services/post_service.dart';
 
 class FeedProvider extends ChangeNotifier {
@@ -12,12 +11,6 @@ class FeedProvider extends ChangeNotifier {
 
   FeedProvider() {
     fetchFeed();
-  }
-
-  /// Aggregates all initial posts from the public workshops in WorkshopProvider.
-  /// Kept for backward compatibility with proxy provider in main.dart
-  void initializeFromWorkshops(List<PublicWorkshopModel> workshops) {
-    // Live fetching handles data, but we keep this method to avoid breaking main.dart
   }
 
   Future<void> fetchFeed() async {

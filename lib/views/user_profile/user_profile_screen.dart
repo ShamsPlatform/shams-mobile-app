@@ -17,7 +17,7 @@ import '../../providers/chat_provider.dart';
 import '../../providers/feed_provider.dart';
 import '../../providers/workshop_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../widgets/auth_gate.dart';
+import 'package:shams_mobile_app/app/auth_gate.dart';
 import 'edit_profile_screen.dart';
 import '../../services/local_storage_service.dart';
 // ─────────────────────────────────────────────────────────────────────────────
