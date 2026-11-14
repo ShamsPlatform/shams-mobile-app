@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/providers/chat_provider.dart';
 import 'package:shams_mobile_app/providers/feed_provider.dart';
 import 'package:shams_mobile_app/providers/notification_provider.dart';
-import 'package:shams_mobile_app/providers/theme_provider.dart';
+import 'package:shams_mobile_app/core/theme/theme_provider.dart';
 import 'package:shams_mobile_app/providers/user_provider.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
 

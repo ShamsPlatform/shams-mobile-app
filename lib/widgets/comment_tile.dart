@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shams_mobile_app/utils/constants.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 class ShamsCommentTile extends StatelessWidget {
   final String userName;

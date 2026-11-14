@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import '../utils/constants.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 /// Shows a modal bottom sheet with Gallery / Camera options.
 /// Returns the chosen [ImageSource], or `null` if dismissed.

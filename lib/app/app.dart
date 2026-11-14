@@ -3,8 +3,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/app/auth_gate.dart';
 import 'package:shams_mobile_app/app/navigation.dart';
-import 'package:shams_mobile_app/providers/theme_provider.dart';
-import 'package:shams_mobile_app/utils/theme.dart';
+import 'package:shams_mobile_app/core/theme/theme_provider.dart';
+import 'package:shams_mobile_app/core/theme/shams_theme.dart';
 
 /// Root widget of the Shams Platform application.
 class ShamsApp extends StatelessWidget {

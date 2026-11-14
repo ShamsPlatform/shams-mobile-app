@@ -7,7 +7,7 @@ import '../../models/post_model.dart';
 import '../../providers/workshop_provider.dart';
 import '../../providers/feed_provider.dart';
 import '../../services/post_service.dart';
-import '../../utils/constants.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'create_post_screen.dart'; // إعادة استخدام MediaFile و _AttachmentThumbnail
 
 // ─────────────────────────────────────────────────────────────────────────────

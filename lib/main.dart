@@ -4,7 +4,7 @@ import 'package:shams_mobile_app/app/app.dart';
 import 'package:shams_mobile_app/app/app_providers.dart';
 import 'package:shams_mobile_app/core/config/env.dart';
 import 'package:shams_mobile_app/core/di/injection.dart';
-import 'package:shams_mobile_app/providers/theme_provider.dart';
+import 'package:shams_mobile_app/core/theme/theme_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
@@ -21,7 +21,7 @@ Future<void> main() async {
     debugPrint('Continuing in offline mode for UI testing.');
   }
   await initDependencies();
-  final themeProvider = ThemeProvider();
+  final themeProvider = ThemeProvider(sl());
   await themeProvider.loadSavedTheme();
   runApp(AppProviders(themeProvider: themeProvider, child: const ShamsApp()));
 }

@@ -5,7 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../utils/constants.dart';
+import 'package:shams_mobile_app/core/constants/app_constants.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import '../../widgets/image_source_sheet.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/scrollable_image_picker.dart';

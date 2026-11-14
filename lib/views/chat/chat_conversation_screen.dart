@@ -5,7 +5,7 @@ import 'package:shams_mobile_app/models/chat_model.dart';
 import '../../widgets/message_bubble.dart';
 import '../../widgets/chat_input_field.dart';
 import '../../widgets/inline_search_bar.dart';
-import '../../utils/constants.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:provider/provider.dart';
 import '../../providers/chat_provider.dart';
 import '../../providers/user_provider.dart';

@@ -7,7 +7,7 @@ import '../providers/user_provider.dart';
 import '../providers/notification_provider.dart';
 import '../providers/chat_provider.dart';
 import '../providers/feed_provider.dart';
-import '../utils/constants.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/app/main_screen.dart';
 import '../views/user_profile/edit_profile_screen.dart';
 import '../views/user_profile/about_shams_screen.dart';

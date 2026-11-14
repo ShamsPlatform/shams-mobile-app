@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:shams_mobile_app/core/theme/theme_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -19,5 +20,5 @@ Future<void> initDependencies() async {
 }
 
 void _initCore() {
-  // Core services (ThemeStorage, FileStorageDataSource) are registered here.
+  sl.registerLazySingleton<ThemeStorage>(() => ThemeStorage(sl()));
 }

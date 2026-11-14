@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/providers/notification_provider.dart';
-import 'package:shams_mobile_app/providers/theme_provider.dart';
+import 'package:shams_mobile_app/core/theme/theme_provider.dart';
 
 /// ShamsPlatformAppBar — شريط التطبيق الرئيسي لمنصة شمس
 ///

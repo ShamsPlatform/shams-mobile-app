@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../utils/constants.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import '../../models/notification_model.dart';
 import '../../providers/notification_provider.dart';
 import '../posts/post_detail_screen.dart';

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shams_mobile_app/core/theme/theme_storage.dart';
 
 /// ThemeProvider — مدير وضع السمة (فاتح / داكن)
 ///
-/// يحفظ تفضيل المستخدم في SharedPreferences ويُعيد تحميله عند بدء التطبيق.
+/// يحفظ تفضيل المستخدم في [ThemeStorage] ويُعيد تحميله عند بدء التطبيق.
 class ThemeProvider extends ChangeNotifier {
-  static const String _kThemeModeKey = 'shams_theme_mode';
+  final ThemeStorage _storage;
+
+  ThemeProvider(this._storage);
 
   ThemeMode _themeMode = ThemeMode.light;
 
@@ -15,10 +17,9 @@ class ThemeProvider extends ChangeNotifier {
 
   /// يُحمَّل عند بدء التشغيل — يُعيد قراءة التفضيل المحفوظ.
   Future<void> loadSavedTheme() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedIndex = prefs.getInt(_kThemeModeKey);
-    if (savedIndex != null && savedIndex < ThemeMode.values.length) {
-      _themeMode = ThemeMode.values[savedIndex];
+    final savedMode = await _storage.loadThemeMode();
+    if (savedMode != null) {
+      _themeMode = savedMode;
       notifyListeners();
     }
   }
@@ -28,8 +29,7 @@ class ThemeProvider extends ChangeNotifier {
     _themeMode =
         _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
     notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_kThemeModeKey, _themeMode.index);
+    await _storage.saveThemeMode(_themeMode);
   }
 
   /// يضبط وضع السمة مباشرة.
@@ -37,7 +37,6 @@ class ThemeProvider extends ChangeNotifier {
     if (_themeMode == mode) return;
     _themeMode = mode;
     notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_kThemeModeKey, mode.index);
+    await _storage.saveThemeMode(mode);
   }
 }

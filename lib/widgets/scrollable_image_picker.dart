@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../utils/constants.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 /// A horizontally scrollable image picker that supports an unlimited number
 /// of images.  The trailing slot is always an "Add" button.

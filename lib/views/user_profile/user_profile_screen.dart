@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../utils/constants.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import '../../widgets/primary_button.dart';
 import 'add_workshop_screen.dart';
 import 'privacy_security_screen.dart';

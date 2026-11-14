@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../utils/constants.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 class MessageBubble extends StatelessWidget {
   final String message;

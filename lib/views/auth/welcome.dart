@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../utils/constants.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/outlined_button.dart';
 import 'signin.dart';

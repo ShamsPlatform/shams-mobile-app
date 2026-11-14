@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import '../../utils/constants.dart';
+import 'package:shams_mobile_app/core/constants/app_constants.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import '../../widgets/appbar.dart';
 import '../../widgets/city_filter.dart';
 import '../../widgets/workshop_card.dart';

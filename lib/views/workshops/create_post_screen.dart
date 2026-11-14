@@ -8,7 +8,7 @@ import '../../providers/workshop_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/feed_provider.dart';
 import '../../services/post_service.dart';
-import '../../utils/constants.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MediaFile — نموذج للملفات المرفقة
