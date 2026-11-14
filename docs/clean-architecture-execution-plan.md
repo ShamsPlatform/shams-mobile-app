@@ -996,7 +996,7 @@ Run on a device or emulator, in light **and** dark mode, Arabic RTL layout.
 | Phase | Branch | Status | PR | Merged on | Notes |
 |---|---|---|---|---|---|
 | 0. Preparation | `refactor/ca-p0-prep` | ✅ Completed | | | Device-backed read-only baseline captured; mutation and realtime paths were not run because no disposable multi-account setup was provided. |
-| 1. Core foundation | `refactor/ca-p1-core` | ✅ Completed | | | Implemented P1.1–P1.10; G1 checks, 22 unit tests, and debug APK build/launch verified (UI tab/theme toggle not tapped on device because lockscreen was active). |
+| 1. Core foundation | `refactor/ca-p1-core` | ✅ Completed | | | Implemented P1.1–P1.10; G1 checks, 22 unit tests, debug APK build, and Moto G 5G smoke checks (A1 startup, 4-tab navigation, A12 theme toggle + cold-restart persistence) passed. |
 | 2. Auth & session | `refactor/ca-p2-auth` | ⬜ Not started | | | |
 | 3. Profile & AppUser | `refactor/ca-p3-profile` | ⬜ Not started | | | |
 | 4. Posts | `refactor/ca-p4-posts` | ⬜ Not started | | | B1 needs confirmation |
