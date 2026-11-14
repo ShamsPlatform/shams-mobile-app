@@ -1,28 +1,29 @@
 import 'dart:io';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:shams_mobile_app/core/data/datasources/file_storage_data_source.dart';
+import 'package:shams_mobile_app/core/di/injection.dart';
+
+/// Temporary shim delegating to [FileStorageDataSource] until legacy screens
+/// and services are migrated (deleted in Phase 5).
 class StorageService {
-  static final _storage = Supabase.instance.client.storage;
-
   /// Uploads [file] to [bucket]/[path] and returns the public URL.
   static Future<String> uploadImage({
     required String bucket,
     required String path,
     required File file,
-  }) async {
-    await _storage.from(bucket).upload(
-      path,
-      file,
-      fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
+  }) {
+    return sl<FileStorageDataSource>().uploadFile(
+      bucket: bucket,
+      path: path,
+      localFilePath: file.path,
     );
-    return _storage.from(bucket).getPublicUrl(path);
   }
 
   /// Deletes a file from storage.
   static Future<void> deleteImage({
     required String bucket,
     required String path,
-  }) async {
-    await _storage.from(bucket).remove([path]);
+  }) {
+    return sl<FileStorageDataSource>().delete(bucket: bucket, path: path);
   }
 }

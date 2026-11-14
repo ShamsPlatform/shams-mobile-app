@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:shams_mobile_app/core/data/datasources/file_storage_data_source.dart';
 import 'package:shams_mobile_app/core/theme/theme_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -20,5 +21,8 @@ Future<void> initDependencies() async {
 }
 
 void _initCore() {
+  sl.registerLazySingleton<FileStorageDataSource>(
+    () => FileStorageDataSourceImpl(sl()),
+  );
   sl.registerLazySingleton<ThemeStorage>(() => ThemeStorage(sl()));
 }
