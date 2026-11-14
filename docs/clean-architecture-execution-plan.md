@@ -366,12 +366,12 @@ flutter pub add dev:mocktail
 
 ### Exit criteria
 
-- [ ] `main.dart` is bootstrap only. The Supabase URL/key are no longer in source code.
-- [ ] `core/` has error, result, usecase, config, di, theme, constants, data, domain, utils, widgets, presentation.
-- [ ] The proxy provider and `initializeFromWorkshops` are removed.
-- [ ] `dart run tool/check_architecture.dart` passes.
-- [ ] The theme preference survives the upgrade (same key).
-- [ ] Tests: result, error mapper, theme provider, `AppUserModel`, formatters.
+- [x] `main.dart` is bootstrap only. The Supabase URL/key are no longer in source code.
+- [x] `core/` has error, result, usecase, config, di, theme, constants, data, domain, utils, widgets, presentation.
+- [x] The proxy provider and `initializeFromWorkshops` are removed.
+- [x] `dart run tool/check_architecture.dart` passes.
+- [x] The theme preference survives the upgrade (same key).
+- [x] Tests: result, error mapper, theme provider, `AppUserModel`, formatters.
 
 ---
 
@@ -996,7 +996,7 @@ Run on a device or emulator, in light **and** dark mode, Arabic RTL layout.
 | Phase | Branch | Status | PR | Merged on | Notes |
 |---|---|---|---|---|---|
 | 0. Preparation | `refactor/ca-p0-prep` | ✅ Completed | | | Device-backed read-only baseline captured; mutation and realtime paths were not run because no disposable multi-account setup was provided. |
-| 1. Core foundation | `refactor/ca-p1-core` | ⬜ Not started | | | |
+| 1. Core foundation | `refactor/ca-p1-core` | ✅ Completed | | | Implemented P1.1–P1.10; G1 checks, 22 unit tests, and debug APK build/launch verified (UI tab/theme toggle not tapped on device because lockscreen was active). |
 | 2. Auth & session | `refactor/ca-p2-auth` | ⬜ Not started | | | |
 | 3. Profile & AppUser | `refactor/ca-p3-profile` | ⬜ Not started | | | |
 | 4. Posts | `refactor/ca-p4-posts` | ⬜ Not started | | | B1 needs confirmation |
