@@ -2,7 +2,7 @@
 
 | Item | Value |
 |---|---|
-| Status | In progress — Phase 0 preparation |
+| Status | Phase 0 completed — baseline limitations documented |
 | Scope | Everything under `lib/` (≈ 70 Dart files, ≈ 20k LOC) |
 | Strategy | Incremental, feature by feature (Strangler Fig). No big-bang rewrite. |
 | State management | Keep `provider` during the migration. A switch to Bloc/Riverpod is out of scope. |

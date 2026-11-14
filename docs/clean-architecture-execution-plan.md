@@ -995,7 +995,7 @@ Run on a device or emulator, in light **and** dark mode, Arabic RTL layout.
 
 | Phase | Branch | Status | PR | Merged on | Notes |
 |---|---|---|---|---|---|
-| 0. Preparation | `refactor/ca-p0-prep` | 🟡 In progress | | | Automated baseline recorded; interactive baseline awaits a runnable device/emulator. |
+| 0. Preparation | `refactor/ca-p0-prep` | ✅ Completed | | | Device-backed read-only baseline captured; mutation and realtime paths were not run because no disposable multi-account setup was provided. |
 | 1. Core foundation | `refactor/ca-p1-core` | ⬜ Not started | | | |
 | 2. Auth & session | `refactor/ca-p2-auth` | ⬜ Not started | | | |
 | 3. Profile & AppUser | `refactor/ca-p3-profile` | ⬜ Not started | | | |
