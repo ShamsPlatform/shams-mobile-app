@@ -949,9 +949,9 @@ Get-ChildItem -Recurse lib -Filter *.dart | Select-String "supabase_flutter|shar
 
 ### Exit criteria
 
-- [ ] Only `core/`, `app/`, `features/` and `main.dart` remain under `lib/`.
-- [ ] Strict architecture check, `flutter analyze` (no new issues vs. baseline) and `flutter test` all pass.
-- [ ] The full smoke test matches the baseline.
+- [x] Only `core/`, `app/`, `features/` and `main.dart` remain under `lib/`.
+- [x] Strict architecture check, `flutter analyze` (no new issues vs. baseline) and `flutter test` all pass.
+- [ ] The full smoke test matches the baseline. *(Partial live verification only: debug APK built from `env/dev.json` and run on Moto G 5G `ZN3222BNK7` verified non-mutating UI flows — `UserProfileScreen` split widgets, support/language bottom sheets, Light/Dark mode toggle + restore, tab switching across `الرئيسية`/`الورش`/`المتابعة`/`الملف`, and `logcat -d -s flutter` with 0 exceptions. End-to-end mutating flows — OAuth, sign-up, DB writes, two-device realtime, sign-out — were intentionally skipped on production Supabase without disposable test accounts.)*
 
 ---
 
@@ -1003,6 +1003,6 @@ Run on a device or emulator, in light **and** dark mode, Arabic RTL layout.
 | 5. Workshops | `refactor/ca-p5-workshops` | ✅ Completed | | | Implemented P5.1–P5.7 (`Workshop`/`MyWorkshop`/`Review` domain + `WorkshopRepositoryImpl`/`ReviewRepositoryImpl` + 6 use cases + `WorkshopsProvider`/`MyWorkshopProvider` with cross-provider sync + migrated screens/widgets + split dashboard/profile widgets `<= 336 LOC` + deleted legacy models/services/provider/`storage_service.dart` shim); G1 checks (`0` errors, `4` baseline infos down from `14`), `138` passing tests, and `flutter build apk --debug` passed; live Moto G 5G (`ZN3222BNK7`) A7/A8 smoke checks verified directory/filter/search/profile/follow+restart persistence/dashboard/drawer/`EditWorkshopSheet` cross-provider sync/light-dark mode (`AddWorkshopScreen` & image upload paths covered by unit tests). |
 | 6. Chat & maintenance | `refactor/ca-p6-chat` | ✅ Completed | | | Implemented P6.1–P6.5 (`Chat`/`Message`/`MaintenanceRequest` domain + `ChatRepositoryImpl`/`MaintenanceRepositoryImpl` + 9 chat use cases + `SubmitMaintenanceRequestUseCase` orchestration + `ChatListProvider`/`ConversationProvider`/`MaintenanceRequestProvider` + migrated chat screens/widgets + deleted legacy models/services/`ChatProvider`); G1 checks (`0` errors/warnings/infos down from `4` baseline infos, `check_architecture.dart` passed), `186` passing tests (`48` new chat+maintenance unit tests), and `flutter build apk --debug` passed; single-device `ZN3222BNK7` verified chat list/badges, conversation screen, 10x open/close channel deduplication, in-chat search, multi-select bar, `MaintenanceRequestSheet` mount & empty validation, and `logcat` 0 Flutter exceptions (2-device realtime, DB-mutating submit/delete, and live sign-out remain covered by unit tests without disposable accounts). |
 | 7. Notifications | `refactor/ca-p7-notifications` | ✅ Completed | | | Implemented P7.1–P7.4 (`AppNotification`/`NotificationType` domain + `NotificationRepositoryImpl` + 5 notification use cases + `GetChatIdByMaintenanceRequestUseCase` + `NotificationRemoteDataSource` realtime stream + `NotificationProvider` + migrated `NotificationsScreen`/`NotificationTile` + `unreadNotifications` decoupling on `ShamsPlatformAppBar` + deleted legacy notification files); G1 checks (`0` errors/warnings/infos, `check_architecture.dart` passed), `205` passing unit tests (`18` new notification tests), and `flutter build apk --debug` passed; single-device `ZN3222BNK7` verified `NotificationsScreen` in dark & light modes and live `maintenance_status` tap navigation into `ChatConversationScreen` (`logcat` 0 exceptions; realtime insert & DB-mutating read/delete covered by unit tests). |
-| 8. Cleanup | `refactor/ca-p8-cleanup` | ⬜ Not started | | | |
+| 8. Cleanup | `refactor/ca-p8-cleanup` | ✅ Completed (branch ready for FF merge) | `04f810d`, `ac782d0` + docs | 205 pass / 0 issues | Strict arch + CI; non-mutating live APK smoke |
 
 **Total estimate:** ≈ 15–18 working days for one developer (Phase 9 not included).
