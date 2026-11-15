@@ -1,5 +1,5 @@
 import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
-import 'package:shams_mobile_app/models/post_model.dart';
+import 'package:shams_mobile_app/features/posts/domain/entities/post.dart';
 import 'package:shams_mobile_app/models/review_model.dart';
 
 /// PublicWorkshopModel — نموذج بيانات الورشة العامة
@@ -41,7 +41,7 @@ class PublicWorkshopModel {
   final bool isFollowing;
 
   /// Work-log posts displayed on the profile
-  final List<PostModel> posts;
+  final List<Post> posts;
 
   // ── Domain-specific fields ────────────────────────────────────────────────
 
@@ -96,7 +96,7 @@ class PublicWorkshopModel {
     String? logoPath,
     String? coverImagePath,
     bool? isFollowing,
-    List<PostModel>? posts,
+    List<Post>? posts,
     List<String>? serviceTypes,
     String? phone,
     String? whatsapp,
@@ -129,7 +129,7 @@ class PublicWorkshopModel {
   factory PublicWorkshopModel.fromSupabase(
     Map<String, dynamic> map, {
     bool isFollowing = false,
-    List<PostModel> posts = const [],
+    List<Post> posts = const [],
     List<ReviewModel> reviews = const [],
   }) {
     return PublicWorkshopModel(

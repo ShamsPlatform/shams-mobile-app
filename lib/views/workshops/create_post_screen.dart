@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:shams_mobile_app/models/post_model.dart';
+import 'package:shams_mobile_app/core/di/injection.dart';
+import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
+import 'package:shams_mobile_app/features/posts/presentation/providers/post_editor_provider.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
-import 'package:shams_mobile_app/providers/feed_provider.dart';
-import 'package:shams_mobile_app/services/post_service.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -137,7 +137,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     setState(() => _attachments.removeAt(index));
   }
 
-  void _publish() async {
+  Future<void> _publish(BuildContext editorContext) async {
     if (_contentController.text.trim().isEmpty && _attachments.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -153,6 +153,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     final myWorkshop = context.read<WorkshopProvider>().myWorkshop;
     final currentUser = context.read<ProfileProvider>().currentUserOrPlaceholder;
     final workshopId = myWorkshop?.id ?? currentUser.id;
+    final editor = editorContext.read<PostEditorProvider>();
 
     showDialog(
       context: context,
@@ -162,34 +163,31 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       ),
     );
 
-    try {
-      final imageFiles = _attachments.map((a) => File(a.path)).toList();
-      final newPostMap = await PostService.createPost(
-        workshopId: workshopId,
-        textDetails: _contentController.text.trim(),
-        images: imageFiles,
-        isHighlighted: _isHighlighted,
-      );
+    final newPost = await editor.create(
+      workshopId: workshopId,
+      textDetails: _contentController.text.trim(),
+      imagePaths: _attachments.map((a) => a.path).toList(),
+      isHighlighted: _isHighlighted,
+    );
 
-      final newPost = PostModel.fromSupabase(newPostMap);
+    if (!mounted) return;
+    Navigator.pop(context); // Dismiss loading
 
-      if (mounted) {
-        context.read<WorkshopProvider>().addPost(newPost);
-        context.read<FeedProvider>().addPost(newPost);
-        Navigator.pop(context); // Dismiss loading
-        Navigator.pop(context); // Go back
-      }
-    } catch (e) {
-      if (mounted) {
-        Navigator.pop(context); // Dismiss loading
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('حدث خطأ أثناء النشر: $e', style: GoogleFonts.tajawal()),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            behavior: SnackBarBehavior.floating,
+    if (newPost != null) {
+      context.read<WorkshopProvider>().addPost(newPost);
+      context.read<FeedProvider>().addPost(newPost);
+      Navigator.pop(context); // Go back
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'حدث خطأ أثناء النشر: ${editor.errorMessage ?? ''}',
+            style: GoogleFonts.tajawal(),
           ),
-        );
-      }
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
@@ -197,7 +195,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
+    return ChangeNotifierProvider(
+      create: (_) => sl<PostEditorProvider>(),
+      builder: (editorContext, _) => Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
@@ -243,10 +243,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 ),
               ),
             ),
-            _buildPublishButton(),
+            _buildPublishButton(editorContext),
           ],
         ),
       ),
+    ),
     );
   }
 
@@ -458,14 +459,14 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     );
   }
 
-  Widget _buildPublishButton() {
+  Widget _buildPublishButton(BuildContext editorContext) {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: SizedBox(
         width: double.infinity,
         height: 54,
         child: ElevatedButton(
-          onPressed: _publish,
+          onPressed: () => _publish(editorContext),
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.secondary,
             shape: RoundedRectangleBorder(

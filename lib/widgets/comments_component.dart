@@ -5,8 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 import 'package:provider/provider.dart';
-import 'package:shams_mobile_app/models/comment_model.dart';
-import 'package:shams_mobile_app/providers/feed_provider.dart';
+import 'package:shams_mobile_app/features/posts/domain/entities/comment.dart';
+import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -60,16 +60,7 @@ class _CommentsComponentState extends State<CommentsComponent> {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
-    final currentUser = context.read<ProfileProvider>().currentUserOrPlaceholder;
-    final newComment = CommentModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      postId: widget.postId,
-      text: text,
-      timestamp: DateTime.now(),
-      user: currentUser,
-    );
-
-    context.read<FeedProvider>().addComment(widget.postId, newComment);
+    context.read<FeedProvider>().addComment(widget.postId, text);
     _controller.clear();
     _focusNode.unfocus();
   }
@@ -301,7 +292,7 @@ class _CommentsComponentState extends State<CommentsComponent> {
   void _showCommentMenu(
     BuildContext context,
     int index,
-    List<CommentModel> currentComments,
+    List<Comment> currentComments,
     String? postAuthorId,
   ) {
     final comment = currentComments[index];
@@ -395,7 +386,7 @@ class _CommentsComponentState extends State<CommentsComponent> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _CommentTile extends StatelessWidget {
-  final CommentModel comment;
+  final Comment comment;
   final VoidCallback onLikeTap;
 
   const _CommentTile({required this.comment, required this.onLikeTap});
@@ -470,7 +461,7 @@ class _CommentTile extends StatelessWidget {
                     ),
                     const Spacer(),
                     Text(
-                      timeago.format(comment.timestamp, locale: 'ar'),
+                      timeago.format(comment.createdAt, locale: 'ar'),
                       style: GoogleFonts.tajawal(
                         fontSize: 11.5,
                         color: ext.textHint,

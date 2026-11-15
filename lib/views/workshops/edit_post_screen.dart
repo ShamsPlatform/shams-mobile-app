@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:shams_mobile_app/models/post_model.dart';
+import 'package:shams_mobile_app/core/di/injection.dart';
+import 'package:shams_mobile_app/features/posts/domain/entities/post.dart';
+import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
+import 'package:shams_mobile_app/features/posts/presentation/providers/post_editor_provider.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
-import 'package:shams_mobile_app/providers/feed_provider.dart';
-import 'package:shams_mobile_app/services/post_service.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/views/workshops/create_post_screen.dart'; // إعادة استخدام MediaFile و _AttachmentThumbnail
 
@@ -15,8 +16,8 @@ import 'package:shams_mobile_app/views/workshops/create_post_screen.dart'; // إ
 // ─────────────────────────────────────────────────────────────────────────────
 
 class EditPostScreen extends StatefulWidget {
-  /// بيانات المنشور الأصلي المراد تعديله (PostModel)
-  final PostModel post;
+  /// بيانات المنشور الأصلي المراد تعديله ([Post])
+  final Post post;
 
   const EditPostScreen({super.key, required this.post});
 
@@ -43,9 +44,9 @@ class _EditPostScreenState extends State<EditPostScreen> {
     _contentController = TextEditingController(text: widget.post.textDetails);
     _isHighlighted = widget.post.isHighlighted;
 
-    // تحميل الصور الأصلية من PostModel
+    // تحميل الصور الأصلية من Post
     _attachments = widget.post.images
-        .map((path) => MediaFile(path: path, isAsset: !widget.post.isLocalFile))
+        .map((path) => MediaFile(path: path, isAsset: !path.startsWith('http')))
         .toList();
   }
 
@@ -135,7 +136,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
     setState(() => _attachments.removeAt(index));
   }
 
-  void _save() async {
+  Future<void> _save(BuildContext editorContext) async {
     if (_contentController.text.trim().isEmpty && _attachments.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -148,49 +149,39 @@ class _EditPostScreenState extends State<EditPostScreen> {
       return;
     }
 
+    final editor = editorContext.read<PostEditorProvider>();
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => const Center(child: CircularProgressIndicator()),
     );
 
-    try {
-      await PostService.updatePost(
-        postId: widget.post.id,
-        textDetails: _contentController.text.trim(),
-        isHighlighted: _isHighlighted,
-      );
+    final updatedPost = await editor.update(
+      original: widget.post,
+      textDetails: _contentController.text.trim(),
+      images: _attachments.map((a) => a.path).toList(),
+      isHighlighted: _isHighlighted,
+    );
 
-      final hasNewLocalFile =
-          _attachments.isNotEmpty && !_attachments.first.isAsset;
+    if (!mounted) return;
+    Navigator.pop(context); // Dismiss loading
 
-      final updatedPost = widget.post.copyWith(
-        textDetails: _contentController.text.trim(),
-        isHighlighted: _isHighlighted,
-        images: _attachments.map((a) => a.path).toList(),
-        isLocalFile: hasNewLocalFile,
-      );
-
-      if (mounted) {
-        context.read<WorkshopProvider>().updatePost(updatedPost);
-        context.read<FeedProvider>().updatePost(updatedPost);
-        Navigator.pop(context); // Dismiss loading
-        Navigator.pop(context); // Go back
-      }
-    } catch (e) {
-      if (mounted) {
-        Navigator.pop(context); // Dismiss loading
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'حدث خطأ أثناء تعديل المنشور: $e',
-              style: GoogleFonts.tajawal(),
-            ),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            behavior: SnackBarBehavior.floating,
+    if (updatedPost != null) {
+      context.read<WorkshopProvider>().updatePost(updatedPost);
+      context.read<FeedProvider>().updatePost(updatedPost);
+      Navigator.pop(context); // Go back
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'حدث خطأ أثناء تعديل المنشور: ${editor.errorMessage ?? ''}',
+            style: GoogleFonts.tajawal(),
           ),
-        );
-      }
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
@@ -198,7 +189,9 @@ class _EditPostScreenState extends State<EditPostScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
+    return ChangeNotifierProvider(
+      create: (_) => sl<PostEditorProvider>(),
+      builder: (editorContext, _) => Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
@@ -240,10 +233,11 @@ class _EditPostScreenState extends State<EditPostScreen> {
               ),
             ),
             // زر الحفظ السفلي الثابت
-            _buildSaveButton(),
+            _buildSaveButton(editorContext),
           ],
         ),
       ),
+    ),
     );
   }
 
@@ -432,14 +426,14 @@ class _EditPostScreenState extends State<EditPostScreen> {
     );
   }
 
-  Widget _buildSaveButton() {
+  Widget _buildSaveButton(BuildContext editorContext) {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: SizedBox(
         width: double.infinity,
         height: 54,
         child: ElevatedButton(
-          onPressed: _save,
+          onPressed: () => _save(editorContext),
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.secondary,
             shape: RoundedRectangleBorder(

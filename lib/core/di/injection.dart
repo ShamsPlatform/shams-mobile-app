@@ -25,6 +25,8 @@ import 'package:shams_mobile_app/features/posts/domain/usecases/hide_post_usecas
 import 'package:shams_mobile_app/features/posts/domain/usecases/toggle_comment_like_usecase.dart';
 import 'package:shams_mobile_app/features/posts/domain/usecases/toggle_post_like_usecase.dart';
 import 'package:shams_mobile_app/features/posts/domain/usecases/update_post_usecase.dart';
+import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
+import 'package:shams_mobile_app/features/posts/presentation/providers/post_editor_provider.dart';
 import 'package:shams_mobile_app/features/profile/data/datasources/profile_remote_data_source.dart';
 import 'package:shams_mobile_app/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:shams_mobile_app/features/profile/domain/repositories/profile_repository.dart';
@@ -114,4 +116,17 @@ void _initPosts() {
   sl.registerLazySingleton(() => AddCommentUseCase(sl()));
   sl.registerLazySingleton(() => DeleteCommentUseCase(sl()));
   sl.registerLazySingleton(() => ToggleCommentLikeUseCase(sl()));
+  sl.registerFactory(
+    () => FeedProvider(
+      getFeed: sl(),
+      toggleLike: sl(),
+      addComment: sl(),
+      deleteComment: sl(),
+      toggleCommentLike: sl(),
+      hidePost: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => PostEditorProvider(createPost: sl(), updatePost: sl()),
+  );
 }

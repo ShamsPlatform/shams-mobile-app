@@ -4,7 +4,7 @@ import 'package:shams_mobile_app/app/navigation.dart';
 import 'package:shams_mobile_app/core/presentation/resettable.dart';
 import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shams_mobile_app/providers/chat_provider.dart';
-import 'package:shams_mobile_app/providers/feed_provider.dart';
+import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/providers/notification_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
@@ -57,7 +57,7 @@ class _SessionListenerState extends State<SessionListener> {
         context.read<WorkshopProvider>().fetchPublicWorkshops();
         context.read<NotificationProvider>().fetchNotifications();
         context.read<ChatProvider>().fetchChats();
-        context.read<FeedProvider>().fetchFeed();
+        context.read<FeedProvider>().load();
 
         if (currentUser.id.isNotEmpty && currentUser.hasWorkshop) {
           final username = currentUser.username ?? 'owner';

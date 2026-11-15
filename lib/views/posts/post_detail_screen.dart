@@ -6,7 +6,7 @@ import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/widgets/post_card.dart';
 import 'package:shams_mobile_app/widgets/comments_component.dart';
 
-import 'package:shams_mobile_app/providers/feed_provider.dart';
+import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
 import 'package:shams_mobile_app/models/public_workshop_model.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -382,7 +382,7 @@ class _CommentsSection extends StatelessWidget {
                       'assets/images/logo/shams logo.png',
                   userName: comment.user.name,
                   text: comment.text,
-                  timeAgo: timeago.format(comment.timestamp, locale: 'ar'),
+                  timeAgo: timeago.format(comment.createdAt, locale: 'ar'),
                 ),
                 if (comment != comments.take(2).last)
                   const Divider(

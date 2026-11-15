@@ -5,7 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-import 'package:shams_mobile_app/models/post_model.dart';
+import 'package:shams_mobile_app/core/utils/formatters.dart';
+import 'package:shams_mobile_app/features/posts/domain/entities/post.dart';
 import 'package:shams_mobile_app/models/workshop_data.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
@@ -598,7 +599,7 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
 
   // ── Delete confirmation ───────────────────────────────────────────────────
 
-  void _confirmDelete(PostModel post) {
+  void _confirmDelete(Post post) {
     showDialog<bool>(
       context: context,
       builder: (ctx) => Directionality(
@@ -900,11 +901,10 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
                             final post = posts[index];
                             return ManagedPostCard(
                               content: post.textDetails,
-                              timeAgo: post.createdAt,
-                              viewsCount: post.viewsCount,
+                              timeAgo: formatRelativeTime(post.createdAt),
+                              viewsCount: formatCompactNumber(post.viewsCount),
                               likesCount: post.likesCount,
                               imagePaths: post.images,
-                              isLocalFile: post.isLocalFile,
                               onEdit: () {
                                 Navigator.push(
                                   context,

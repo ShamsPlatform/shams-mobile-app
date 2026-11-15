@@ -7,7 +7,7 @@ import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
 import 'package:shams_mobile_app/views/posts/post_detail_screen.dart';
 import 'package:shams_mobile_app/widgets/comments_component.dart';
 import 'package:provider/provider.dart';
-import 'package:shams_mobile_app/providers/feed_provider.dart';
+import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
 import 'package:shams_mobile_app/models/public_workshop_model.dart';
 import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';

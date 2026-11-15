@@ -10,7 +10,8 @@ import 'package:shams_mobile_app/views/chat/chat_conversation_screen.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
 import 'package:shams_mobile_app/providers/chat_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
-import 'package:shams_mobile_app/providers/feed_provider.dart';
+import 'package:shams_mobile_app/core/utils/formatters.dart';
+import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/models/public_workshop_model.dart';
 
@@ -791,7 +792,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
           )
         else
           ...workshopPosts.map((post) => _buildWorkLogCard(
-                post.createdAt,
+                formatRelativeTime(post.createdAt),
                 post.textDetails,
                 post.images,
               )),

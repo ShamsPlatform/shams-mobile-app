@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:shams_mobile_app/core/di/injection.dart';
 import 'package:shams_mobile_app/core/presentation/resettable.dart';
+import 'package:shams_mobile_app/core/result/result.dart';
+import 'package:shams_mobile_app/features/posts/domain/entities/post.dart';
+import 'package:shams_mobile_app/features/posts/domain/usecases/get_workshop_posts_usecase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:shams_mobile_app/models/post_model.dart';
-import 'package:shams_mobile_app/models/comment_model.dart';
 import 'package:shams_mobile_app/models/public_workshop_model.dart';
 import 'package:shams_mobile_app/models/workshop_data.dart';
 import 'package:shams_mobile_app/services/workshop_service.dart';
-import 'package:shams_mobile_app/services/post_service.dart';
 
 /// WorkshopProvider — state manager for all workshop data.
 ///
@@ -18,6 +19,10 @@ import 'package:shams_mobile_app/services/post_service.dart';
 /// All mutations call [notifyListeners] so every context.watch() subscriber
 /// rebuilds automatically. No Consumer widgets needed.
 class WorkshopProvider extends ChangeNotifier implements Resettable {
+  WorkshopProvider({GetWorkshopPostsUseCase? getWorkshopPosts})
+      : _getWorkshopPosts = getWorkshopPosts;
+
+  final GetWorkshopPostsUseCase? _getWorkshopPosts;
   Future<void> fetchPublicWorkshops() async {
     try {
       final data = await WorkshopService.fetchPublicWorkshops();
@@ -100,19 +105,16 @@ class WorkshopProvider extends ChangeNotifier implements Resettable {
   }
 
   Future<void> fetchMyWorkshopPosts(String workshopId) async {
-    try {
-      final data = await PostService.fetchWorkshopPosts(workshopId: workshopId);
-      final List<PostModel> loaded = [];
-      for (final item in data) {
-        final commentsData = await PostService.fetchComments(item['id']);
-        final comments = commentsData.map((c) => CommentModel.fromSupabase(c)).toList();
-        loaded.add(PostModel.fromSupabase(item, comments: comments));
-      }
-      _posts.clear();
-      _posts.addAll(loaded);
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Error fetching my workshop posts: $e');
+    final getPosts = _getWorkshopPosts ?? sl<GetWorkshopPostsUseCase>();
+    final result = await getPosts(GetWorkshopPostsParams(workshopId: workshopId));
+    switch (result) {
+      case Ok(:final data):
+        _posts
+          ..clear()
+          ..addAll(data);
+        notifyListeners();
+      case Err(:final failure):
+        debugPrint('Error fetching my workshop posts: ${failure.message}');
     }
   }
 
@@ -159,7 +161,7 @@ class WorkshopProvider extends ChangeNotifier implements Resettable {
 
   // ── My Workshop Posts (owner's dashboard) ──────────────────────────────────
 
-  final List<PostModel> _posts = [];
+  final List<Post> _posts = [];
 
   // ── Public Workshops Directory ─────────────────────────────────────────────
 
@@ -168,7 +170,7 @@ class WorkshopProvider extends ChangeNotifier implements Resettable {
   // ── Public API ─────────────────────────────────────────────────────────────
 
   /// Unmodifiable view of the owner's posts list (for dashboard).
-  List<PostModel> get posts => List.unmodifiable(_posts);
+  List<Post> get posts => List.unmodifiable(_posts);
 
   /// Total number of published posts.
   int get postCount => _posts.length;
@@ -225,13 +227,13 @@ class WorkshopProvider extends ChangeNotifier implements Resettable {
   // ── Owner's Post Management (dashboard) ───────────────────────────────────
 
   /// Add a new post at the top of the owner's list.
-  void addPost(PostModel newPost) {
+  void addPost(Post newPost) {
     _posts.insert(0, newPost);
     if (_myWorkshop != null) {
       final index = _publicWorkshops.indexWhere((w) => w.id == _myWorkshop!.id);
       if (index != -1) {
         final currentW = _publicWorkshops[index];
-        final updatedPosts = List<PostModel>.from(currentW.posts)..insert(0, newPost);
+        final updatedPosts = List<Post>.from(currentW.posts)..insert(0, newPost);
         _publicWorkshops[index] = currentW.copyWith(posts: updatedPosts);
       }
     }
@@ -240,7 +242,7 @@ class WorkshopProvider extends ChangeNotifier implements Resettable {
 
   /// Replace the post with the same [id] with [updatedPost].
   /// If no matching post is found, the list is unchanged.
-  void updatePost(PostModel updatedPost) {
+  void updatePost(Post updatedPost) {
     final index = _posts.indexWhere((p) => p.id == updatedPost.id);
     if (index != -1) {
       _posts[index] = updatedPost;
@@ -251,7 +253,7 @@ class WorkshopProvider extends ChangeNotifier implements Resettable {
         final currentW = _publicWorkshops[wIndex];
         final pIndex = currentW.posts.indexWhere((p) => p.id == updatedPost.id);
         if (pIndex != -1) {
-          final updatedPosts = List<PostModel>.from(currentW.posts);
+          final updatedPosts = List<Post>.from(currentW.posts);
           updatedPosts[pIndex] = updatedPost;
           _publicWorkshops[wIndex] = currentW.copyWith(posts: updatedPosts);
         }
@@ -267,7 +269,7 @@ class WorkshopProvider extends ChangeNotifier implements Resettable {
       final wIndex = _publicWorkshops.indexWhere((w) => w.id == _myWorkshop!.id);
       if (wIndex != -1) {
         final currentW = _publicWorkshops[wIndex];
-        final updatedPosts = List<PostModel>.from(currentW.posts)..removeWhere((p) => p.id == postId);
+        final updatedPosts = List<Post>.from(currentW.posts)..removeWhere((p) => p.id == postId);
         _publicWorkshops[wIndex] = currentW.copyWith(posts: updatedPosts);
       }
     }

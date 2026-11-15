@@ -9,7 +9,6 @@ class ManagedPostCard extends StatefulWidget {
   final String viewsCount;
   final int likesCount;
   final List<String> imagePaths;
-  final bool isLocalFile;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -20,7 +19,6 @@ class ManagedPostCard extends StatefulWidget {
     required this.viewsCount,
     this.likesCount = 0,
     required this.imagePaths,
-    this.isLocalFile = false,
     required this.onEdit,
     required this.onDelete,
   });
