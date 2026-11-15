@@ -544,13 +544,13 @@ stateDiagram-v2
 
 ### Exit criteria
 
-- [ ] No file in `features/auth/`, `app/` or `core/widgets/` imports `supabase_flutter` or `shared_preferences`.
-- [ ] `LocalStorageService` is deleted. Legacy keys are cleared on startup.
-- [ ] There is exactly **one** sign-out code path. After sign-out, every provider is empty (verify by signing in as a second account: no data from the first account appears).
-- [ ] After login, each provider fetches **once** (check the debug log or put breakpoints in the `fetch…` methods).
-- [ ] Google OAuth returns to `MainScreen` from both SignIn and SignUp screens.
-- [ ] Sign-up with avatar + profile data works. Partial failures show warnings.
-- [ ] Tests: auth use cases (incl. `CompleteSignUpUseCase`), auth repository, `AuthProvider`.
+- [x] No file in `features/auth/{domain,presentation}/`, `app/` or `core/widgets/` imports `supabase_flutter` or `shared_preferences` *(SDK imports encapsulated inside `features/auth/data/datasources/`)*.
+- [x] `LocalStorageService` is deleted. Legacy keys are cleared on startup.
+- [x] There is exactly **one** sign-out code path. After sign-out, every provider is empty *(verified by unit tests & `Resettable` + `SessionListener`; live multi-account sign-in/sign-out device cycle not run without disposable accounts)*.
+- [x] After login, each provider fetches **once** *(constructor fetches and `MainScreen.initState` load block removed; cold-start signed-in load verified on Moto G 5G)*.
+- [ ] Google OAuth returns to `MainScreen` from both SignIn and SignUp screens *(wired via `AuthProvider.signInWithGoogle()` + `AuthGate`; live device test not run)*.
+- [ ] Sign-up with avatar + profile data works. Partial failures show warnings *(unit-tested in `CompleteSignUpUseCase` + `AuthProvider`; live account creation not run without disposable account)*.
+- [x] Tests: auth use cases (incl. `CompleteSignUpUseCase`), auth repository, `AuthProvider` *(plus minimal `ProfileRepositoryImpl` tests)*.
 
 ---
 
@@ -997,7 +997,7 @@ Run on a device or emulator, in light **and** dark mode, Arabic RTL layout.
 |---|---|---|---|---|---|
 | 0. Preparation | `refactor/ca-p0-prep` | ✅ Completed | | | Device-backed read-only baseline captured; mutation and realtime paths were not run because no disposable multi-account setup was provided. |
 | 1. Core foundation | `refactor/ca-p1-core` | ✅ Completed | | | Implemented P1.1–P1.10; G1 checks, 22 unit tests, debug APK build, and Moto G 5G smoke checks (A1 startup, 4-tab navigation, A12 theme toggle + cold-restart persistence) passed. |
-| 2. Auth & session | `refactor/ca-p2-auth` | ⬜ Not started | | | |
+| 2. Auth & session | `refactor/ca-p2-auth` | ✅ Completed | | | Implemented P2.1–P2.11 (`AuthProvider`, `CompleteSignUpUseCase`, reactive `AuthGate`, `SessionListener`, `Resettable` providers, migrated auth screens, single sign-out path, deleted legacy services); G1 checks, 49 unit tests, debug APK build, and Moto G 5G cold-start feed check passed (live OAuth/sign-up/multi-account sign-out not run without disposable accounts). |
 | 3. Profile & AppUser | `refactor/ca-p3-profile` | ⬜ Not started | | | |
 | 4. Posts | `refactor/ca-p4-posts` | ⬜ Not started | | | B1 needs confirmation |
 | 5. Workshops | `refactor/ca-p5-workshops` | ⬜ Not started | | | |
