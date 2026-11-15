@@ -40,6 +40,7 @@ import 'package:shams_mobile_app/features/notifications/domain/usecases/get_noti
 import 'package:shams_mobile_app/features/notifications/domain/usecases/mark_all_notifications_as_read_usecase.dart';
 import 'package:shams_mobile_app/features/notifications/domain/usecases/mark_notification_as_read_usecase.dart';
 import 'package:shams_mobile_app/features/notifications/domain/usecases/watch_notifications_usecase.dart';
+import 'package:shams_mobile_app/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:shams_mobile_app/features/posts/data/datasources/post_remote_data_source.dart';
 import 'package:shams_mobile_app/features/posts/data/repositories/post_repository_impl.dart';
 import 'package:shams_mobile_app/features/posts/domain/repositories/post_repository.dart';
@@ -274,4 +275,14 @@ void _initNotifications() {
   sl.registerLazySingleton(() => MarkAllNotificationsAsReadUseCase(sl()));
   sl.registerLazySingleton(() => DeleteNotificationUseCase(sl()));
   sl.registerLazySingleton(() => WatchNotificationsUseCase(sl()));
+  sl.registerFactory(
+    () => NotificationProvider(
+      getNotifications: sl(),
+      markNotificationAsRead: sl(),
+      markAllNotificationsAsRead: sl(),
+      deleteNotification: sl(),
+      watchNotifications: sl(),
+      getChatIdByMaintenanceRequest: sl(),
+    ),
+  );
 }
