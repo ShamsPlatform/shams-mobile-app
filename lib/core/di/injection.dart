@@ -17,6 +17,7 @@ import 'package:shams_mobile_app/features/profile/data/repositories/profile_repo
 import 'package:shams_mobile_app/features/profile/domain/repositories/profile_repository.dart';
 import 'package:shams_mobile_app/features/profile/domain/usecases/get_my_profile_usecase.dart';
 import 'package:shams_mobile_app/features/profile/domain/usecases/update_profile_usecase.dart';
+import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -79,4 +80,7 @@ void _initProfile() {
   );
   sl.registerLazySingleton(() => GetMyProfileUseCase(sl(), sl()));
   sl.registerLazySingleton(() => UpdateProfileUseCase(sl(), sl()));
+  sl.registerFactory(
+    () => ProfileProvider(getMyProfile: sl(), updateProfile: sl()),
+  );
 }

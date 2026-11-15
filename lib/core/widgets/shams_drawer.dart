@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/app/main_screen.dart';
 import 'package:shams_mobile_app/views/user_profile/edit_profile_screen.dart';
@@ -11,11 +10,13 @@ import 'package:shams_mobile_app/views/workshops/workshop_dashboard_screen.dart'
 
 class ShamsDrawer extends StatelessWidget {
   final int activeIndex;
+  final AppUser currentUser;
   final VoidCallback onSignOut;
 
   const ShamsDrawer({
     super.key,
     required this.activeIndex,
+    required this.currentUser,
     required this.onSignOut,
   });
 
@@ -226,8 +227,7 @@ class ShamsDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = context.watch<UserProvider>();
-    final user = userProvider.currentUser;
+    final user = currentUser;
     final colorScheme = Theme.of(context).colorScheme;
     final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
 

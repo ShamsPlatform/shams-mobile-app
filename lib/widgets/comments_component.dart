@@ -7,7 +7,7 @@ import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/models/comment_model.dart';
 import 'package:shams_mobile_app/providers/feed_provider.dart';
-import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -60,7 +60,7 @@ class _CommentsComponentState extends State<CommentsComponent> {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
-    final currentUser = context.read<UserProvider>().currentUser;
+    final currentUser = context.read<ProfileProvider>().currentUserOrPlaceholder;
     final newComment = CommentModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       postId: widget.postId,
@@ -305,7 +305,7 @@ class _CommentsComponentState extends State<CommentsComponent> {
     String? postAuthorId,
   ) {
     final comment = currentComments[index];
-    final currentUser = context.read<UserProvider>().currentUser;
+    final currentUser = context.read<ProfileProvider>().currentUserOrPlaceholder;
     final commentAuthorId = comment.user.id;
 
     final bool canDelete = currentUser.id == commentAuthorId ||

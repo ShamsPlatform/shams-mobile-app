@@ -11,6 +11,7 @@ import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
 import 'package:shams_mobile_app/providers/notification_provider.dart';
 import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/views/workshops/workshop_profile_screen.dart';
 import 'package:shams_mobile_app/views/notifications/notifications_screen.dart';
 import 'package:shams_mobile_app/core/widgets/shams_drawer.dart';
@@ -59,6 +60,7 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
         key: _scaffoldKey,
         drawer: ShamsDrawer(
           activeIndex: 1,
+          currentUser: context.watch<ProfileProvider>().currentUserOrPlaceholder,
           onSignOut: () => context.read<AuthProvider>().signOut(),
         ),
         backgroundColor: Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,

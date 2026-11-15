@@ -6,7 +6,7 @@ import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provi
 import 'package:shams_mobile_app/providers/chat_provider.dart';
 import 'package:shams_mobile_app/providers/feed_provider.dart';
 import 'package:shams_mobile_app/providers/notification_provider.dart';
-import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
 
 /// Bridges [AuthProvider] state transitions to session-level side effects:
@@ -49,11 +49,11 @@ class _SessionListenerState extends State<SessionListener> {
         return;
       case AuthStatus.authenticated:
         rootNavigatorKey.currentState?.popUntil((route) => route.isFirst);
-        final userProvider = context.read<UserProvider>();
-        await userProvider.fetchUserData();
+        final profileProvider = context.read<ProfileProvider>();
+        await profileProvider.load();
         if (!mounted || _sessionEpoch != epoch) return;
 
-        final currentUser = userProvider.currentUser;
+        final currentUser = profileProvider.currentUserOrPlaceholder;
         context.read<WorkshopProvider>().fetchPublicWorkshops();
         context.read<NotificationProvider>().fetchNotifications();
         context.read<ChatProvider>().fetchChats();
@@ -68,7 +68,7 @@ class _SessionListenerState extends State<SessionListener> {
       case AuthStatus.unauthenticated:
         rootNavigatorKey.currentState?.popUntil((route) => route.isFirst);
         final resettables = <Resettable>[
-          context.read<UserProvider>(),
+          context.read<ProfileProvider>(),
           context.read<WorkshopProvider>(),
           context.read<FeedProvider>(),
           context.read<ChatProvider>(),

@@ -6,7 +6,7 @@ import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provi
 import 'package:shams_mobile_app/providers/chat_provider.dart';
 import 'package:shams_mobile_app/providers/feed_provider.dart';
 import 'package:shams_mobile_app/providers/notification_provider.dart';
-import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
 
 /// Top-level [MultiProvider] wiring for the application.
@@ -27,7 +27,7 @@ class AppProviders extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => sl<AuthProvider>()..start()),
         ChangeNotifierProvider.value(value: themeProvider),
         ChangeNotifierProvider(create: (_) => WorkshopProvider()),
-        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => sl<ProfileProvider>()),
         ChangeNotifierProvider(create: (_) => FeedProvider()),
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),

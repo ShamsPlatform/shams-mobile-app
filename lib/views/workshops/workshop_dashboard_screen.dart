@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/models/post_model.dart';
 import 'package:shams_mobile_app/models/workshop_data.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
-import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/services/storage_service.dart';
 import 'package:shams_mobile_app/services/workshop_service.dart';
 import 'package:shams_mobile_app/core/constants/app_constants.dart';
@@ -75,7 +75,7 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
       ownerId:
           currentWorkshop?.ownerId ??
           widget.workshopData?.ownerId ??
-          context.read<UserProvider>().currentUser.id,
+          context.read<ProfileProvider>().currentUserOrPlaceholder.id,
       name: _workshopName,
       username: _workshopHandle.replaceFirst('@', ''),
       city: _workshopCity,
@@ -662,7 +662,7 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
   Widget build(BuildContext context) {
     // 💡 التعديل الجديد: تعريف المتغير الذي يراقب حالة الورشة
     final workshopState = context.watch<WorkshopProvider>();
-    final currentUser = context.read<UserProvider>().currentUser;
+    final currentUser = context.read<ProfileProvider>().currentUserOrPlaceholder;
 
     // Auto-fetch if user has a workshop but it's not loaded in the provider
     if (currentUser.hasWorkshop && workshopState.myWorkshop == null) {

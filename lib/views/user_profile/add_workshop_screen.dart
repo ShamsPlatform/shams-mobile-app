@@ -13,7 +13,7 @@ import 'package:shams_mobile_app/core/widgets/scrollable_image_picker.dart';
 import 'package:shams_mobile_app/features/auth/presentation/widgets/username_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
 import 'package:shams_mobile_app/models/workshop_data.dart';
 import 'package:shams_mobile_app/services/workshop_service.dart';
@@ -137,7 +137,7 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
       // 3. Update local state
       if (mounted) {
         context.read<WorkshopProvider>().setMyWorkshop(newWorkshop);
-        context.read<UserProvider>().updateWorkshopStatus(true);
+        context.read<ProfileProvider>().updateWorkshopStatus(true);
         
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

@@ -9,7 +9,7 @@ import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
 import 'package:shams_mobile_app/views/chat/chat_conversation_screen.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
 import 'package:shams_mobile_app/providers/chat_provider.dart';
-import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/providers/feed_provider.dart';
 import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/models/public_workshop_model.dart';
@@ -296,7 +296,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
                           );
 
                           // 4. Create the maintenance chat session
-                          final currentUser = context.read<UserProvider>().currentUser;
+                          final currentUser = context.read<ProfileProvider>().currentUserOrPlaceholder;
                           String generatedChatId = '';
                           try {
                             generatedChatId = await context

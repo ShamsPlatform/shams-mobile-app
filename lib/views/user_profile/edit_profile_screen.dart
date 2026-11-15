@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/features/profile/domain/usecases/update_profile_usecase.dart';
+import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -31,7 +31,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void initState() {
     super.initState();
     // تهيئة البيانات المسبقة من الـ Provider
-    final currentUser = context.read<UserProvider>().currentUser;
+    final currentUser = context.read<ProfileProvider>().currentUserOrPlaceholder;
     _nameController.text = currentUser.name;
     _usernameController.text =
         currentUser.username ?? currentUser.email.split('@').first;
@@ -78,148 +78,54 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  // دالة الحفظ وإرسال البيانات للـ Provider و Supabase
+  // دالة الحفظ وإرسال البيانات للـ Provider
   Future<void> _saveChanges() async {
     setState(() => _isLoading = true);
 
-    final provider = context.read<UserProvider>();
-    final currentUser = provider.currentUser;
-
-    final name = _nameController.text.trim();
-    final username = _usernameController.text.trim();
-    final phone = _phoneController.text.trim();
-    final bio = _bioController.text.trim();
-    final location = _selectedLocation;
-
-    String? imageUrl = currentUser.profileImageUrl;
-    String? uploadError;
-
-    // 1. رفع الصورة إلى Supabase إن وجدت صورة مختارة وجلسة نشطة
-    if (_selectedImage != null) {
-      try {
-        final user = Supabase.instance.client.auth.currentUser;
-        if (user != null) {
-          final fileExt = _selectedImage!.path.split('.').last;
-          final fileName =
-              '${user.id}-${DateTime.now().millisecondsSinceEpoch}.$fileExt';
-
-          final imageBytes = await _selectedImage!.readAsBytes();
-
-          await Supabase.instance.client.storage
-              .from('avatars')
-              .uploadBinary(
-                fileName,
-                imageBytes,
-                fileOptions: const FileOptions(
-                  cacheControl: '3600',
-                  upsert: true,
-                ),
-              );
-          imageUrl = Supabase.instance.client.storage
-              .from('avatars')
-              .getPublicUrl(fileName);
-        } else {
-          // في حال عدم وجود جلسة، نستخدم المسار المحلي مؤقتاً للتطوير
-          imageUrl = _selectedImage!.path;
-        }
-      } catch (e) {
-        debugPrint('Image upload failed: $e');
-        uploadError = e.toString();
-      }
-    }
-
-    if (uploadError != null) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'فشل رفع الصورة: $uploadError',
-              style: GoogleFonts.tajawal(),
-            ),
-            backgroundColor: Theme.of(context).colorScheme.error, // لون أحمر للفشل
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      }
-      return;
-    }
-
-    // 2. تحديث البيانات في قاعدة البيانات إن وجدت جلسة نشطة
-    bool isSuccess = true;
-    String? dbError;
-    try {
-      final user = Supabase.instance.client.auth.currentUser;
-      if (user != null) {
-        final Map<String, dynamic> updates = {
-          'name': name,
-          'username': username,
-          'phone': phone,
-          'bio': bio,
-          'location': location,
-        };
-        if (imageUrl != null) {
-          updates['profile_image_url'] = imageUrl;
-        }
-        await Supabase.instance.client
-            .from('profiles')
-            .update(updates)
-            .eq('id', user.id);
-      }
-    } catch (e) {
-      debugPrint('Error updating profiles in database: $e');
-      dbError = e.toString();
-      isSuccess = false;
-    }
-
-    final updatedUser = currentUser.copyWith(
-      name: name,
-      username: username,
-      phone: phone,
-      bio: bio,
-      location: location,
-      profileImageUrl: imageUrl,
+    final provider = context.read<ProfileProvider>();
+    final isSuccess = await provider.updateProfile(
+      UpdateProfileParams(
+        name: _nameController.text.trim(),
+        username: _usernameController.text.trim(),
+        phone: _phoneController.text.trim(),
+        bio: _bioController.text.trim(),
+        location: _selectedLocation,
+        newAvatarPath: _selectedImage?.path,
+      ),
     );
 
-    if (isSuccess) {
-      // 3. تحديث الموديل محلياً في الـ Provider
-      provider.updateProfile(updatedUser);
-    }
+    if (!mounted) return;
+    setState(() => _isLoading = false);
 
-    if (mounted) {
-      setState(() => _isLoading = false);
-      if (isSuccess) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'تم تحديث الملف الشخصي بنجاح',
-              style: GoogleFonts.tajawal(),
-            ),
-            backgroundColor: Theme.of(context).colorScheme.tertiary, // لون أخضر للنجاح
-            duration: const Duration(seconds: 2),
+    if (isSuccess) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'تم تحديث الملف الشخصي بنجاح',
+            style: GoogleFonts.tajawal(),
           ),
-        );
-        Navigator.pop(context);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'حدث خطأ أثناء حفظ التعديلات في السيرفر: ${dbError ?? ''}',
-              style: GoogleFonts.tajawal(),
-            ),
-            backgroundColor: Theme.of(context).colorScheme.error, // لون أحمر للفشل
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      }
+          backgroundColor: Theme.of(context).colorScheme.tertiary, // لون أخضر للنجاح
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      Navigator.pop(context);
     } else {
-      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'حدث خطأ أثناء حفظ التعديلات: ${provider.errorMessage ?? ''}',
+            style: GoogleFonts.tajawal(),
+          ),
+          backgroundColor: Theme.of(context).colorScheme.error, // لون أحمر للفشل
+          duration: const Duration(seconds: 4),
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = context.watch<UserProvider>().currentUser;
+    final currentUser = context.watch<ProfileProvider>().currentUserOrPlaceholder;
 
     return Directionality(
       textDirection: TextDirection.rtl, // لضمان الاتجاه من اليمين لليسار

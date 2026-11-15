@@ -12,7 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
-import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/views/user_profile/edit_profile_screen.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 // UserProfileScreen — شاشة الملف الشخصي للمستخدم
@@ -50,7 +50,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<UserProvider>().fetchUserData();
+      context.read<ProfileProvider>().load();
     });
   }
 
@@ -93,7 +93,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   // ─── Header — تصميم مطابق تماماً للصورة ─────────────────────────────
 
   Widget _buildHeader() {
-    final currentUser = context.watch<UserProvider>().currentUser;
+    final currentUser = context.watch<ProfileProvider>().currentUserOrPlaceholder;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -283,8 +283,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   Widget _buildWorkshopTile() {
     final bool hasWorkshop = context
-        .watch<UserProvider>()
-        .currentUser
+        .watch<ProfileProvider>()
+        .currentUserOrPlaceholder
         .hasWorkshop;
 
     return InkWell(
@@ -367,8 +367,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     ).then((_) {
       if (mounted) {
         final hasWorkshop = context
-            .read<UserProvider>()
-            .currentUser
+            .read<ProfileProvider>()
+            .currentUserOrPlaceholder
             .hasWorkshop;
         if (hasWorkshop) {
           _showWorkshopCreatedSnackBar();

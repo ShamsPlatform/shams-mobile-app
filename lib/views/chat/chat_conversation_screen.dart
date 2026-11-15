@@ -8,7 +8,7 @@ import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/providers/chat_provider.dart';
-import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
 import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/models/message_model.dart';
@@ -106,7 +106,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
 
   void _addNewMessage(String text) {
     if (text.trim().isEmpty) return;
-    final currentUser = context.read<UserProvider>().currentUser;
+    final currentUser = context.read<ProfileProvider>().currentUserOrPlaceholder;
     final newMsg = MessageModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       senderId: currentUser.id,
@@ -142,7 +142,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
   @override
   Widget build(BuildContext context) {
     final chatProvider = context.watch<ChatProvider>();
-    final currentUser = context.watch<UserProvider>().currentUser;
+    final currentUser = context.watch<ProfileProvider>().currentUserOrPlaceholder;
     final chat = chatProvider.chats.firstWhere(
       (c) => c.chatId == widget.chatId,
       orElse: () => ChatModel(

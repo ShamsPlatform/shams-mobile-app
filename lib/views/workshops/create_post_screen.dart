@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/models/post_model.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
-import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/providers/feed_provider.dart';
 import 'package:shams_mobile_app/services/post_service.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
@@ -151,7 +151,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     }
 
     final myWorkshop = context.read<WorkshopProvider>().myWorkshop;
-    final currentUser = context.read<UserProvider>().currentUser;
+    final currentUser = context.read<ProfileProvider>().currentUserOrPlaceholder;
     final workshopId = myWorkshop?.id ?? currentUser.id;
 
     showDialog(

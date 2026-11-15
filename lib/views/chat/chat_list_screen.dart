@@ -6,7 +6,7 @@ import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
 import 'package:shams_mobile_app/views/chat/chat_conversation_screen.dart'; // مسار شاشة الدردشة
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/providers/chat_provider.dart';
-import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -148,7 +148,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   @override
   Widget build(BuildContext context) {
     final chatProvider = context.watch<ChatProvider>();
-    final currentUser = context.watch<UserProvider>().currentUser;
+    final currentUser = context.watch<ProfileProvider>().currentUserOrPlaceholder;
     final workshopProvider = context.watch<WorkshopProvider>();
     final allChats = chatProvider.chats;
 
