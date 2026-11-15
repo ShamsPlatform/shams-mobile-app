@@ -8,7 +8,7 @@ import 'package:shams_mobile_app/features/chat/presentation/providers/chat_list_
 import 'package:shams_mobile_app/features/maintenance/domain/usecases/submit_maintenance_request_usecase.dart';
 import 'package:shams_mobile_app/features/maintenance/presentation/providers/maintenance_request_provider.dart';
 import 'package:shams_mobile_app/features/workshops/domain/entities/workshop.dart';
-import 'package:shams_mobile_app/views/chat/chat_conversation_screen.dart';
+import 'package:shams_mobile_app/features/chat/presentation/screens/chat_conversation_screen.dart';
 
 /// Opens the modal bottom sheet for submitting a maintenance request to [workshop].
 void showMaintenanceRequestSheet(BuildContext context, Workshop workshop) {
