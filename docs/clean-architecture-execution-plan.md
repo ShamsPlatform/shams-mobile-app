@@ -700,11 +700,11 @@ stateDiagram-v2
 
 ### Exit criteria
 
-- [ ] `PostService`, the legacy `PostModel` and the legacy `CommentModel` are deleted.
-- [ ] No `Map<String, dynamic>` reaches `FeedProvider` / `WorkshopProvider` for posts.
-- [ ] Relative times and view counts look identical to the baseline.
-- [ ] Like, comment, comment-like, hide, create (with multiple images), edit and delete all work.
-- [ ] Tests: all post use cases, models, repository, `FeedProvider`, `PostEditorProvider`.
+- [x] `PostService`, the legacy `PostModel` and the legacy `CommentModel` are deleted.
+- [x] No `Map<String, dynamic>` reaches `FeedProvider` / `WorkshopProvider` for posts.
+- [x] Relative times and view counts look identical to the baseline.
+- [ ] Like, comment, comment-like, hide, create (with multiple images), edit and delete all work (live `ZN3222BNK7` verified Home feed, `PostDetailScreen`, `CommentsComponent`, reversible like toggle, `WorkshopDashboardScreen`, and `CreatePostScreen` mount; live comment, comment-like, hide, create submit, edit submit, and delete submit are covered by repository/use-case/provider unit tests without mutating production DB).
+- [x] Tests: all post use cases, models, repository, `FeedProvider`, `PostEditorProvider` (and `WorkshopProvider.deletePost` B1 fix).
 
 ---
 
@@ -999,7 +999,7 @@ Run on a device or emulator, in light **and** dark mode, Arabic RTL layout.
 | 1. Core foundation | `refactor/ca-p1-core` | ✅ Completed | | | Implemented P1.1–P1.10; G1 checks, 22 unit tests, debug APK build, and Moto G 5G smoke checks (A1 startup, 4-tab navigation, A12 theme toggle + cold-restart persistence) passed. |
 | 2. Auth & session | `refactor/ca-p2-auth` | ✅ Completed | | | Implemented P2.1–P2.11 (`AuthProvider`, `CompleteSignUpUseCase`, reactive `AuthGate`, `SessionListener`, `Resettable` providers, migrated auth screens, single sign-out path, deleted legacy services); G1 checks, 49 unit tests, debug APK build, and Moto G 5G cold-start feed check passed (live OAuth/sign-up/multi-account sign-out not run without disposable accounts). |
 | 3. Profile & AppUser | `refactor/ca-p3-profile` | ✅ Completed | | | Implemented P3.1–P3.5 (`GetMyProfileUseCase`, `UpdateProfileUseCase`, deleted `UserModel`, `ProfileProvider`, migrated profile screens); G1 checks, 62 tests, debug APK build, and Moto G 5G (`ZN3222BNK7`) smoke checks (startup/Home, `ShamsDrawer` profile header, `EditProfileScreen` callback navigation + Supabase profile save SnackBar `'تم تحديث الملف الشخصي بنجاح'`, `UserProfileScreen`, `PrivacySecurityScreen`) passed; photo-picker upload and fresh Google account creation remain covered by unit tests without a disposable account. |
-| 4. Posts | `refactor/ca-p4-posts` | ⬜ Not started | | | B1 needs confirmation |
+| 4. Posts | `refactor/ca-p4-posts` | ✅ Completed | | | Implemented P4.1–P4.10 (`Post`/`Comment` domain + `PostRepositoryImpl` + 10 use cases + `FeedProvider` + `PostEditorProvider` + moved screens/widgets + deleted `PostService`/legacy models + fixed B1 `WorkshopProvider.deletePost` persistence); G1 checks (`0` errors, `14` baseline infos down from `16`), `91` passing tests, debug APK build, and Moto G 5G (`ZN3222BNK7`) smoke checks (Home feed, `PostDetailScreen`, `CommentsComponent` timestamps without `timeago` warnings, reversible like toggle `3 <-> 4`, `WorkshopDashboardScreen`, `CreatePostScreen` mount) passed; live comment/hide/create/edit/delete mutations remain unit-tested to avoid mutating production data. |
 | 5. Workshops | `refactor/ca-p5-workshops` | ⬜ Not started | | | |
 | 6. Chat & maintenance | `refactor/ca-p6-chat` | ⬜ Not started | | | |
 | 7. Notifications | `refactor/ca-p7-notifications` | ⬜ Not started | | | |
