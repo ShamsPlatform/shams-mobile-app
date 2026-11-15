@@ -1,20 +1,21 @@
 import 'dart:io'; // [dart:io] مكتبة Dart للتعامل مع نظام الملفات - نحتاجها لـ FileImage لعرض صور الجهاز المحلية
 import 'package:flutter/material.dart'; // توفر ChangeNotifier لإدارة الحالة + NetworkImage/FileImage للتعامل مع كاش الصور
+import 'package:shams_mobile_app/core/data/models/app_user_model.dart';
+import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/core/presentation/resettable.dart';
-import 'package:shams_mobile_app/models/user_model.dart'; // نموذج بيانات المستخدم الذي نخزّنه ونُحوّل إليه البيانات القادمة من Supabase
 import 'package:supabase_flutter/supabase_flutter.dart'; // للوصول إلى Auth وقاعدة البيانات عبر Supabase
 
 // أي widget يستخدم context.watch<UserProvider>() سيُعاد بناؤه تلقائياً عند استدعاء notifyListeners()
 class UserProvider extends ChangeNotifier implements Resettable {
   // [const] القيمة الابتدائية ثابتة وقت التصريف - نستخدم قيمة مبدئية بدلاً من null لضمان أمان النوع (Null Safety)
-  UserModel _currentUser = const UserModel(
+  AppUser _currentUser = const AppUser(
     id: '',                  // معرّف فارغ يشير إلى أنه لم يُحمَّل بعد
     name: 'جاري التحميل...', // اسم مؤقت يظهر في الواجهة ريثما تنتهي عملية جلب البيانات من السيرفر
     email: '',               // بريد إلكتروني فارغ مبدئياً
   );
 
   // [Getter] العالَم الخارجي يقرأ فقط - لا يستطيع تعديل _currentUser مباشرة
-  UserModel get currentUser => _currentUser; // [=>] Arrow Syntax: اختصار لدالة تعيد قيمة واحدة
+  AppUser get currentUser => _currentUser; // [=>] Arrow Syntax: اختصار لدالة تعيد قيمة واحدة
 
   // [_evictImage] الشرطة السفلية _ قبل الاسم تعني private
   // الهدف: حذف الصورة من ذاكرة كاش Flutter حتى لا تظهر الصورة القديمة عند تغيير المستخدم لصورته
@@ -36,7 +37,7 @@ class UserProvider extends ChangeNotifier implements Resettable {
 
   // تُستدعى بعد نجاح تعديل الملف الشخصي في edit_profile_screen.dart
   // تُحدّث البيانات محلياً في الذاكرة مباشرة دون الحاجة للرجوع لـ Supabase مجدداً
-  void updateProfile(UserModel updatedUser) {
+  void updateProfile(AppUser updatedUser) {
     // نقارن رابط الصورة القديمة بالجديدة - إذا اختلفا يجب حذف الصورة القديمة من الكاش
     if (_currentUser.profileImageUrl != updatedUser.profileImageUrl) {
       _evictImage(_currentUser.profileImageUrl); // احذف الصورة القديمة من الكاش قبل التحديث
@@ -98,7 +99,7 @@ class UserProvider extends ChangeNotifier implements Resettable {
       // ثم 'email' الجديد يُكتب بعده ويُستبدل به - المفتاح الأخير يفوز في Dart Maps (لا يتكرر)
       // لماذا نُعيد الإيميل؟ لأن الإيميل في جدول profiles قد لا يكون محدّثاً دائماً
       // مصدر الحقيقة الأصلي للإيميل هو جلسة Auth وليس جدول profiles
-      final newUser = UserModel.fromMap({
+      final newUser = AppUserModel.fromJson({
         ...data, // [Spread ...] يفرغ كل محتوى data: {"id":..., "name":..., "email": "قديم", ...}
         'email': user.email ?? data['email'] ?? '', // يُكتب بعد الـ spread فيُلغي قيمة email القديمة في data
         // النتيجة: ماب بدون تكرار - email القديم في data استُبدل بهذا الجديد
@@ -130,7 +131,7 @@ class UserProvider extends ChangeNotifier implements Resettable {
   // هذا يحمي خصوصية المستخدم ويمنع ظهور بياناته في الجلسة التالية
   void clearUserData() {
     // أعد تهيئة _currentUser لكائن فارغ - لا نستخدم null لأن Dart لا يسمح بذلك بدون ?
-    _currentUser = const UserModel(id: '', name: 'مستخدم غير مسجل', email: '');
+    _currentUser = const AppUser(id: '', name: 'مستخدم غير مسجل', email: '');
     notifyListeners(); // أجبر الواجهة على العودة لحالة "غير مسجّل" وإخفاء البيانات الشخصية
   }
 

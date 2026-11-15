@@ -10,8 +10,8 @@ import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/providers/chat_provider.dart';
 import 'package:shams_mobile_app/providers/user_provider.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
+import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/models/message_model.dart';
-import 'package:shams_mobile_app/models/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shams_mobile_app/services/chat_service.dart';
 
@@ -153,7 +153,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
       ),
     );
     final otherParticipant = chat.participants.isEmpty
-        ? const UserModel(id: '', name: 'محادثة', email: '')
+        ? const AppUser(id: '', name: 'محادثة', email: '')
         : chat.participants.firstWhere(
             (p) => p.id != currentUser.id,
             orElse: () => chat.participants.first,

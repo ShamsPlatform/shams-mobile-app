@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/core/presentation/resettable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shams_mobile_app/models/chat_model.dart';
 import 'package:shams_mobile_app/models/message_model.dart';
-import 'package:shams_mobile_app/models/user_model.dart';
 import 'package:shams_mobile_app/services/chat_service.dart';
 import 'package:shams_mobile_app/services/maintenance_service.dart';
 
@@ -132,7 +132,7 @@ class ChatProvider extends ChangeNotifier implements Resettable {
   }
 
   /// الحصول على محادثة قائمة بين المستخدم الحالي ومستخدم آخر أو إنشاء محادثة جديدة
-  Future<String> getOrCreateChat(UserModel currentUser, UserModel otherUser) async {
+  Future<String> getOrCreateChat(AppUser currentUser, AppUser otherUser) async {
     try {
       // استدعاء خدمة الشات لجلب المحادثة أو إنشائها بالاعتماد على معرف المستخدم الآخر
       final chatId = await ChatService.getOrCreateChat(otherUserId: otherUser.id);
@@ -149,9 +149,9 @@ class ChatProvider extends ChangeNotifier implements Resettable {
 
   /// إنشاء محادثة جديدة مخصصة لطلب صيانة وربطها بالطلب بشكل كامل
   Future<String> createMaintenanceChat({
-    required UserModel currentUser,
+    required AppUser currentUser,
     required String workshopId,
-    required UserModel targetWorkshop,
+    required AppUser targetWorkshop,
     required String serviceType,
     required String problemDescription,
     double? systemCapacityKw,

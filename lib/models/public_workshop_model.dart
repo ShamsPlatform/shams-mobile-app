@@ -1,6 +1,6 @@
+import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/models/post_model.dart';
 import 'package:shams_mobile_app/models/review_model.dart';
-import 'package:shams_mobile_app/models/user_model.dart';
 
 /// PublicWorkshopModel — نموذج بيانات الورشة العامة
 ///
@@ -154,9 +154,9 @@ class PublicWorkshopModel {
     );
   }
 
-  /// Converts this workshop to a [UserModel] suitable for use in chat participants.
-  UserModel toUserModel() {
-    return UserModel(
+  /// Converts this workshop to an [AppUser] suitable for use in chat participants.
+  AppUser toAppUser() {
+    return AppUser(
       id: ownerId,
       name: name,
       email: '${handle.replaceFirst('@', '')}@shams.com',

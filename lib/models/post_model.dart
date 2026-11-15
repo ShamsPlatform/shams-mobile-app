@@ -1,4 +1,5 @@
-import 'package:shams_mobile_app/models/user_model.dart';
+import 'package:shams_mobile_app/core/data/models/app_user_model.dart';
+import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/models/comment_model.dart';
 
 /// PostModel — نموذج بيانات منشور الورشة
@@ -30,7 +31,7 @@ class PostModel {
   final bool isHighlighted;
 
   /// The author of the post
-  final UserModel? author;
+  final AppUser? author;
 
   /// Number of likes
   final int likesCount;
@@ -66,7 +67,7 @@ class PostModel {
     String? viewsCount,
     String? createdAt,
     bool? isHighlighted,
-    UserModel? author,
+    AppUser? author,
     int? likesCount,
     bool? isLiked,
     List<CommentModel>? comments,
@@ -87,23 +88,6 @@ class PostModel {
     );
   }
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'workshopId': workshopId,
-      'textDetails': textDetails,
-      'images': images,
-      'isLocalFile': isLocalFile,
-      'viewsCount': viewsCount,
-      'createdAt': createdAt,
-      'isHighlighted': isHighlighted,
-      'author': author?.toMap(),
-      'likesCount': likesCount,
-      'isLiked': isLiked,
-      'comments': comments.map((c) => c.toMap()).toList(),
-    };
-  }
-
   factory PostModel.fromMap(Map<String, dynamic> map) {
     return PostModel(
       id: map['id'] ?? '',
@@ -114,7 +98,7 @@ class PostModel {
       viewsCount: map['viewsCount'] ?? '0',
       createdAt: map['createdAt'] ?? '',
       isHighlighted: map['isHighlighted'] ?? false,
-      author: map['author'] != null ? UserModel.fromMap(map['author']) : null,
+      author: map['author'] != null ? AppUserModel.fromJson(map['author']) : null,
       likesCount: map['likesCount'] ?? 0,
       isLiked: map['isLiked'] ?? false,
       comments: (map['comments'] as List<dynamic>?)
@@ -150,7 +134,7 @@ class PostModel {
     List<CommentModel> comments = const [],
   }) {
     final authorMap = map['profiles'];
-    final author = authorMap != null ? UserModel.fromMap(authorMap) : null;
+    final author = authorMap != null ? AppUserModel.fromJson(authorMap) : null;
     final viewsVal = map['views_count'] ?? 0;
     
     return PostModel(

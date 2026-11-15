@@ -7,8 +7,8 @@ import 'package:shams_mobile_app/views/chat/chat_conversation_screen.dart'; // �
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/providers/chat_provider.dart';
 import 'package:shams_mobile_app/providers/user_provider.dart';
+import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
-import 'package:shams_mobile_app/models/user_model.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class ChatListScreen extends StatefulWidget {
@@ -262,7 +262,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                       itemBuilder: (context, index) {
                         final chat = filteredChats[index];
                         final otherParticipant = chat.participants.isEmpty
-                            ? const UserModel(id: '', name: 'محادثة', email: '')
+                            ? const AppUser(id: '', name: 'محادثة', email: '')
                             : chat.participants.firstWhere(
                                 (p) => p.id != currentUser.id, 
                                 orElse: () => chat.participants.first

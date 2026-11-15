@@ -1,4 +1,5 @@
-import 'package:shams_mobile_app/models/user_model.dart';
+import 'package:shams_mobile_app/core/data/models/app_user_model.dart';
+import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 
 /// ReviewModel — نموذج بيانات التقييم
 ///
@@ -9,7 +10,7 @@ class ReviewModel {
   final String id;
 
   /// The user who submitted the review
-  final UserModel reviewer;
+  final AppUser reviewer;
 
   /// Rating from 1.0 to 5.0
   final double rating;
@@ -30,7 +31,7 @@ class ReviewModel {
 
   ReviewModel copyWith({
     String? id,
-    UserModel? reviewer,
+    AppUser? reviewer,
     double? rating,
     String? comment,
     DateTime? createdAt,
@@ -44,20 +45,10 @@ class ReviewModel {
     );
   }
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'reviewer': reviewer.toMap(),
-      'rating': rating,
-      'comment': comment,
-      'created_at': createdAt.toIso8601String(),
-    };
-  }
-
   factory ReviewModel.fromMap(Map<String, dynamic> map) {
     return ReviewModel(
       id: map['id'] ?? '',
-      reviewer: UserModel.fromMap(map['reviewer'] ?? {}),
+      reviewer: AppUserModel.fromJson(map['reviewer'] ?? {}),
       rating: (map['rating'] as num?)?.toDouble() ?? 0.0,
       comment: map['comment'] ?? '',
       createdAt: map['created_at'] != null
@@ -70,7 +61,7 @@ class ReviewModel {
     final reviewerMap = map['profiles'] ?? {};
     return ReviewModel(
       id: map['id'] ?? '',
-      reviewer: UserModel.fromMap(reviewerMap),
+      reviewer: AppUserModel.fromJson(reviewerMap),
       rating: (map['rating'] as num?)?.toDouble() ?? 0.0,
       comment: map['comment'] ?? '',
       createdAt: map['created_at'] != null

@@ -11,7 +11,7 @@ import 'package:shams_mobile_app/providers/workshop_provider.dart';
 import 'package:shams_mobile_app/providers/chat_provider.dart';
 import 'package:shams_mobile_app/providers/user_provider.dart';
 import 'package:shams_mobile_app/providers/feed_provider.dart';
-import 'package:shams_mobile_app/models/user_model.dart';
+import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/models/public_workshop_model.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -287,8 +287,8 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
                           final capacityVal = double.tryParse(capacityController.text.trim());
                           final problemDesc = descController.text.trim();
 
-                          // 3. Prepare target workshop data as UserModel
-                          final workshopData = UserModel(
+                          // 3. Prepare target workshop data as AppUser
+                          final workshopData = AppUser(
                             id: workshop.ownerId, // Real owner user ID!
                             name: workshop.name,
                             email: '${workshop.handle.replaceFirst('@', '')}@shams.com',

@@ -1,9 +1,10 @@
-import 'package:shams_mobile_app/models/user_model.dart';
+import 'package:shams_mobile_app/core/data/models/app_user_model.dart';
+import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/models/message_model.dart';
 
 class ChatModel {
   final String chatId;
-  final List<UserModel> participants;
+  final List<AppUser> participants;
   final List<MessageModel> messages;
   final DateTime lastMessageTime;
 
@@ -16,7 +17,7 @@ class ChatModel {
 
   ChatModel copyWith({
     String? chatId,
-    List<UserModel>? participants,
+    List<AppUser>? participants,
     List<MessageModel>? messages,
     DateTime? lastMessageTime,
   }) {
@@ -28,20 +29,11 @@ class ChatModel {
     );
   }
 
-  Map<String, dynamic> toMap() {
-    return {
-      'chatId': chatId,
-      'participants': participants.map((e) => e.toMap()).toList(),
-      'messages': messages.map((e) => e.toMap()).toList(),
-      'lastMessageTime': lastMessageTime.toIso8601String(),
-    };
-  }
-
   factory ChatModel.fromMap(Map<String, dynamic> map) {
     return ChatModel(
       chatId: map['chatId'] ?? '',
       participants: (map['participants'] as List<dynamic>?)
-              ?.map((e) => UserModel.fromMap(e as Map<String, dynamic>))
+              ?.map((e) => AppUserModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
       messages: (map['messages'] as List<dynamic>?)
@@ -57,7 +49,7 @@ class ChatModel {
   factory ChatModel.fromSupabase(Map<String, dynamic> map, {List<MessageModel> messages = const []}) {
     final participantsData = map['chat_participants'] as List<dynamic>? ?? [];
     final participants = participantsData
-        .map((p) => UserModel.fromMap(p['profiles'] as Map<String, dynamic>? ?? {}))
+        .map((p) => AppUserModel.fromJson(p['profiles'] as Map<String, dynamic>? ?? {}))
         .toList();
 
     return ChatModel(

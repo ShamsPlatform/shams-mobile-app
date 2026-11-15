@@ -1,9 +1,10 @@
-import 'package:shams_mobile_app/models/user_model.dart';
+import 'package:shams_mobile_app/core/data/models/app_user_model.dart';
+import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 
 class CommentModel {
   final String id;
   final String postId;
-  final UserModel user;
+  final AppUser user;
   final String text;
   final int likesCount;
   final bool isLiked;
@@ -22,7 +23,7 @@ class CommentModel {
   CommentModel copyWith({
     String? id,
     String? postId,
-    UserModel? user,
+    AppUser? user,
     String? text,
     int? likesCount,
     bool? isLiked,
@@ -39,23 +40,11 @@ class CommentModel {
     );
   }
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'postId': postId,
-      'user': user.toMap(),
-      'text': text,
-      'likesCount': likesCount,
-      'isLiked': isLiked,
-      'timestamp': timestamp.toIso8601String(),
-    };
-  }
-
   factory CommentModel.fromMap(Map<String, dynamic> map) {
     return CommentModel(
       id: map['id'] ?? '',
       postId: map['postId'] ?? '',
-      user: UserModel.fromMap(map['user'] ?? {}),
+      user: AppUserModel.fromJson(map['user'] ?? {}),
       text: map['text'] ?? '',
       likesCount: map['likesCount']?.toInt() ?? 0,
       isLiked: map['isLiked'] as bool? ?? false,
@@ -73,7 +62,7 @@ class CommentModel {
     return CommentModel(
       id: map['id'] ?? '',
       postId: map['post_id'] ?? '',
-      user: UserModel.fromMap(userMap),
+      user: AppUserModel.fromJson(userMap),
       text: map['text'] ?? '',
       likesCount: map['likes_count']?.toInt() ?? 0,
       isLiked: isLiked,
