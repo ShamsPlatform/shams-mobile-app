@@ -10,7 +10,7 @@ import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/image_source_sheet.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
 import 'package:shams_mobile_app/core/widgets/scrollable_image_picker.dart';
-import 'package:shams_mobile_app/widgets/username_field.dart';
+import 'package:shams_mobile_app/features/auth/presentation/widgets/username_field.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/providers/user_provider.dart';

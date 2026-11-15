@@ -1,17 +1,13 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import 'package:shams_mobile_app/core/widgets/text_field.dart';
-import 'package:shams_mobile_app/core/widgets/primary_button.dart';
-import 'package:shams_mobile_app/core/widgets/outlined_button.dart';
-import 'package:shams_mobile_app/views/auth/signin.dart';
-import 'package:shams_mobile_app/views/auth/signup_profile_screen.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:shams_mobile_app/providers/user_provider.dart';
-import 'package:shams_mobile_app/app/auth_gate.dart';
-import 'package:shams_mobile_app/services/local_storage_service.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
+import 'package:shams_mobile_app/core/widgets/outlined_button.dart';
+import 'package:shams_mobile_app/core/widgets/primary_button.dart';
+import 'package:shams_mobile_app/core/widgets/text_field.dart';
+import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shams_mobile_app/features/auth/presentation/screens/signin.dart';
+import 'package:shams_mobile_app/features/auth/presentation/screens/signup_profile_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -27,37 +23,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   String? _emailError, _passError, _confirmPassError;
   bool _isLoading = false;
-  late final StreamSubscription<AuthState> _authSubscription;
-
-  void _listenToAuth() {
-    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) async{
-      final AuthChangeEvent event = data.event;
-      // Only react if we are signed in and it's not just the initial session check
-      if (event == AuthChangeEvent.signedIn) {
-        final user = Supabase.instance.client.auth.currentUser;
-        if (user != null && user.email != null) {
-          await LocalStorageService.saveLoginData(user.email!);
-        }
-        if (mounted) {
-          context.read<UserProvider>().fetchUserData();
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const AuthGate()),
-            (route) => false,
-          );
-        }
-      }
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _listenToAuth();
-  }
 
   @override
   void dispose() {
-    _authSubscription.cancel();
     _emailController.dispose();
     _passController.dispose();
     _confirmPassController.dispose();
@@ -71,13 +39,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     setState(() {
       _emailError = !email.contains('@') ? 'البريد الإلكتروني غير صالح' : null;
-      _passError = password.length < 6 ? 'كلمة المرور قصيرة جداً (6 أحرف على الأقل)' : null;
-      _confirmPassError = password != confirmPassword ? 'كلمتا المرور غير متطابقتين' : null;
+      _passError =
+          password.length < 6 ? 'كلمة المرور قصيرة جداً (6 أحرف على الأقل)' : null;
+      _confirmPassError =
+          password != confirmPassword ? 'كلمتا المرور غير متطابقتين' : null;
     });
 
     if (_emailError == null && _passError == null && _confirmPassError == null) {
-      // Cancel the listener so it doesn't prematurely navigate when signUp is called!
-      _authSubscription.cancel();
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -86,25 +54,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
             password: password,
           ),
         ),
-      ).then((_) {
-        // Re-subscribe if the user goes back to this screen
-        if (mounted) _listenToAuth();
-      });
+      );
     }
   }
 
   Future<void> _handleGoogleSignUp() async {
     setState(() => _isLoading = true);
     try {
-      await Supabase.instance.client.auth.signInWithOAuth(
-        OAuthProvider.google,
-        redirectTo: 'shams://login-callback/',
-      );
-    } catch (e) {
-      if (mounted) {
+      final authProvider = context.read<AuthProvider>();
+      final ok = await authProvider.signInWithGoogle();
+      if (!ok && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('حدث خطأ أثناء التسجيل: $e', style: GoogleFonts.tajawal()),
+            content: Text(
+              authProvider.errorMessage ?? 'حدث خطأ أثناء التسجيل',
+              style: GoogleFonts.tajawal(),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );

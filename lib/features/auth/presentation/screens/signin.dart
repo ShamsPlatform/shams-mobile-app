@@ -1,16 +1,12 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import 'package:shams_mobile_app/core/widgets/text_field.dart';
-import 'package:shams_mobile_app/core/widgets/primary_button.dart';
-import 'package:shams_mobile_app/core/widgets/outlined_button.dart';
-import 'package:shams_mobile_app/views/auth/signup.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:shams_mobile_app/providers/user_provider.dart';
-import 'package:shams_mobile_app/app/auth_gate.dart';
-import 'package:shams_mobile_app/services/local_storage_service.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
+import 'package:shams_mobile_app/core/widgets/outlined_button.dart';
+import 'package:shams_mobile_app/core/widgets/primary_button.dart';
+import 'package:shams_mobile_app/core/widgets/text_field.dart';
+import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shams_mobile_app/features/auth/presentation/screens/signup.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -24,33 +20,9 @@ class _SignInScreenState extends State<SignInScreen> {
   final _passController = TextEditingController();
   String? _emailError, _passError;
   bool _isLoading = false;
-  late final StreamSubscription<AuthState> _authSubscription;
-
-  @override
-  void initState() {
-    super.initState();
-    // Listen for auth state changes (e.g. returning from Google Sign-In)
-    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
-      final AuthChangeEvent event = data.event;
-      if (event == AuthChangeEvent.signedIn) {
-        final user = Supabase.instance.client.auth.currentUser;
-        if (user != null && user.email != null) {
-          await LocalStorageService.saveLoginData(user.email!);
-        }
-        if (mounted) {
-          context.read<UserProvider>().fetchUserData();
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const AuthGate()),
-            (route) => false,
-          );
-        }
-      }
-    });
-  }
 
   @override
   void dispose() {
-    _authSubscription.cancel();
     _emailController.dispose();
     _passController.dispose();
     super.dispose();
@@ -68,43 +40,18 @@ class _SignInScreenState extends State<SignInScreen> {
     if (_emailError == null && _passError == null) {
       setState(() => _isLoading = true);
       try {
-        await Supabase.instance.client.auth.signInWithPassword(
+        final authProvider = context.read<AuthProvider>();
+        final ok = await authProvider.signInWithEmail(
           email: email,
           password: password,
         );
-         await LocalStorageService.saveLoginData(email);
-        if (mounted) {
-          await context.read<UserProvider>().fetchUserData();
-          
-          if (mounted) {
-           
-            // Remove Welcome & SignIn screens from stack and go back to root
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => const AuthGate()),
-              (route) => false,
-            );
-          }
-        }
-      } on AuthException catch (e) {
-        if (mounted) {
-          String errorMessage = e.message;
-          if (e.message.contains('Invalid login credentials')) {
-            errorMessage = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
-          } else if (e.message.contains('Email not confirmed')) {
-            errorMessage = 'يرجى تأكيد بريدك الإلكتروني أولاً';
-          }
+        if (!ok && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(errorMessage, style: GoogleFonts.tajawal()),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('حدث خطأ أثناء تسجيل الدخول: $e', style: GoogleFonts.tajawal()),
+              content: Text(
+                authProvider.errorMessage ?? 'حدث خطأ أثناء تسجيل الدخول',
+                style: GoogleFonts.tajawal(),
+              ),
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
@@ -118,20 +65,24 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Future<void> _handleGoogleLogin() async {
+    setState(() => _isLoading = true);
     try {
-      await Supabase.instance.client.auth.signInWithOAuth(
-        OAuthProvider.google,
-        redirectTo: 'shams://login-callback/',
-      );
-      // fetchUserData will be called by AuthGate or after redirect
-    } catch (e) {
-      if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('فشل تسجيل الدخول عبر جوجل'),
-              backgroundColor: Theme.of(context).colorScheme.error,
+      final authProvider = context.read<AuthProvider>();
+      final ok = await authProvider.signInWithGoogle();
+      if (!ok && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              authProvider.errorMessage ?? 'فشل تسجيل الدخول عبر جوجل',
+              style: GoogleFonts.tajawal(),
             ),
-          );
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
     }
   }

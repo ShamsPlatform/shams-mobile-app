@@ -2,14 +2,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import 'package:shams_mobile_app/core/widgets/text_field.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
-import 'package:shams_mobile_app/providers/user_provider.dart';
-import 'package:shams_mobile_app/app/auth_gate.dart';
-import 'package:shams_mobile_app/services/local_storage_service.dart';
+import 'package:shams_mobile_app/core/widgets/text_field.dart';
+import 'package:shams_mobile_app/features/auth/domain/usecases/complete_sign_up_usecase.dart';
+import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
 
 class SignUpProfileScreen extends StatefulWidget {
   final String email;
@@ -78,104 +76,40 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
     if (_nameError == null) {
       setState(() => _isLoading = true);
       try {
-        // 1. Create the user in Supabase
-        final res = await Supabase.instance.client.auth.signUp(
-          email: widget.email,
-          password: widget.password,
-          data: {'full_name': name},
+        final authProvider = context.read<AuthProvider>();
+        final ok = await authProvider.completeSignUp(
+          SignUpParams(
+            email: widget.email,
+            password: widget.password,
+            name: name,
+            username: username,
+            location: location ?? 'صنعاء',
+            phone: phone,
+            bio: bio,
+            avatarPath: _profileImage?.path,
+          ),
         );
 
-        if (res.user != null) {
-          String? imageUrl;
-
-          // 2. Upload image if selected
-          if (_profileImage != null) {
-            try {
-              final fileExt = _profileImage!.path.split('.').last;
-              final fileName = '${res.user!.id}-${DateTime.now().millisecondsSinceEpoch}.$fileExt';
-              
-              // Read as bytes to avoid some SocketExceptions with File uploads
-              final imageBytes = await _profileImage!.readAsBytes();
-              
-              await Supabase.instance.client.storage.from('avatars').uploadBinary(
-                fileName,
-                imageBytes,
-                fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
-              );
-              imageUrl = Supabase.instance.client.storage.from('avatars').getPublicUrl(fileName);
-            } catch (e) {
-              debugPrint('Image upload failed: $e');
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('حدث خطأ أثناء رفع الصورة: $e', style: GoogleFonts.tajawal()),
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                    duration: const Duration(seconds: 5),
-                  ),
-                );
-              }
-            }
-          }
-
-           // 3. Update profile row
-          try {
-            final Map<String, dynamic> updates = {
-              'id': res.user!.id,
-              'name': name,
-              'username': username,
-              'location': location,
-              'email': widget.email,
-            };
-            if (phone.isNotEmpty) updates['phone'] = phone;
-            if (bio.isNotEmpty) updates['bio'] = bio;
-            if (imageUrl != null) updates['profile_image_url'] = imageUrl;
-
-            await Supabase.instance.client
-                .from('profiles')
-                .upsert(updates);
-          } catch (e) {
-            debugPrint('Profile update failed: $e');
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('حدث خطأ أثناء تحديث بيانات الملف: $e', style: GoogleFonts.tajawal()),
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                ),
-              );
-            }
-          }
-        }
-         await LocalStorageService.saveLoginData(widget.email);
-
-        if (mounted) {
-          await context.read<UserProvider>().fetchUserData();
-          
-          if (mounted) {
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => const AuthGate()),
-              (route) => false,
-            );
-          }
-        }
-      } on AuthException catch (e) {
-        if (mounted) {
-          String errorMessage = e.message;
-          if (e.message.contains('User already registered')) {
-            errorMessage = 'هذا البريد الإلكتروني مسجل مسبقاً، حاول تسجيل الدخول من الشاشة السابقة';
-          }
+        if (!mounted) return;
+        if (!ok) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(errorMessage, style: GoogleFonts.tajawal()),
+              content: Text(
+                authProvider.errorMessage ?? 'حدث خطأ أثناء إكمال الحساب',
+                style: GoogleFonts.tajawal(),
+              ),
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
-        }
-      } catch (e) {
-        if (mounted) {
+        } else if (authProvider.warnings.isNotEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('حدث خطأ أثناء إكمال الحساب: $e', style: GoogleFonts.tajawal()),
+              content: Text(
+                authProvider.warnings.join('\n'),
+                style: GoogleFonts.tajawal(),
+              ),
               backgroundColor: Theme.of(context).colorScheme.error,
+              duration: const Duration(seconds: 5),
             ),
           );
         }

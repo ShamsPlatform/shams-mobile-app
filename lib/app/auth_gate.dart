@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/app/main_screen.dart';
 import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
-import 'package:shams_mobile_app/views/auth/welcome.dart';
+import 'package:shams_mobile_app/features/auth/presentation/screens/welcome.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
