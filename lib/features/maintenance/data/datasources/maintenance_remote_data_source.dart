@@ -24,9 +24,13 @@ abstract interface class MaintenanceRemoteDataSource {
 }
 
 class MaintenanceRemoteDataSourceImpl implements MaintenanceRemoteDataSource {
-  MaintenanceRemoteDataSourceImpl(this._db);
+  MaintenanceRemoteDataSourceImpl(
+    this._db, {
+    bool useDbNotificationTriggers = false,
+  }) : _useDbNotificationTriggers = useDbNotificationTriggers;
 
   final SupabaseClient _db;
+  final bool _useDbNotificationTriggers;
 
   String _requireUserId() {
     final user = _db.auth.currentUser;
@@ -68,14 +72,16 @@ class MaintenanceRemoteDataSourceImpl implements MaintenanceRemoteDataSource {
           .select()
           .single();
 
-      unawaited(
-        _createMaintenanceNotification(
-          requestId: request['id'] as String,
-          workshopId: params.workshopId,
-          clientId: userId,
-          serviceType: params.serviceType,
-        ),
-      );
+      if (!_useDbNotificationTriggers) {
+        unawaited(
+          _createMaintenanceNotification(
+            requestId: request['id'] as String,
+            workshopId: params.workshopId,
+            clientId: userId,
+            serviceType: params.serviceType,
+          ),
+        );
+      }
 
       return request;
     });
@@ -153,12 +159,14 @@ class MaintenanceRemoteDataSourceImpl implements MaintenanceRemoteDataSource {
         'status': newStatus,
       }).eq('id', requestId);
 
-      unawaited(
-        _createStatusUpdateNotification(
-          requestId: requestId,
-          newStatus: newStatus,
-        ),
-      );
+      if (!_useDbNotificationTriggers) {
+        unawaited(
+          _createStatusUpdateNotification(
+            requestId: requestId,
+            newStatus: newStatus,
+          ),
+        );
+      }
     });
   }
 

@@ -9,6 +9,12 @@ class Env {
     defaultValue: 'shams://login-callback/',
   );
 
+  /// When true, client data sources skip notification inserts handled by DB triggers.
+  static const useDbNotificationTriggers = bool.fromEnvironment(
+    'USE_DB_NOTIFICATION_TRIGGERS',
+    defaultValue: false,
+  );
+
   /// Fails fast when required Supabase configuration is missing.
   static void validate() {
     if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {

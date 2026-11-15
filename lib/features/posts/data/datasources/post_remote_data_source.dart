@@ -64,13 +64,16 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     this._db,
     this._storage, {
     DateTime Function()? clock,
-  }) : _clock = clock ?? DateTime.now;
+    bool useDbNotificationTriggers = false,
+  })  : _clock = clock ?? DateTime.now,
+        _useDbNotificationTriggers = useDbNotificationTriggers;
 
   static const _postsBucket = 'posts';
 
   final SupabaseClient _db;
   final FileStorageDataSource _storage;
   final DateTime Function() _clock;
+  final bool _useDbNotificationTriggers;
 
   String _requireUserId() {
     final user = _db.auth.currentUser;
@@ -159,6 +162,24 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   Future<void> _incrementPostsViews(List<String> postIds) async {
     if (postIds.isEmpty) return;
     try {
+      await _db.rpc(
+        'increment_post_views',
+        params: {'post_ids': postIds},
+      );
+      return;
+    } on PostgrestException catch (e) {
+      // Fall back to legacy loop only until increment_post_views RPC is deployed.
+      final isMissingRpc = e.code == 'PGRST202' || e.code == '42883';
+      if (!isMissingRpc) {
+        debugPrint('Error incrementing posts views via RPC: $e');
+        return;
+      }
+    } catch (e) {
+      debugPrint('Error incrementing posts views via RPC: $e');
+      return;
+    }
+
+    try {
       for (final id in postIds) {
         final post = await _db
             .from('posts')
@@ -177,6 +198,11 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       debugPrint('Error incrementing posts views: $e');
     }
   }
+
+  /// Exposes post view incrementation for targeted data source unit tests.
+  @visibleForTesting
+  Future<void> incrementPostsViewsForTest(List<String> postIds) =>
+      _incrementPostsViews(postIds);
 
   @override
   Future<List<Map<String, dynamic>>> fetchWorkshopPosts({
@@ -241,7 +267,9 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
           'post_id': postId,
           'user_id': userId,
         });
-        unawaited(_createLikeNotification(postId, userId));
+        if (!_useDbNotificationTriggers) {
+          unawaited(_createLikeNotification(postId, userId));
+        }
         return true;
       }
     });

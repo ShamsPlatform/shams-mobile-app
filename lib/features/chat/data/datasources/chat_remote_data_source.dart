@@ -38,9 +38,13 @@ abstract interface class ChatRemoteDataSource {
 }
 
 class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
-  ChatRemoteDataSourceImpl(this._db);
+  ChatRemoteDataSourceImpl(
+    this._db, {
+    bool useDbNotificationTriggers = false,
+  }) : _useDbNotificationTriggers = useDbNotificationTriggers;
 
   final SupabaseClient _db;
+  final bool _useDbNotificationTriggers;
 
   static const _chatSelect = '''
     *,
@@ -197,14 +201,16 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
           .select()
           .single();
 
-      // Fire-and-forget notification so message send stays responsive.
-      unawaited(
-        _createMessageNotification(
-          chatId: chatId,
-          senderId: userId,
-          text: text,
-        ),
-      );
+      if (!_useDbNotificationTriggers) {
+        // Fire-and-forget notification so message send stays responsive.
+        unawaited(
+          _createMessageNotification(
+            chatId: chatId,
+            senderId: userId,
+            text: text,
+          ),
+        );
+      }
 
       return message;
     });

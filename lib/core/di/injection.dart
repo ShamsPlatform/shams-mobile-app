@@ -75,6 +75,7 @@ import 'package:shams_mobile_app/features/workshops/domain/usecases/toggle_follo
 import 'package:shams_mobile_app/features/workshops/domain/usecases/update_workshop_usecase.dart';
 import 'package:shams_mobile_app/features/workshops/domain/usecases/upload_workshop_image_usecase.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/my_workshop_provider.dart';
+import 'package:shams_mobile_app/core/config/env.dart';
 import 'package:shams_mobile_app/features/workshops/domain/usecases/add_review_usecase.dart';
 import 'package:shams_mobile_app/features/workshops/domain/usecases/delete_review_usecase.dart';
 import 'package:shams_mobile_app/features/workshops/domain/usecases/get_workshop_reviews_usecase.dart';
@@ -155,7 +156,11 @@ void _initProfile() {
 
 void _initPosts() {
   sl.registerLazySingleton<PostRemoteDataSource>(
-    () => PostRemoteDataSourceImpl(sl(), sl()),
+    () => PostRemoteDataSourceImpl(
+      sl(),
+      sl(),
+      useDbNotificationTriggers: Env.useDbNotificationTriggers,
+    ),
   );
   sl.registerLazySingleton<PostRepository>(() => PostRepositoryImpl(sl()));
   sl.registerLazySingleton(() => GetFeedUseCase(sl(), sl()));
@@ -234,7 +239,10 @@ void _initWorkshops() {
 
 void _initChat() {
   sl.registerLazySingleton<ChatRemoteDataSource>(
-    () => ChatRemoteDataSourceImpl(sl()),
+    () => ChatRemoteDataSourceImpl(
+      sl(),
+      useDbNotificationTriggers: Env.useDbNotificationTriggers,
+    ),
   );
   sl.registerLazySingleton<ChatRepository>(() => ChatRepositoryImpl(sl()));
   sl.registerLazySingleton(() => GetChatsUseCase(sl()));
@@ -269,7 +277,10 @@ void _initChat() {
 
 void _initMaintenance() {
   sl.registerLazySingleton<MaintenanceRemoteDataSource>(
-    () => MaintenanceRemoteDataSourceImpl(sl()),
+    () => MaintenanceRemoteDataSourceImpl(
+      sl(),
+      useDbNotificationTriggers: Env.useDbNotificationTriggers,
+    ),
   );
   sl.registerLazySingleton<MaintenanceRepository>(
     () => MaintenanceRepositoryImpl(sl()),
