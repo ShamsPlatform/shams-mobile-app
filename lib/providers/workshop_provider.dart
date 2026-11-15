@@ -3,6 +3,7 @@ import 'package:shams_mobile_app/core/di/injection.dart';
 import 'package:shams_mobile_app/core/presentation/resettable.dart';
 import 'package:shams_mobile_app/core/result/result.dart';
 import 'package:shams_mobile_app/features/posts/domain/entities/post.dart';
+import 'package:shams_mobile_app/features/posts/domain/usecases/delete_post_usecase.dart';
 import 'package:shams_mobile_app/features/posts/domain/usecases/get_workshop_posts_usecase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shams_mobile_app/models/public_workshop_model.dart';
@@ -19,10 +20,17 @@ import 'package:shams_mobile_app/services/workshop_service.dart';
 /// All mutations call [notifyListeners] so every context.watch() subscriber
 /// rebuilds automatically. No Consumer widgets needed.
 class WorkshopProvider extends ChangeNotifier implements Resettable {
-  WorkshopProvider({GetWorkshopPostsUseCase? getWorkshopPosts})
-      : _getWorkshopPosts = getWorkshopPosts;
+  WorkshopProvider({
+    GetWorkshopPostsUseCase? getWorkshopPosts,
+    DeletePostUseCase? deletePost,
+  })  : _getWorkshopPosts = getWorkshopPosts,
+        _deletePost = deletePost;
 
   final GetWorkshopPostsUseCase? _getWorkshopPosts;
+  final DeletePostUseCase? _deletePost;
+  String? _errorMessage;
+
+  String? get errorMessage => _errorMessage;
   Future<void> fetchPublicWorkshops() async {
     try {
       final data = await WorkshopService.fetchPublicWorkshops();
@@ -262,18 +270,31 @@ class WorkshopProvider extends ChangeNotifier implements Resettable {
     notifyListeners();
   }
 
-  /// Remove the post with the given [postId].
-  void deletePost(String postId) {
-    _posts.removeWhere((p) => p.id == postId);
-    if (_myWorkshop != null) {
-      final wIndex = _publicWorkshops.indexWhere((w) => w.id == _myWorkshop!.id);
-      if (wIndex != -1) {
-        final currentW = _publicWorkshops[wIndex];
-        final updatedPosts = List<Post>.from(currentW.posts)..removeWhere((p) => p.id == postId);
-        _publicWorkshops[wIndex] = currentW.copyWith(posts: updatedPosts);
-      }
+  /// Delete the post with [postId] remotely, then remove it locally on [Ok].
+  Future<bool> deletePost(String postId) async {
+    _errorMessage = null;
+    final delete = _deletePost ?? sl<DeletePostUseCase>();
+    final result = await delete(postId);
+    switch (result) {
+      case Ok():
+        _posts.removeWhere((p) => p.id == postId);
+        if (_myWorkshop != null) {
+          final wIndex =
+              _publicWorkshops.indexWhere((w) => w.id == _myWorkshop!.id);
+          if (wIndex != -1) {
+            final currentW = _publicWorkshops[wIndex];
+            final updatedPosts = List<Post>.from(currentW.posts)
+              ..removeWhere((p) => p.id == postId);
+            _publicWorkshops[wIndex] = currentW.copyWith(posts: updatedPosts);
+          }
+        }
+        notifyListeners();
+        return true;
+      case Err(:final failure):
+        _errorMessage = failure.message;
+        notifyListeners();
+        return false;
     }
-    notifyListeners();
   }
 
   /// Reset owner's workshop data and dashboard posts on logout.
@@ -281,6 +302,7 @@ class WorkshopProvider extends ChangeNotifier implements Resettable {
     _myWorkshop = null;
     _myWorkshopFollowersCount = 0;
     _posts.clear();
+    _errorMessage = null;
     notifyListeners();
   }
 

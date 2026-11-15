@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import 'package:shams_mobile_app/core/utils/formatters.dart';
 import 'package:shams_mobile_app/features/posts/domain/entities/post.dart';
+import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/models/workshop_data.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
@@ -640,18 +641,42 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
           ],
         ),
       ),
-    ).then((confirmed) {
-      if (confirmed == true && mounted) {
-        context.read<WorkshopProvider>().deletePost(post.id);
-        ScaffoldMessenger.of(context).showSnackBar(
+    ).then((confirmed) async {
+      if (confirmed != true || !mounted) return;
+      final workshopProvider = context.read<WorkshopProvider>();
+      final feedProvider = context.read<FeedProvider>();
+      final messenger = ScaffoldMessenger.of(context);
+      final errorColor = Theme.of(context).colorScheme.error;
+
+      final deleted = await workshopProvider.deletePost(post.id);
+      if (!mounted) return;
+
+      if (deleted) {
+        feedProvider.deletePost(post.id);
+        messenger.showSnackBar(
           SnackBar(
             content: Text('تم حذف المنشور بنجاح', style: GoogleFonts.tajawal()),
-            backgroundColor: Theme.of(context).colorScheme.error,
+            backgroundColor: errorColor,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
             duration: const Duration(seconds: 2),
+          ),
+        );
+      } else {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              workshopProvider.errorMessage ?? 'تعذر حذف المنشور',
+              style: GoogleFonts.tajawal(),
+            ),
+            backgroundColor: errorColor,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
