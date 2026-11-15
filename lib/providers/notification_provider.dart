@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shams_mobile_app/core/presentation/resettable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shams_mobile_app/models/notification_model.dart';
 import 'package:shams_mobile_app/services/notification_service.dart';
 
-class NotificationProvider extends ChangeNotifier {
+class NotificationProvider extends ChangeNotifier implements Resettable {
   final List<NotificationModel> _notifications = [];
   RealtimeChannel? _subscription;
 
@@ -98,6 +99,9 @@ class NotificationProvider extends ChangeNotifier {
     _subscription = null;
     notifyListeners();
   }
+
+  @override
+  void reset() => clearNotifications();
 
   @override
   void dispose() {

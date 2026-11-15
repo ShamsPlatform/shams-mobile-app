@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/app/auth_gate.dart';
 import 'package:shams_mobile_app/app/navigation.dart';
+import 'package:shams_mobile_app/app/session_listener.dart';
 import 'package:shams_mobile_app/core/theme/theme_provider.dart';
 import 'package:shams_mobile_app/core/theme/shams_theme.dart';
 
@@ -39,6 +40,11 @@ class ShamsApp extends StatelessWidget {
       ],
 
       // ── Entry Point ─────────────────────────────────────────────
+      builder: (context, child) {
+        return SessionListener(
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       home: const AuthGate(),
     );
   }

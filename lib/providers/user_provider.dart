@@ -1,10 +1,11 @@
 import 'dart:io'; // [dart:io] مكتبة Dart للتعامل مع نظام الملفات - نحتاجها لـ FileImage لعرض صور الجهاز المحلية
 import 'package:flutter/material.dart'; // توفر ChangeNotifier لإدارة الحالة + NetworkImage/FileImage للتعامل مع كاش الصور
+import 'package:shams_mobile_app/core/presentation/resettable.dart';
 import 'package:shams_mobile_app/models/user_model.dart'; // نموذج بيانات المستخدم الذي نخزّنه ونُحوّل إليه البيانات القادمة من Supabase
 import 'package:supabase_flutter/supabase_flutter.dart'; // للوصول إلى Auth وقاعدة البيانات عبر Supabase
 
 // أي widget يستخدم context.watch<UserProvider>() سيُعاد بناؤه تلقائياً عند استدعاء notifyListeners()
-class UserProvider extends ChangeNotifier {
+class UserProvider extends ChangeNotifier implements Resettable {
   // [const] القيمة الابتدائية ثابتة وقت التصريف - نستخدم قيمة مبدئية بدلاً من null لضمان أمان النوع (Null Safety)
   UserModel _currentUser = const UserModel(
     id: '',                  // معرّف فارغ يشير إلى أنه لم يُحمَّل بعد
@@ -131,5 +132,11 @@ class UserProvider extends ChangeNotifier {
     // أعد تهيئة _currentUser لكائن فارغ - لا نستخدم null لأن Dart لا يسمح بذلك بدون ?
     _currentUser = const UserModel(id: '', name: 'مستخدم غير مسجل', email: '');
     notifyListeners(); // أجبر الواجهة على العودة لحالة "غير مسجّل" وإخفاء البيانات الشخصية
+  }
+
+  @override
+  void reset() {
+    _evictImage(_currentUser.profileImageUrl);
+    clearUserData();
   }
 }

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:shams_mobile_app/core/presentation/resettable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shams_mobile_app/models/post_model.dart';
 import 'package:shams_mobile_app/models/comment_model.dart';
 import 'package:shams_mobile_app/services/post_service.dart';
 
-class FeedProvider extends ChangeNotifier {
+class FeedProvider extends ChangeNotifier implements Resettable {
   final List<PostModel> _posts = [];
 
   List<PostModel> get posts => _posts;
@@ -186,4 +187,7 @@ class FeedProvider extends ChangeNotifier {
     _posts.clear();
     notifyListeners();
   }
+
+  @override
+  void reset() => clearFeed();
 }

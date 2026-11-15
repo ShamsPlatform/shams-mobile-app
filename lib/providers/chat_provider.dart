@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shams_mobile_app/core/presentation/resettable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shams_mobile_app/models/chat_model.dart';
 import 'package:shams_mobile_app/models/message_model.dart';
@@ -7,7 +8,7 @@ import 'package:shams_mobile_app/services/chat_service.dart';
 import 'package:shams_mobile_app/services/maintenance_service.dart';
 
 /// كلاس إدارة حالة المحادثات في التطبيق باستخدام ChangeNotifier لتحديث واجهة المستخدم تلقائياً
-class ChatProvider extends ChangeNotifier {
+class ChatProvider extends ChangeNotifier implements Resettable {
   // قائمة خاصة لتخزين كائنات المحادثات محلياً
   final List<ChatModel> _chats = [];
   
@@ -262,6 +263,9 @@ class ChatProvider extends ChangeNotifier {
     // تنبيه واجهة المستخدم بالتغييرات
     notifyListeners();
   }
+
+  @override
+  void reset() => clearChats();
 
   @override
   void dispose() {

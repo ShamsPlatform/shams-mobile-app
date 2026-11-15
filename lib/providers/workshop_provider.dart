@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shams_mobile_app/core/presentation/resettable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shams_mobile_app/models/post_model.dart';
 import 'package:shams_mobile_app/models/comment_model.dart';
@@ -16,7 +17,7 @@ import 'package:shams_mobile_app/services/post_service.dart';
 ///
 /// All mutations call [notifyListeners] so every context.watch() subscriber
 /// rebuilds automatically. No Consumer widgets needed.
-class WorkshopProvider extends ChangeNotifier {
+class WorkshopProvider extends ChangeNotifier implements Resettable {
   WorkshopProvider() {
     fetchPublicWorkshops();
   }
@@ -283,6 +284,12 @@ class WorkshopProvider extends ChangeNotifier {
     _myWorkshopFollowersCount = 0;
     _posts.clear();
     notifyListeners();
+  }
+
+  @override
+  void reset() {
+    _publicWorkshops.clear();
+    clearWorkshopData();
   }
 }
 
