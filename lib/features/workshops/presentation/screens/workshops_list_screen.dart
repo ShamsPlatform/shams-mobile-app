@@ -10,14 +10,14 @@ import 'package:shams_mobile_app/features/workshops/presentation/widgets/worksho
 import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/constants/workshop_assets.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
-import 'package:shams_mobile_app/providers/notification_provider.dart';
+import 'package:shams_mobile_app/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/screens/about_shams_screen.dart';
 import 'package:shams_mobile_app/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/screens/workshop_dashboard_screen.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/screens/workshop_profile_screen.dart';
-import 'package:shams_mobile_app/views/notifications/notifications_screen.dart';
+import 'package:shams_mobile_app/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:shams_mobile_app/core/widgets/shams_drawer.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -85,6 +85,8 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
 
         // ── الشريط العلوي ──────────────────────────────────────────────────
         appBar: ShamsPlatformAppBar(
+          unreadNotifications:
+              context.select<NotificationProvider, int>((p) => p.unreadCount),
           onMenuTap: () {
             _scaffoldKey.currentState?.openDrawer();
           },

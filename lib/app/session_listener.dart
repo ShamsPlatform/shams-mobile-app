@@ -5,7 +5,7 @@ import 'package:shams_mobile_app/core/presentation/resettable.dart';
 import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shams_mobile_app/features/chat/presentation/providers/chat_list_provider.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
-import 'package:shams_mobile_app/providers/notification_provider.dart';
+import 'package:shams_mobile_app/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/my_workshop_provider.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
@@ -56,7 +56,7 @@ class _SessionListenerState extends State<SessionListener> {
 
         final currentUser = profileProvider.currentUserOrPlaceholder;
         context.read<WorkshopsProvider>().load();
-        context.read<NotificationProvider>().fetchNotifications();
+        context.read<NotificationProvider>().load();
         context.read<ChatListProvider>().load();
         context.read<FeedProvider>().load();
 

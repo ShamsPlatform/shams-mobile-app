@@ -5,7 +5,7 @@ import 'package:shams_mobile_app/core/theme/theme_provider.dart';
 import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shams_mobile_app/features/chat/presentation/providers/chat_list_provider.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
-import 'package:shams_mobile_app/providers/notification_provider.dart';
+import 'package:shams_mobile_app/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/my_workshop_provider.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
@@ -41,7 +41,7 @@ class AppProviders extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => sl<ProfileProvider>()),
         ChangeNotifierProvider(create: (_) => sl<FeedProvider>()),
         ChangeNotifierProvider(create: (_) => sl<ChatListProvider>()),
-        ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (_) => sl<NotificationProvider>()),
       ],
       child: child,
     );

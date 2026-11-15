@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shams_mobile_app/providers/notification_provider.dart';
 import 'package:shams_mobile_app/core/theme/theme_provider.dart';
 
 /// ShamsPlatformAppBar — شريط التطبيق الرئيسي لمنصة شمس
@@ -27,11 +26,15 @@ class ShamsPlatformAppBar extends StatelessWidget
   /// إذا كان null يُستخدم ThemeProvider.toggleTheme() مباشرة.
   final VoidCallback? onDarkModeTap;
 
+  /// عدد الإشعارات غير المقروءة للعرض على الشارة
+  final int unreadNotifications;
+
   const ShamsPlatformAppBar({
     super.key,
     this.onMenuTap,
     this.onNotificationTap,
     this.onDarkModeTap,
+    this.unreadNotifications = 0,
   });
 
   @override
@@ -39,7 +42,7 @@ class ShamsPlatformAppBar extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
-    final unreadCount = context.watch<NotificationProvider>().unreadCount;
+    final unreadCount = unreadNotifications;
     final themeProvider = context.watch<ThemeProvider>();
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = themeProvider.isDarkMode;
