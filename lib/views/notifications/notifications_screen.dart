@@ -5,7 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/models/notification_model.dart';
 import 'package:shams_mobile_app/providers/notification_provider.dart';
-import 'package:shams_mobile_app/views/posts/post_detail_screen.dart';
+import 'package:shams_mobile_app/features/posts/presentation/screens/post_detail_screen.dart';
 import 'package:shams_mobile_app/views/workshops/workshop_profile_screen.dart';
 import 'package:shams_mobile_app/views/chat/chat_conversation_screen.dart';
 

@@ -7,8 +7,8 @@ import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/features/posts/domain/entities/comment.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
+import 'package:shams_mobile_app/core/utils/formatters.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // دالة مساعدة لعرض التعليقات كـ Modal Bottom Sheet
@@ -461,7 +461,7 @@ class _CommentTile extends StatelessWidget {
                     ),
                     const Spacer(),
                     Text(
-                      timeago.format(comment.createdAt, locale: 'ar'),
+                      formatRelativeTime(comment.createdAt),
                       style: GoogleFonts.tajawal(
                         fontSize: 11.5,
                         color: ext.textHint,

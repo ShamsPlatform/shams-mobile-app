@@ -17,8 +17,8 @@ import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/widgets/managed_post_card.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
 import 'package:shams_mobile_app/core/widgets/scrollable_image_picker.dart';
-import 'package:shams_mobile_app/views/workshops/create_post_screen.dart';
-import 'package:shams_mobile_app/views/workshops/edit_post_screen.dart';
+import 'package:shams_mobile_app/features/posts/presentation/screens/create_post_screen.dart';
+import 'package:shams_mobile_app/features/posts/presentation/screens/edit_post_screen.dart';
 
 class WorkshopDashboardScreen extends StatefulWidget {
   /// Optional workshop data passed from the Add Workshop form.

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shams_mobile_app/views/chat/chat_list_screen.dart';
-import 'package:shams_mobile_app/views/home.dart';
+import 'package:shams_mobile_app/features/posts/presentation/screens/home_screen.dart';
 import 'package:shams_mobile_app/features/profile/presentation/screens/user_profile_screen.dart';
 import 'package:shams_mobile_app/views/workshops/workshops_list_screen.dart';
 import 'package:shams_mobile_app/core/widgets/shams_bottom_nav_bar.dart';

@@ -9,7 +9,7 @@ import 'package:shams_mobile_app/features/posts/presentation/providers/feed_prov
 import 'package:shams_mobile_app/features/posts/presentation/providers/post_editor_provider.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import 'package:shams_mobile_app/views/workshops/create_post_screen.dart'; // إعادة استخدام MediaFile و _AttachmentThumbnail
+import 'package:shams_mobile_app/features/posts/presentation/screens/create_post_screen.dart'; // إعادة استخدام MediaFile و _AttachmentThumbnail
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EditPostScreen — شاشة تعديل المنشور
