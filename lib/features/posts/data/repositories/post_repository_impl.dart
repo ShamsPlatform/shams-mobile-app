@@ -12,9 +12,38 @@ class PostRepositoryImpl implements PostRepository {
 
   final PostRemoteDataSource _remote;
 
-  Future<List<Comment>> _loadCommentsForPost(String postId) async {
-    final rows = await _remote.fetchComments(postId);
-    return rows.map(CommentModel.fromJson).toList();
+  Future<List<Post>> _mapPostsWithComments(
+    List<Map<String, dynamic>> rows, {
+    Set<String> likedIds = const {},
+  }) async {
+    if (rows.isEmpty) return const <Post>[];
+
+    final postIds = rows
+        .map((p) => p['id'] as String?)
+        .whereType<String>()
+        .where((id) => id.isNotEmpty)
+        .toList();
+
+    final commentRows = postIds.isNotEmpty
+        ? await _remote.fetchCommentsForPosts(postIds)
+        : const <Map<String, dynamic>>[];
+    final commentsByPost = <String, List<Comment>>{};
+    for (final commentRow in commentRows) {
+      final postId = commentRow['post_id'] as String?;
+      if (postId == null || postId.isEmpty) continue;
+      commentsByPost
+          .putIfAbsent(postId, () => <Comment>[])
+          .add(CommentModel.fromJson(commentRow));
+    }
+
+    return rows.map((item) {
+      final id = item['id'] as String? ?? '';
+      return PostModel.fromJson(
+        item,
+        isLiked: likedIds.contains(id),
+        comments: commentsByPost[id] ?? const <Comment>[],
+      );
+    }).toList();
   }
 
   @override
@@ -39,19 +68,7 @@ class PostRepositoryImpl implements PostRepository {
           ? await _remote.fetchLikedPostIds(postIds)
           : <String>{};
 
-      final posts = <Post>[];
-      for (final item in rows) {
-        final id = item['id'] as String? ?? '';
-        final comments = await _loadCommentsForPost(id);
-        posts.add(
-          PostModel.fromJson(
-            item,
-            isLiked: likedIds.contains(id),
-            comments: comments,
-          ),
-        );
-      }
-      return posts;
+      return _mapPostsWithComments(rows, likedIds: likedIds);
     });
   }
 
@@ -67,14 +84,7 @@ class PostRepositoryImpl implements PostRepository {
         limit: limit,
         offset: offset,
       );
-
-      final posts = <Post>[];
-      for (final item in rows) {
-        final id = item['id'] as String? ?? '';
-        final comments = await _loadCommentsForPost(id);
-        posts.add(PostModel.fromJson(item, comments: comments));
-      }
-      return posts;
+      return _mapPostsWithComments(rows);
     });
   }
 

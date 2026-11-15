@@ -30,10 +30,11 @@ void main() {
       expect(result, isA<Ok<List<Post>>>());
       expect((result as Ok<List<Post>>).data, isEmpty);
       verifyNever(() => remote.fetchLikedPostIds(any()));
+      verifyNever(() => remote.fetchCommentsForPosts(any()));
       verifyNever(() => remote.fetchComments(any()));
     });
 
-    test('merges liked post ids and per-post comments', () async {
+    test('batches liked post ids and comments in single calls', () async {
       when(
         () => remote.fetchFeed(currentUserId: 'u1', limit: 20, offset: 0),
       ).thenAnswer(
@@ -54,7 +55,7 @@ void main() {
       );
       when(() => remote.fetchLikedPostIds(['p1', 'p2']))
           .thenAnswer((_) async => {'p2'});
-      when(() => remote.fetchComments('p1')).thenAnswer(
+      when(() => remote.fetchCommentsForPosts(['p1', 'p2'])).thenAnswer(
         (_) async => [
           {
             'id': 'c1',
@@ -65,7 +66,6 @@ void main() {
           },
         ],
       );
-      when(() => remote.fetchComments('p2')).thenAnswer((_) async => []);
 
       final result = await repository.fetchFeed(currentUserId: 'u1');
 
@@ -76,6 +76,8 @@ void main() {
       expect(posts[0].comments.single.text, 'Hello');
       expect(posts[1].isLiked, true);
       expect(posts[1].comments, isEmpty);
+      verify(() => remote.fetchCommentsForPosts(['p1', 'p2'])).called(1);
+      verifyNever(() => remote.fetchComments(any()));
     });
 
     test('maps ServerException to ServerFailure', () async {
@@ -93,7 +95,7 @@ void main() {
   });
 
   group('fetchWorkshopPosts', () {
-    test('maps rows and attaches comments', () async {
+    test('maps rows and batches comments in a single query', () async {
       when(
         () => remote.fetchWorkshopPosts(workshopId: 'w1', limit: 20, offset: 0),
       ).thenAnswer(
@@ -104,14 +106,35 @@ void main() {
             'text_details': 'Workshop post',
             'created_at': '2026-11-15T00:00:00.000Z',
           },
+          {
+            'id': 'p2',
+            'workshop_id': 'w1',
+            'text_details': 'Workshop post 2',
+            'created_at': '2026-11-15T01:00:00.000Z',
+          },
         ],
       );
-      when(() => remote.fetchComments('p1')).thenAnswer((_) async => []);
+      when(() => remote.fetchCommentsForPosts(['p1', 'p2'])).thenAnswer(
+        (_) async => [
+          {
+            'id': 'c1',
+            'post_id': 'p2',
+            'text': 'Batch reply',
+            'created_at': '2026-11-15T01:10:00.000Z',
+            'profiles': {'id': 'u2', 'name': 'Noor'},
+          },
+        ],
+      );
 
       final result = await repository.fetchWorkshopPosts(workshopId: 'w1');
 
       expect(result, isA<Ok<List<Post>>>());
-      expect((result as Ok<List<Post>>).data.single.id, 'p1');
+      final posts = (result as Ok<List<Post>>).data;
+      expect(posts.map((p) => p.id), ['p1', 'p2']);
+      expect(posts[0].comments, isEmpty);
+      expect(posts[1].comments.single.text, 'Batch reply');
+      verify(() => remote.fetchCommentsForPosts(['p1', 'p2'])).called(1);
+      verifyNever(() => remote.fetchComments(any()));
     });
   });
 

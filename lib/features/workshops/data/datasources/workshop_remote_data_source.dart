@@ -12,6 +12,8 @@ abstract interface class WorkshopRemoteDataSource {
     int offset = 0,
   });
 
+  Future<Set<String>> fetchFollowedWorkshopIds(List<String> workshopIds);
+
   Future<bool> isFollowing(String workshopId);
 
   Future<Map<String, dynamic>?> fetchMyWorkshop(String userId);
@@ -139,18 +141,27 @@ class WorkshopRemoteDataSourceImpl implements WorkshopRemoteDataSource {
   }
 
   @override
-  Future<bool> isFollowing(String workshopId) {
+  Future<Set<String>> fetchFollowedWorkshopIds(List<String> workshopIds) {
     return _guardDb(() async {
+      if (workshopIds.isEmpty) return <String>{};
       final user = _db.auth.currentUser;
-      if (user == null) return false;
-      final data = await _db
+      if (user == null) return <String>{};
+      final rows = await _db
           .from('follows')
-          .select('id')
+          .select('workshop_id')
           .eq('follower_id', user.id)
-          .eq('workshop_id', workshopId)
-          .maybeSingle();
-      return data != null;
+          .inFilter('workshop_id', workshopIds);
+      return rows
+          .map((r) => r['workshop_id'] as String?)
+          .whereType<String>()
+          .toSet();
     });
+  }
+
+  @override
+  Future<bool> isFollowing(String workshopId) async {
+    final followedIds = await fetchFollowedWorkshopIds([workshopId]);
+    return followedIds.contains(workshopId);
   }
 
   @override

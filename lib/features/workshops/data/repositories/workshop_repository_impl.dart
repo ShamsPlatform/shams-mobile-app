@@ -27,13 +27,24 @@ class WorkshopRepositoryImpl implements WorkshopRepository {
         limit: limit,
         offset: offset,
       );
-      final workshops = <Workshop>[];
-      for (final row in rows) {
+      if (rows.isEmpty) return const <Workshop>[];
+
+      final workshopIds = rows
+          .map((r) => r['id'] as String?)
+          .whereType<String>()
+          .where((id) => id.isNotEmpty)
+          .toList();
+      final followedIds = workshopIds.isNotEmpty
+          ? await _remote.fetchFollowedWorkshopIds(workshopIds)
+          : <String>{};
+
+      return rows.map((row) {
         final id = row['id'] as String? ?? '';
-        final following = id.isNotEmpty ? await _remote.isFollowing(id) : false;
-        workshops.add(WorkshopModel.fromJson(row, isFollowing: following));
-      }
-      return workshops;
+        return WorkshopModel.fromJson(
+          row,
+          isFollowing: followedIds.contains(id),
+        );
+      }).toList();
     });
   }
 

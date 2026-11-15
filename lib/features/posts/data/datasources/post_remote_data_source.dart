@@ -37,6 +37,10 @@ abstract interface class PostRemoteDataSource {
 
   Future<Set<String>> fetchLikedPostIds(List<String> postIds);
 
+  Future<List<Map<String, dynamic>>> fetchCommentsForPosts(
+    List<String> postIds,
+  );
+
   Future<List<Map<String, dynamic>>> fetchComments(String postId);
 
   Future<Map<String, dynamic>> addComment({
@@ -287,17 +291,25 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> fetchComments(String postId) {
+  Future<List<Map<String, dynamic>>> fetchCommentsForPosts(
+    List<String> postIds,
+  ) {
     return _guardDb(() async {
+      if (postIds.isEmpty) return const <Map<String, dynamic>>[];
       return await _db
           .from('comments')
           .select('''
           *,
           profiles!comments_user_id_fkey(id, name, username, profile_image_url)
         ''')
-          .eq('post_id', postId)
+          .inFilter('post_id', postIds)
           .order('created_at', ascending: true);
     });
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchComments(String postId) {
+    return fetchCommentsForPosts([postId]);
   }
 
   @override

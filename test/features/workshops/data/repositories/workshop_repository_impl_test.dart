@@ -39,7 +39,24 @@ void main() {
   });
 
   group('getPublicWorkshops', () {
-    test('maps rows and merges per-workshop isFollowing state', () async {
+    test('returns empty list without extra follow query when directory is empty',
+        () async {
+      when(
+        () => remote.fetchPublicWorkshops(
+          cityFilter: null,
+          limit: 20,
+          offset: 0,
+        ),
+      ).thenAnswer((_) async => []);
+
+      final result = await repository.getPublicWorkshops();
+
+      expect((result as Ok<List<Workshop>>).data, isEmpty);
+      verifyNever(() => remote.fetchFollowedWorkshopIds(any()));
+      verifyNever(() => remote.isFollowing(any()));
+    });
+
+    test('maps rows and batches follow status in a single call', () async {
       when(
         () => remote.fetchPublicWorkshops(
           cityFilter: null,
@@ -52,8 +69,8 @@ void main() {
           {'id': 'w2', 'owner_id': 'u2', 'name': 'W2'},
         ],
       );
-      when(() => remote.isFollowing('w1')).thenAnswer((_) async => true);
-      when(() => remote.isFollowing('w2')).thenAnswer((_) async => false);
+      when(() => remote.fetchFollowedWorkshopIds(['w1', 'w2']))
+          .thenAnswer((_) async => {'w1'});
 
       final result = await repository.getPublicWorkshops();
 
@@ -62,6 +79,8 @@ void main() {
       expect(workshops, hasLength(2));
       expect(workshops[0].isFollowing, isTrue);
       expect(workshops[1].isFollowing, isFalse);
+      verify(() => remote.fetchFollowedWorkshopIds(['w1', 'w2'])).called(1);
+      verifyNever(() => remote.isFollowing(any()));
     });
 
     test('maps ServerException to ServerFailure', () async {
