@@ -47,4 +47,9 @@ app.*.map.json
 # Local environment secrets
 env/*.json
 !env/example.json
+.env*
+!.env.example
+
+# Database schema & setup scripts
+*.sql
 

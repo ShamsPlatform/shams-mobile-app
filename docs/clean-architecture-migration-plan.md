@@ -2,7 +2,7 @@
 
 | Item | Value |
 |---|---|
-| Status | Completed — Phases 0–8 executed; Clean Architecture enforced via `tool/check_architecture.dart` and CI |
+| Status | Completed — Phases 0–9 executed; Clean Architecture enforced via `tool/check_architecture.dart` and CI |
 | Scope | Everything under `lib/` (≈ 70 Dart files, ≈ 20k LOC) |
 | Strategy | Incremental, feature by feature (Strangler Fig). No big-bang rewrite. |
 | State management | Keep `provider` during the migration. A switch to Bloc/Riverpod is out of scope. |
