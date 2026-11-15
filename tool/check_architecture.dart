@@ -86,7 +86,7 @@ void main() {
         final line = lines[i].trim();
         if (!line.startsWith('import ')) continue;
 
-        for (final banned in _entryForbiddenImports(rule, normalizedPath, line)) {
+        for (final banned in rule.forbiddenImports) {
           final matched = switch (banned) {
             final RegExp r => r.hasMatch(line),
             final String s => line.contains(s),
@@ -109,17 +109,4 @@ void main() {
   }
 
   stdout.writeln('Architecture check passed.');
-}
-
-List<Pattern> _entryForbiddenImports(
-  _ImportRule rule,
-  String normalizedPath,
-  String importLine,
-) {
-  // Temporary Phase 1 allowance until AuthGate switches to AuthProvider in P2.6.
-  if (normalizedPath == 'lib/app/auth_gate.dart' &&
-      importLine.contains('package:shams_mobile_app/services/local_storage_service.dart')) {
-    return const [];
-  }
-  return rule.forbiddenImports;
 }
