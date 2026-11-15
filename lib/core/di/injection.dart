@@ -12,6 +12,19 @@ import 'package:shams_mobile_app/features/auth/domain/usecases/sign_in_with_goog
 import 'package:shams_mobile_app/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:shams_mobile_app/features/auth/domain/usecases/watch_auth_state_usecase.dart';
 import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shams_mobile_app/features/posts/data/datasources/post_remote_data_source.dart';
+import 'package:shams_mobile_app/features/posts/data/repositories/post_repository_impl.dart';
+import 'package:shams_mobile_app/features/posts/domain/repositories/post_repository.dart';
+import 'package:shams_mobile_app/features/posts/domain/usecases/add_comment_usecase.dart';
+import 'package:shams_mobile_app/features/posts/domain/usecases/create_post_usecase.dart';
+import 'package:shams_mobile_app/features/posts/domain/usecases/delete_comment_usecase.dart';
+import 'package:shams_mobile_app/features/posts/domain/usecases/delete_post_usecase.dart';
+import 'package:shams_mobile_app/features/posts/domain/usecases/get_feed_usecase.dart';
+import 'package:shams_mobile_app/features/posts/domain/usecases/get_workshop_posts_usecase.dart';
+import 'package:shams_mobile_app/features/posts/domain/usecases/hide_post_usecase.dart';
+import 'package:shams_mobile_app/features/posts/domain/usecases/toggle_comment_like_usecase.dart';
+import 'package:shams_mobile_app/features/posts/domain/usecases/toggle_post_like_usecase.dart';
+import 'package:shams_mobile_app/features/posts/domain/usecases/update_post_usecase.dart';
 import 'package:shams_mobile_app/features/profile/data/datasources/profile_remote_data_source.dart';
 import 'package:shams_mobile_app/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:shams_mobile_app/features/profile/domain/repositories/profile_repository.dart';
@@ -35,6 +48,7 @@ Future<void> initDependencies() async {
   _initCore();
   _initAuth();
   _initProfile();
+  _initPosts();
 }
 
 void _initCore() {
@@ -83,4 +97,21 @@ void _initProfile() {
   sl.registerFactory(
     () => ProfileProvider(getMyProfile: sl(), updateProfile: sl()),
   );
+}
+
+void _initPosts() {
+  sl.registerLazySingleton<PostRemoteDataSource>(
+    () => PostRemoteDataSourceImpl(sl(), sl()),
+  );
+  sl.registerLazySingleton<PostRepository>(() => PostRepositoryImpl(sl()));
+  sl.registerLazySingleton(() => GetFeedUseCase(sl(), sl()));
+  sl.registerLazySingleton(() => GetWorkshopPostsUseCase(sl()));
+  sl.registerLazySingleton(() => CreatePostUseCase(sl()));
+  sl.registerLazySingleton(() => UpdatePostUseCase(sl()));
+  sl.registerLazySingleton(() => DeletePostUseCase(sl()));
+  sl.registerLazySingleton(() => HidePostUseCase(sl()));
+  sl.registerLazySingleton(() => TogglePostLikeUseCase(sl()));
+  sl.registerLazySingleton(() => AddCommentUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteCommentUseCase(sl()));
+  sl.registerLazySingleton(() => ToggleCommentLikeUseCase(sl()));
 }
