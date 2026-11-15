@@ -1,23 +1,21 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import 'package:shams_mobile_app/core/presentation/view_status.dart';
-import 'package:shams_mobile_app/core/utils/formatters.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/features/posts/domain/entities/post.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
-import 'package:shams_mobile_app/features/workshops/presentation/providers/my_workshop_provider.dart';
-import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
-import 'package:shams_mobile_app/core/constants/app_constants.dart';
-import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import 'package:shams_mobile_app/features/workshops/presentation/widgets/managed_post_card.dart';
-import 'package:shams_mobile_app/core/widgets/primary_button.dart';
-import 'package:shams_mobile_app/core/widgets/scrollable_image_picker.dart';
 import 'package:shams_mobile_app/features/posts/presentation/screens/create_post_screen.dart';
 import 'package:shams_mobile_app/features/posts/presentation/screens/edit_post_screen.dart';
+import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/providers/my_workshop_provider.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/widgets/dashboard/dashboard_header.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/widgets/dashboard/dashboard_image_source_sheet.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/widgets/dashboard/dashboard_info_section.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/widgets/dashboard/dashboard_posts_section.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/widgets/dashboard/edit_workshop_sheet.dart';
 
 class WorkshopDashboardScreen extends StatefulWidget {
   const WorkshopDashboardScreen({super.key});
@@ -60,7 +58,9 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
   // ── Image pickers ─────────────────────────────────────────────────────────
 
   Future<void> _pickCoverImage() async {
-    _showImageSourceSheet(
+    showDashboardImageSourceSheet(
+      context: context,
+      picker: _picker,
       onPicked: (file) async {
         final provider = context.read<MyWorkshopProvider>();
         final ok = await provider.uploadAndSetCover(file.path);
@@ -72,7 +72,9 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
   }
 
   Future<void> _pickProfileImage() async {
-    _showImageSourceSheet(
+    showDashboardImageSourceSheet(
+      context: context,
+      picker: _picker,
       onPicked: (file) async {
         final provider = context.read<MyWorkshopProvider>();
         final ok = await provider.uploadAndSetLogo(file.path);
@@ -84,7 +86,9 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
   }
 
   Future<void> _pickAndAddImage() async {
-    _showImageSourceSheet(
+    showDashboardImageSourceSheet(
+      context: context,
+      picker: _picker,
       onPicked: (file) async {
         final provider = context.read<MyWorkshopProvider>();
         final ok = await provider.uploadAndAddGalleryImage(file.path);
@@ -92,364 +96,6 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
           _showErrorSnackBar(provider.errorMessage ?? 'تعذر رفع الصورة');
         }
       },
-    );
-  }
-
-  void _showImageSourceSheet({required void Function(File file) onPicked}) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // مقبض السحب
-                Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).extension<ShamsExtendedColors>()!.handleBar,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                _buildSheetOption(
-                  icon: Icons.photo_library_outlined,
-                  label: 'اختر من المعرض',
-                  color: Theme.of(context).colorScheme.primary,
-                  onTap: () async {
-                    Navigator.pop(ctx);
-                    final xf = await _picker.pickImage(
-                      source: ImageSource.gallery,
-                      imageQuality: 85,
-                    );
-                    if (xf != null) onPicked(File(xf.path));
-                  },
-                ),
-                _buildSheetOption(
-                  icon: Icons.camera_alt_outlined,
-                  label: 'التقط صورة',
-                  color: Theme.of(context).colorScheme.secondary,
-                  onTap: () async {
-                    Navigator.pop(ctx);
-                    try {
-                      final xf = await _picker.pickImage(
-                        source: ImageSource.camera,
-                        imageQuality: 85,
-                      );
-                      if (xf != null) onPicked(File(xf.path));
-                    } catch (_) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'الكاميرا غير متاحة على هذا الجهاز.',
-                              style: GoogleFonts.tajawal(),
-                            ),
-                          ),
-                        );
-                      }
-                    }
-                  },
-                ),
-                const SizedBox(height: 8),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSheetOption({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      onTap: onTap,
-      leading: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, color: color, size: 22),
-      ),
-      title: Text(label, style: GoogleFonts.tajawal(fontSize: 15)),
-    );
-  }
-
-  // ── City list — sourced from ShamsConstants (single source of truth) ────
-  static List<String> get _cities => ShamsConstants.yemeniCities;
-
-  // ── Edit workshop info bottom sheet ──────────────────────────────────────
-
-  void _showEditWorkshopSheet() {
-    final myWorkshop = context.read<MyWorkshopProvider>().myWorkshop;
-    final currentName = myWorkshop?.name ?? 'ورشتي على شمس';
-    final currentUsername = myWorkshop?.username ?? 'workshop';
-    final currentCity = myWorkshop?.city ?? 'صنعاء';
-
-    final nameCtrl = TextEditingController(text: currentName);
-    final handleCtrl = TextEditingController(text: currentUsername);
-    // تحديد المدينة الحالية إذا كانت موجودة في القائمة
-    String? selectedCity = _cities.contains(currentCity) ? currentCity : null;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        // StatefulBuilder لإعادة بناء الـ dropdown عند تغيير الاختيار
-        child: StatefulBuilder(
-          builder: (ctx, setSheetState) => Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
-              left: 24,
-              right: 24,
-              top: 16,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // مقبض
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 20),
-                    decoration: BoxDecoration(
-                      color: Theme.of(
-                        ctx,
-                      ).extension<ShamsExtendedColors>()!.handleBar,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                Text(
-                  'تعديل ملف الورشة',
-                  style: GoogleFonts.tajawal(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(ctx).colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                _buildEditField(
-                  controller: nameCtrl,
-                  label: 'اسم الورشة',
-                  icon: Icons.store_outlined,
-                ),
-                const SizedBox(height: 14),
-                _buildEditField(
-                  controller: handleCtrl,
-                  label: 'اسم المستخدم',
-                  icon: Icons.alternate_email_rounded,
-                  prefix: '@',
-                ),
-                const SizedBox(height: 14),
-
-                // ── Dropdown المحافظة ──────────────────────────────────────
-                Text(
-                  'المحافظة',
-                  style: GoogleFonts.tajawal(
-                    fontSize: 13,
-                    color: Theme.of(
-                      ctx,
-                    ).extension<ShamsExtendedColors>()!.textHint,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      ctx,
-                    ).extension<ShamsExtendedColors>()!.backgroundLight,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: selectedCity != null
-                          ? Theme.of(ctx).colorScheme.primary
-                          : Theme.of(
-                              ctx,
-                            ).extension<ShamsExtendedColors>()!.borderLight,
-                      width: selectedCity != null ? 1.5 : 1,
-                    ),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: selectedCity,
-                      isExpanded: true,
-                      hint: Text(
-                        'اختر المحافظة',
-                        style: GoogleFonts.tajawal(
-                          fontSize: 14,
-                          color: Colors.grey.shade400,
-                        ),
-                      ),
-                      icon: Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        color: Theme.of(ctx).colorScheme.primary,
-                      ),
-                      items: _cities
-                          .map(
-                            (city) => DropdownMenuItem<String>(
-                              value: city,
-                              child: Text(
-                                city,
-                                style: GoogleFonts.tajawal(
-                                  fontSize: 14,
-                                  color: Theme.of(ctx).colorScheme.onSurface,
-                                ),
-                              ),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (v) => setSheetState(() => selectedCity = v),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      final provider = context.read<MyWorkshopProvider>();
-                      final messenger = ScaffoldMessenger.of(context);
-                      final successColor =
-                          Theme.of(context).colorScheme.tertiary;
-                      final errorColor = Theme.of(context).colorScheme.error;
-
-                      final ok = await provider.updateInfo(
-                        name: nameCtrl.text,
-                        username: handleCtrl.text,
-                        city: selectedCity,
-                      );
-
-                      if (ctx.mounted) Navigator.pop(ctx);
-                      if (!mounted) return;
-                      if (ok) {
-                        messenger.showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'تم حفظ معلومات الورشة بنجاح',
-                              style: GoogleFonts.tajawal(),
-                            ),
-                            backgroundColor: successColor,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      } else {
-                        messenger.showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              provider.errorMessage ?? 'تعذر حفظ التعديلات',
-                              style: GoogleFonts.tajawal(),
-                            ),
-                            backgroundColor: errorColor,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            duration: const Duration(seconds: 3),
-                          ),
-                        );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(ctx).colorScheme.secondary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      'حفظ التعديلات',
-                      style: GoogleFonts.tajawal(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(ctx).colorScheme.onSecondary,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEditField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    String? prefix,
-  }) {
-    return TextField(
-      controller: controller,
-      style: GoogleFonts.tajawal(
-        fontSize: 14,
-        color: Theme.of(context).colorScheme.onSurface,
-      ),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: GoogleFonts.tajawal(
-          color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
-        ),
-        prefixIcon: Icon(
-          icon,
-          color: Theme.of(context).colorScheme.primary,
-          size: 20,
-        ),
-        prefixText: prefix,
-        prefixStyle: GoogleFonts.tajawal(
-          color: Theme.of(context).colorScheme.onSurface,
-          fontWeight: FontWeight.bold,
-        ),
-        filled: true,
-        fillColor: Theme.of(
-          context,
-        ).extension<ShamsExtendedColors>()!.backgroundLight,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.primary,
-            width: 1.5,
-          ),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
-      ),
     );
   }
 
@@ -539,10 +185,12 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
   }
 
   // ── Build ─────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     final workshopState = context.watch<MyWorkshopProvider>();
-    final currentUser = context.read<ProfileProvider>().currentUserOrPlaceholder;
+    final currentUser =
+        context.read<ProfileProvider>().currentUserOrPlaceholder;
 
     // Auto-fetch if user has a workshop but it's not loaded in the provider
     if (currentUser.hasWorkshop &&
@@ -570,7 +218,6 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
-
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
@@ -591,192 +238,54 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
           ),
           centerTitle: true,
         ),
-
         body: SingleChildScrollView(
           child: Column(
             children: [
-              // ── 1. الرأس ──
-              _buildHeader(workshopState),
-
-              // ── 2. معلومات الورشة ──
-              _buildWorkshopInfo(workshopState),
-              const SizedBox(height: 16),
-
-              // ── صور الورشة الإضافية ──
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  children: [
-                    Text(
-                      'صور الورشة',
-                      style: GoogleFonts.tajawal(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '(${(workshopState.myWorkshop?.galleryUrls.length ?? 0) + workshopState.pendingGalleryPaths.length})',
-                      style: GoogleFonts.tajawal(
-                        fontSize: 13,
-                        color: Theme.of(
-                          context,
-                        ).extension<ShamsExtendedColors>()!.textHint,
-                      ),
-                    ),
-                  ],
-                ),
+              DashboardHeader(
+                coverUrl: d?.coverUrl,
+                logoUrl: d?.logoUrl,
+                pendingCoverPath: workshopState.pendingCoverPath,
+                pendingLogoPath: workshopState.pendingLogoPath,
+                onCoverTap: _pickCoverImage,
+                onLogoTap: _pickProfileImage,
               ),
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: ScrollableImagePicker(
-                  images: [
-                    ...?workshopState.myWorkshop?.galleryUrls,
-                    ...workshopState.pendingGalleryPaths.map(File.new),
-                  ],
-                  onAddTap: _pickAndAddImage,
-                  onRemoveTap: (i) async {
-                    final provider = context.read<MyWorkshopProvider>();
-                    final ok = await provider.removeGalleryImageAt(i);
-                    if (!ok && mounted) {
-                      _showErrorSnackBar(
-                        provider.errorMessage ?? 'تعذر حذف الصورة',
-                      );
-                    }
-                  },
-                ),
+              DashboardInfoSection(
+                name: d?.name ?? 'ورشتي على شمس',
+                username: d?.username ?? '',
+                city: d?.city ?? 'صنعاء',
+                galleryUrls: d?.galleryUrls ?? const [],
+                pendingGalleryPaths: workshopState.pendingGalleryPaths,
+                followersCount: workshopState.followersCount,
+                postCount: workshopState.postCount,
+                onAddGalleryTap: _pickAndAddImage,
+                onRemoveGalleryTap: (i) async {
+                  final provider = context.read<MyWorkshopProvider>();
+                  final ok = await provider.removeGalleryImageAt(i);
+                  if (!ok && mounted) {
+                    _showErrorSnackBar(
+                      provider.errorMessage ?? 'تعذر حذف الصورة',
+                    );
+                  }
+                },
+                onEditTap: () => showEditWorkshopSheet(context),
               ),
               const SizedBox(height: 24),
-
-              // ── 3. زر تعديل ملف الورشة ──
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 45,
-                  child: CustomSolidButton(
-                    title: 'تعديل ملف الورشة',
-                    onPressed: _showEditWorkshopSheet,
-                  ),
-                ),
+              DashboardPostsSection(
+                posts: workshopState.posts,
+                onEditPost: (post) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EditPostScreen(post: post),
+                    ),
+                  );
+                },
+                onDeletePost: _confirmDelete,
               ),
-              const SizedBox(height: 24),
-
-              // ── 4. Stats bar (شريط الإحصائيات) ──
-              Divider(color: Colors.grey.shade200, height: 1),
-              IntrinsicHeight(
-                child: Row(
-                  children: [
-                    _buildStatColumn(
-                      workshopState.followersCount.toString(),
-                      'المتابعون',
-                      Icons.people_alt_outlined,
-                    ),
-                    VerticalDivider(
-                      color: Colors.grey.shade200,
-                      width: 1,
-                      thickness: 1,
-                    ),
-                    _buildStatColumn(
-                      '${workshopState.postCount}', // 💡 استخدام مباشر للمتغير
-                      'المنشورات',
-                      Icons.article_outlined,
-                    ),
-                  ],
-                ),
-              ),
-              Divider(color: Colors.grey.shade200, height: 1),
-              const SizedBox(height: 24),
-
-              // ── 5. سجل الأعمال المنشور ──
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'سجل الأعمال المنشور',
-                      style: GoogleFonts.tajawal(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // 💡 حذفنا الـ Consumer واستخدمنا Builder عادي للترتيب التنظيمي فقط
-                    Builder(
-                      builder: (context) {
-                        // 💡 استخدام المتغير لقراءة مصفوفة المنشورات
-                        final posts = workshopState.posts;
-
-                        if (posts.isEmpty) {
-                          return Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(32),
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    Icons.article_outlined,
-                                    size: 48,
-                                    color: Theme.of(context).colorScheme.primary
-                                        .withValues(alpha: 0.2),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'لا توجد أعمال منشورة حالياً.\nاضغط "نشر عمل جديد" للبدء!',
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.tajawal(
-                                      fontSize: 14,
-                                      color: Theme.of(context)
-                                          .extension<ShamsExtendedColors>()!
-                                          .textHint,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }
-
-                        return ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: posts.length,
-                          itemBuilder: (context, index) {
-                            final post = posts[index];
-                            return ManagedPostCard(
-                              content: post.textDetails,
-                              timeAgo: formatRelativeTime(post.createdAt),
-                              viewsCount: formatCompactNumber(post.viewsCount),
-                              likesCount: post.likesCount,
-                              imagePaths: post.images,
-                              onEdit: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => EditPostScreen(post: post),
-                                  ),
-                                );
-                              },
-                              onDelete: () => _confirmDelete(post),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
               const SizedBox(height: 80),
             ],
           ),
         ),
-
-        // ── زر نشر عمل جديد ──
         bottomNavigationBar: SafeArea(
           child: Container(
             padding: const EdgeInsets.all(16),
@@ -820,233 +329,6 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  // ── Header: cover + avatar with tappable camera badges ───────────────────
-
-  Widget _buildHeader(MyWorkshopProvider workshopState) {
-    final pendingCover = workshopState.pendingCoverPath;
-    final pendingLogo = workshopState.pendingLogoPath;
-    final hasCoverUrl =
-        workshopState.myWorkshop?.coverUrl != null &&
-        workshopState.myWorkshop!.coverUrl!.isNotEmpty;
-    final hasLogoUrl =
-        workshopState.myWorkshop?.logoUrl != null &&
-        workshopState.myWorkshop!.logoUrl!.isNotEmpty;
-
-    return SizedBox(
-      height: 250,
-      child: Stack(
-        alignment: Alignment.topCenter,
-        children: [
-          // صورة الغلاف
-          GestureDetector(
-            onTap: _pickCoverImage,
-            child: Stack(
-              children: [
-                SizedBox(
-                  height: 150,
-                  width: double.infinity,
-                  child: pendingCover != null
-                      ? Image(
-                          image: FileImage(File(pendingCover)),
-                          fit: BoxFit.cover,
-                        )
-                      : hasCoverUrl
-                      ? Image.network(
-                          workshopState.myWorkshop!.coverUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => Container(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withValues(alpha: 0.08),
-                            child: const Icon(
-                              Icons.image_outlined,
-                              size: 50,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        )
-                      : Container(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.primary.withValues(alpha: 0.08),
-                          child: const Icon(
-                            Icons.image_outlined,
-                            size: 50,
-                            color: Colors.grey,
-                          ),
-                        ),
-                ),
-                // طبقة شفافة للنقر على صورة الغلاف
-                Positioned(top: 16, right: 16, child: _buildCameraBadge()),
-              ],
-            ),
-          ),
-
-          // الصورة الشخصية
-          Positioned(
-            top: 100,
-            child: GestureDetector(
-              onTap: _pickProfileImage,
-              child: Stack(
-                alignment: Alignment.bottomLeft,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      shape: BoxShape.circle,
-                    ),
-                    child: pendingLogo != null
-                        ? ClipOval(
-                            child: Image(
-                              image: FileImage(File(pendingLogo)),
-                              width: 90,
-                              height: 90,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        : hasLogoUrl
-                        ? ClipOval(
-                            child: Image.network(
-                              workshopState.myWorkshop!.logoUrl!,
-                              width: 90,
-                              height: 90,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, _, _) => CircleAvatar(
-                                radius: 45,
-                                backgroundColor: Theme.of(context).extension<ShamsExtendedColors>()!.avatarFallbackBg,
-                                child: const Icon(
-                                  Icons.store_rounded,
-                                  size: 40,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ),
-                          )
-                        : CircleAvatar(
-                            radius: 45,
-                            backgroundColor: Theme.of(context).extension<ShamsExtendedColors>()!.avatarFallbackBg,
-                            child: const Icon(
-                              Icons.store_rounded,
-                              size: 40,
-                              color: Colors.grey,
-                            ),
-                          ),
-                  ),
-                  _buildCameraBadge(),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWorkshopInfo(MyWorkshopProvider workshopState) {
-    final workshop = workshopState.myWorkshop;
-    final name = workshop?.name ?? 'ورشتي على شمس';
-    final handle = (workshop?.username.isNotEmpty ?? false)
-        ? '@${workshop!.username}'
-        : '@workshop';
-    final city = workshop?.city ?? 'صنعاء';
-
-    return Column(
-      children: [
-        Text(
-          name,
-          style: GoogleFonts.tajawal(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        Text(
-          handle,
-          style: GoogleFonts.tajawal(
-            fontSize: 13,
-            color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.location_on_outlined,
-              size: 16,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              city,
-              style: GoogleFonts.tajawal(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCameraBadge() {
-    return Container(
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 6),
-        ],
-      ),
-      child: Icon(
-        Icons.camera_alt_rounded,
-        size: 16,
-        color: Theme.of(context).colorScheme.onSurface,
-      ),
-    );
-  }
-
-  Widget _buildStatColumn(String count, String label, IconData icon) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  count,
-                  style: GoogleFonts.tajawal(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Icon(
-                  icon,
-                  size: 16,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ],
-            ),
-            Text(
-              label,
-              style: GoogleFonts.tajawal(
-                fontSize: 12,
-                color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
-              ),
-            ),
-          ],
         ),
       ),
     );
