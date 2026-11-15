@@ -776,11 +776,11 @@ stateDiagram-v2
 
 ### Exit criteria
 
-- [ ] No workshop screen imports `supabase_flutter` or any service.
-- [ ] Directory, follow/unfollow, workshop profile, create workshop (with images) and all dashboard edits work. The owner's changes appear in the public directory immediately.
-- [ ] `WorkshopData` with `File` is gone (D4).
-- [ ] Dashboard and workshop profile are split into widgets of ~400 LOC or less.
-- [ ] Tests: workshop use cases, models, repositories, both providers.
+- [x] No workshop screen imports `supabase_flutter` or any service.
+- [ ] Directory, follow/unfollow, workshop profile, create workshop (with images) and all dashboard edits work. The owner's changes appear in the public directory immediately. *(Covered by unit tests across models, repositories, use cases, `WorkshopsProvider`, and `MyWorkshopProvider` sync/optimistic paths; live device smoke tests A7–A8 were not run.)*
+- [x] `WorkshopData` with `File` is gone (D4).
+- [x] Dashboard and workshop profile are split into widgets of ~400 LOC or less.
+- [x] Tests: workshop use cases, models, repositories, both providers.
 
 ---
 
@@ -1000,7 +1000,7 @@ Run on a device or emulator, in light **and** dark mode, Arabic RTL layout.
 | 2. Auth & session | `refactor/ca-p2-auth` | ✅ Completed | | | Implemented P2.1–P2.11 (`AuthProvider`, `CompleteSignUpUseCase`, reactive `AuthGate`, `SessionListener`, `Resettable` providers, migrated auth screens, single sign-out path, deleted legacy services); G1 checks, 49 unit tests, debug APK build, and Moto G 5G cold-start feed check passed (live OAuth/sign-up/multi-account sign-out not run without disposable accounts). |
 | 3. Profile & AppUser | `refactor/ca-p3-profile` | ✅ Completed | | | Implemented P3.1–P3.5 (`GetMyProfileUseCase`, `UpdateProfileUseCase`, deleted `UserModel`, `ProfileProvider`, migrated profile screens); G1 checks, 62 tests, debug APK build, and Moto G 5G (`ZN3222BNK7`) smoke checks (startup/Home, `ShamsDrawer` profile header, `EditProfileScreen` callback navigation + Supabase profile save SnackBar `'تم تحديث الملف الشخصي بنجاح'`, `UserProfileScreen`, `PrivacySecurityScreen`) passed; photo-picker upload and fresh Google account creation remain covered by unit tests without a disposable account. |
 | 4. Posts | `refactor/ca-p4-posts` | ✅ Completed | | | Implemented P4.1–P4.10 (`Post`/`Comment` domain + `PostRepositoryImpl` + 10 use cases + `FeedProvider` + `PostEditorProvider` + moved screens/widgets + deleted `PostService`/legacy models + fixed B1 `WorkshopProvider.deletePost` persistence); G1 checks (`0` errors, `14` baseline infos down from `16`), `91` passing tests, debug APK build, and Moto G 5G (`ZN3222BNK7`) smoke checks (Home feed, `PostDetailScreen`, `CommentsComponent` timestamps without `timeago` warnings, reversible like toggle `3 <-> 4`, `WorkshopDashboardScreen`, `CreatePostScreen` mount) passed; live comment/hide/create/edit/delete mutations remain unit-tested to avoid mutating production data. |
-| 5. Workshops | `refactor/ca-p5-workshops` | ⬜ Not started | | | |
+| 5. Workshops | `refactor/ca-p5-workshops` | ✅ Completed | | | Implemented P5.1–P5.7 (`Workshop`/`MyWorkshop`/`Review` domain + `WorkshopRepositoryImpl`/`ReviewRepositoryImpl` + 6 use cases + `WorkshopsProvider`/`MyWorkshopProvider` with cross-provider sync + migrated screens/widgets + split dashboard/profile widgets `<= 336 LOC` + deleted legacy models/services/provider/`storage_service.dart` shim); G1 checks (`0` errors, `4` baseline infos down from `14`), `138` passing tests, and `flutter build apk --debug` passed; live device smoke checks (A7, A8) were not run. |
 | 6. Chat & maintenance | `refactor/ca-p6-chat` | ⬜ Not started | | | |
 | 7. Notifications | `refactor/ca-p7-notifications` | ⬜ Not started | | | |
 | 8. Cleanup | `refactor/ca-p8-cleanup` | ⬜ Not started | | | |
