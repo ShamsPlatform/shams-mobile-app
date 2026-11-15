@@ -10,10 +10,6 @@ class FeedProvider extends ChangeNotifier implements Resettable {
 
   List<PostModel> get posts => _posts;
 
-  FeedProvider() {
-    fetchFeed();
-  }
-
   Future<void> fetchFeed() async {
     try {
       final user = Supabase.instance.client.auth.currentUser;

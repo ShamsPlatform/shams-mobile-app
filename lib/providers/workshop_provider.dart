@@ -18,10 +18,6 @@ import 'package:shams_mobile_app/services/post_service.dart';
 /// All mutations call [notifyListeners] so every context.watch() subscriber
 /// rebuilds automatically. No Consumer widgets needed.
 class WorkshopProvider extends ChangeNotifier implements Resettable {
-  WorkshopProvider() {
-    fetchPublicWorkshops();
-  }
-
   Future<void> fetchPublicWorkshops() async {
     try {
       final data = await WorkshopService.fetchPublicWorkshops();

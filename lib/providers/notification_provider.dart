@@ -12,10 +12,6 @@ class NotificationProvider extends ChangeNotifier implements Resettable {
 
   int get unreadCount => _notifications.where((n) => !n.isRead).length;
 
-  NotificationProvider() {
-    fetchNotifications();
-  }
-
   Future<void> fetchNotifications() async {
     try {
       final user = Supabase.instance.client.auth.currentUser;

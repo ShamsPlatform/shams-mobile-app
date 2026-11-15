@@ -1,10 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:shams_mobile_app/providers/chat_provider.dart';
-import 'package:shams_mobile_app/providers/feed_provider.dart';
-import 'package:shams_mobile_app/providers/notification_provider.dart';
-import 'package:shams_mobile_app/providers/user_provider.dart';
-import 'package:shams_mobile_app/providers/workshop_provider.dart';
 import 'package:shams_mobile_app/views/chat/chat_list_screen.dart';
 import 'package:shams_mobile_app/views/home.dart';
 import 'package:shams_mobile_app/views/user_profile/user_profile_screen.dart';
@@ -34,25 +28,6 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final userProvider = context.read<UserProvider>();
-      await userProvider.fetchUserData();
-      if (mounted) {
-        final currentUser = userProvider.currentUser;
-        // Fetch public workshops, notifications, chats, and feed for the authenticated user
-        context.read<WorkshopProvider>().fetchPublicWorkshops();
-        context.read<NotificationProvider>().fetchNotifications();
-        context.read<ChatProvider>().fetchChats();
-        context.read<FeedProvider>().fetchFeed();
-
-        if (currentUser.id.isNotEmpty && currentUser.hasWorkshop) {
-          final username = currentUser.username ?? 'owner';
-          await context
-              .read<WorkshopProvider>()
-              .fetchMyWorkshop(currentUser.id, username);
-        }
-      }
-    });
   }
 
   @override

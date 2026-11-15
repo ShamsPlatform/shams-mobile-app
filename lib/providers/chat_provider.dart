@@ -18,11 +18,6 @@ class ChatProvider extends ChangeNotifier implements Resettable {
   // جلب المحادثات المخزنة محلياً لقراءتها من خارج الكلاس بشكل آمن
   List<ChatModel> get chats => _chats;
 
-  // عند إنشاء كائن ChatProvider، يتم جلب المحادثات مباشرة
-  ChatProvider() {
-    fetchChats();
-  }
-
   /// دالة جلب المحادثات من قاعدة بيانات Supabase ومعالجتها
   Future<void> fetchChats() async {
     try {
