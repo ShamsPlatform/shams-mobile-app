@@ -12,6 +12,22 @@ import 'package:shams_mobile_app/features/auth/domain/usecases/sign_in_with_goog
 import 'package:shams_mobile_app/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:shams_mobile_app/features/auth/domain/usecases/watch_auth_state_usecase.dart';
 import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shams_mobile_app/features/chat/data/datasources/chat_remote_data_source.dart';
+import 'package:shams_mobile_app/features/chat/data/repositories/chat_repository_impl.dart';
+import 'package:shams_mobile_app/features/chat/domain/repositories/chat_repository.dart';
+import 'package:shams_mobile_app/features/chat/domain/usecases/delete_chats_usecase.dart';
+import 'package:shams_mobile_app/features/chat/domain/usecases/get_chat_by_id_usecase.dart';
+import 'package:shams_mobile_app/features/chat/domain/usecases/get_chats_usecase.dart';
+import 'package:shams_mobile_app/features/chat/domain/usecases/get_messages_usecase.dart';
+import 'package:shams_mobile_app/features/chat/domain/usecases/get_or_create_chat_usecase.dart';
+import 'package:shams_mobile_app/features/chat/domain/usecases/mark_chat_as_read_usecase.dart';
+import 'package:shams_mobile_app/features/chat/domain/usecases/send_message_usecase.dart';
+import 'package:shams_mobile_app/features/chat/domain/usecases/watch_chat_list_changes_usecase.dart';
+import 'package:shams_mobile_app/features/chat/domain/usecases/watch_new_messages_usecase.dart';
+import 'package:shams_mobile_app/features/maintenance/data/datasources/maintenance_remote_data_source.dart';
+import 'package:shams_mobile_app/features/maintenance/data/repositories/maintenance_repository_impl.dart';
+import 'package:shams_mobile_app/features/maintenance/domain/repositories/maintenance_repository.dart';
+import 'package:shams_mobile_app/features/maintenance/domain/usecases/submit_maintenance_request_usecase.dart';
 import 'package:shams_mobile_app/features/posts/data/datasources/post_remote_data_source.dart';
 import 'package:shams_mobile_app/features/posts/data/repositories/post_repository_impl.dart';
 import 'package:shams_mobile_app/features/posts/domain/repositories/post_repository.dart';
@@ -66,6 +82,8 @@ Future<void> initDependencies() async {
   _initProfile();
   _initPosts();
   _initWorkshops();
+  _initChat();
+  _initMaintenance();
 }
 
 void _initCore() {
@@ -181,4 +199,30 @@ void _initWorkshops() {
       deletePost: sl(),
     ),
   );
+}
+
+void _initChat() {
+  sl.registerLazySingleton<ChatRemoteDataSource>(
+    () => ChatRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<ChatRepository>(() => ChatRepositoryImpl(sl()));
+  sl.registerLazySingleton(() => GetChatsUseCase(sl()));
+  sl.registerLazySingleton(() => GetChatByIdUseCase(sl()));
+  sl.registerLazySingleton(() => GetMessagesUseCase(sl()));
+  sl.registerLazySingleton(() => GetOrCreateChatUseCase(sl()));
+  sl.registerLazySingleton(() => SendMessageUseCase(sl()));
+  sl.registerLazySingleton(() => MarkChatAsReadUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteChatsUseCase(sl()));
+  sl.registerLazySingleton(() => WatchNewMessagesUseCase(sl()));
+  sl.registerLazySingleton(() => WatchChatListChangesUseCase(sl()));
+}
+
+void _initMaintenance() {
+  sl.registerLazySingleton<MaintenanceRemoteDataSource>(
+    () => MaintenanceRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<MaintenanceRepository>(
+    () => MaintenanceRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton(() => SubmitMaintenanceRequestUseCase(sl(), sl()));
 }
