@@ -11,7 +11,7 @@ import 'package:shams_mobile_app/features/posts/presentation/providers/feed_prov
 import 'package:shams_mobile_app/features/workshops/domain/entities/workshop.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/constants/workshop_assets.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
-import 'package:shams_mobile_app/views/workshops/workshop_profile_screen.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/screens/workshop_profile_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PostDetailScreen — شاشة تفاصيل المنشور

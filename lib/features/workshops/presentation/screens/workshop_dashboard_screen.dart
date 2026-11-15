@@ -13,7 +13,7 @@ import 'package:shams_mobile_app/features/workshops/presentation/providers/my_wo
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/core/constants/app_constants.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import 'package:shams_mobile_app/widgets/managed_post_card.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/widgets/managed_post_card.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
 import 'package:shams_mobile_app/core/widgets/scrollable_image_picker.dart';
 import 'package:shams_mobile_app/features/posts/presentation/screens/create_post_screen.dart';

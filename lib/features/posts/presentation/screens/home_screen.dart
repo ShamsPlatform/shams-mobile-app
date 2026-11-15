@@ -16,7 +16,8 @@ import 'package:shams_mobile_app/features/profile/presentation/providers/profile
 import 'package:shams_mobile_app/features/profile/presentation/screens/about_shams_screen.dart';
 import 'package:shams_mobile_app/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:shams_mobile_app/views/notifications/notifications_screen.dart';
-import 'package:shams_mobile_app/views/workshops/workshop_profile_screen.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/screens/workshop_dashboard_screen.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/screens/workshop_profile_screen.dart';
 import 'package:shams_mobile_app/core/widgets/shams_drawer.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -54,6 +55,12 @@ class _HomeScreenState extends State<HomeScreen> {
           onAboutTap: () => Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AboutShamsScreen()),
+          ),
+          onWorkshopDashboardTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const WorkshopDashboardScreen(),
+            ),
           ),
           onSignOut: () => context.read<AuthProvider>().signOut(),
         ),

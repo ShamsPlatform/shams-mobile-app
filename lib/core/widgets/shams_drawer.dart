@@ -4,7 +4,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/app/main_screen.dart';
-import 'package:shams_mobile_app/views/workshops/workshop_dashboard_screen.dart';
 
 class ShamsDrawer extends StatelessWidget {
   final int activeIndex;
@@ -12,6 +11,7 @@ class ShamsDrawer extends StatelessWidget {
   final VoidCallback onEditProfileTap;
   final VoidCallback onAboutTap;
   final VoidCallback onSignOut;
+  final VoidCallback? onWorkshopDashboardTap;
 
   const ShamsDrawer({
     super.key,
@@ -20,6 +20,7 @@ class ShamsDrawer extends StatelessWidget {
     required this.onEditProfileTap,
     required this.onAboutTap,
     required this.onSignOut,
+    this.onWorkshopDashboardTap,
   });
 
   void _navigateTo(BuildContext context, int index) {
@@ -407,15 +408,9 @@ class ShamsDrawer extends StatelessWidget {
                       icon: Icons.dashboard_customize_rounded,
                       title: 'لوحة تحكم الورشة',
                       isSelected: false,
-                      onTap: () async {
+                      onTap: () {
                         Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const WorkshopDashboardScreen(),
-                          ),
-                        );
+                        onWorkshopDashboardTap?.call();
                       },
                     ),
                   ],
