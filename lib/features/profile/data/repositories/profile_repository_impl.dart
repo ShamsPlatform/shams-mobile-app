@@ -1,6 +1,9 @@
+import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/core/error/error_mapper.dart';
 import 'package:shams_mobile_app/core/result/result.dart';
 import 'package:shams_mobile_app/features/profile/data/datasources/profile_remote_data_source.dart';
+import 'package:shams_mobile_app/features/profile/domain/entities/default_profile.dart';
+import 'package:shams_mobile_app/features/profile/domain/entities/profile_update.dart';
 import 'package:shams_mobile_app/features/profile/domain/entities/profile_upsert.dart';
 import 'package:shams_mobile_app/features/profile/domain/repositories/profile_repository.dart';
 
@@ -25,5 +28,20 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<Result<void>> upsertProfile(ProfileUpsert data) {
     return guard(() => _remote.upsertProfile(data));
+  }
+
+  @override
+  Future<Result<AppUser?>> getProfile(String userId) {
+    return guard(() => _remote.getProfile(userId));
+  }
+
+  @override
+  Future<Result<void>> createDefaultProfile(DefaultProfile data) {
+    return guard(() => _remote.createDefaultProfile(data));
+  }
+
+  @override
+  Future<Result<void>> updateProfile(String userId, ProfileUpdate data) {
+    return guard(() => _remote.updateProfile(userId, data));
   }
 }

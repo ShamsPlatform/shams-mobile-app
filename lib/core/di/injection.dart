@@ -15,6 +15,8 @@ import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provi
 import 'package:shams_mobile_app/features/profile/data/datasources/profile_remote_data_source.dart';
 import 'package:shams_mobile_app/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:shams_mobile_app/features/profile/domain/repositories/profile_repository.dart';
+import 'package:shams_mobile_app/features/profile/domain/usecases/get_my_profile_usecase.dart';
+import 'package:shams_mobile_app/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -75,4 +77,6 @@ void _initProfile() {
   sl.registerLazySingleton<ProfileRepository>(
     () => ProfileRepositoryImpl(sl()),
   );
+  sl.registerLazySingleton(() => GetMyProfileUseCase(sl(), sl()));
+  sl.registerLazySingleton(() => UpdateProfileUseCase(sl(), sl()));
 }
