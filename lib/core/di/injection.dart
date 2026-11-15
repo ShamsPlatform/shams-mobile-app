@@ -24,10 +24,13 @@ import 'package:shams_mobile_app/features/chat/domain/usecases/mark_chat_as_read
 import 'package:shams_mobile_app/features/chat/domain/usecases/send_message_usecase.dart';
 import 'package:shams_mobile_app/features/chat/domain/usecases/watch_chat_list_changes_usecase.dart';
 import 'package:shams_mobile_app/features/chat/domain/usecases/watch_new_messages_usecase.dart';
+import 'package:shams_mobile_app/features/chat/presentation/providers/chat_list_provider.dart';
+import 'package:shams_mobile_app/features/chat/presentation/providers/conversation_provider.dart';
 import 'package:shams_mobile_app/features/maintenance/data/datasources/maintenance_remote_data_source.dart';
 import 'package:shams_mobile_app/features/maintenance/data/repositories/maintenance_repository_impl.dart';
 import 'package:shams_mobile_app/features/maintenance/domain/repositories/maintenance_repository.dart';
 import 'package:shams_mobile_app/features/maintenance/domain/usecases/submit_maintenance_request_usecase.dart';
+import 'package:shams_mobile_app/features/maintenance/presentation/providers/maintenance_request_provider.dart';
 import 'package:shams_mobile_app/features/posts/data/datasources/post_remote_data_source.dart';
 import 'package:shams_mobile_app/features/posts/data/repositories/post_repository_impl.dart';
 import 'package:shams_mobile_app/features/posts/domain/repositories/post_repository.dart';
@@ -215,6 +218,24 @@ void _initChat() {
   sl.registerLazySingleton(() => DeleteChatsUseCase(sl()));
   sl.registerLazySingleton(() => WatchNewMessagesUseCase(sl()));
   sl.registerLazySingleton(() => WatchChatListChangesUseCase(sl()));
+  sl.registerFactory(
+    () => ChatListProvider(
+      getChats: sl(),
+      markChatAsRead: sl(),
+      getOrCreateChat: sl(),
+      deleteChats: sl(),
+      watchChatListChanges: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => ConversationProvider(
+      getChatById: sl(),
+      getMessages: sl(),
+      sendMessage: sl(),
+      markChatAsRead: sl(),
+      watchNewMessages: sl(),
+    ),
+  );
 }
 
 void _initMaintenance() {
@@ -225,4 +246,7 @@ void _initMaintenance() {
     () => MaintenanceRepositoryImpl(sl()),
   );
   sl.registerLazySingleton(() => SubmitMaintenanceRequestUseCase(sl(), sl()));
+  sl.registerFactory(
+    () => MaintenanceRequestProvider(submitMaintenanceRequest: sl()),
+  );
 }

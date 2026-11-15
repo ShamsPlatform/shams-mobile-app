@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shams_mobile_app/core/presentation/view_status.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
+import 'package:shams_mobile_app/features/chat/domain/entities/chat.dart';
+import 'package:shams_mobile_app/features/chat/presentation/providers/chat_list_provider.dart';
 import 'package:shams_mobile_app/widgets/chat_tile.dart';
 import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
-import 'package:shams_mobile_app/views/chat/chat_conversation_screen.dart'; // مسار شاشة الدردشة
+import 'package:shams_mobile_app/views/chat/chat_conversation_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:shams_mobile_app/providers/chat_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/constants/workshop_assets.dart';
@@ -39,9 +41,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
     });
   }
 
-  void _selectAll(List<dynamic> visibleChats) {
+  void _selectAll(List<Chat> visibleChats) {
     setState(() {
-      final visibleIds = visibleChats.map((c) => c.chatId as String).toList();
+      final visibleIds = visibleChats.map((c) => c.chatId).toList();
       final allSelected = visibleIds.isNotEmpty && visibleIds.every((id) => _selectedChatIds.contains(id));
       if (allSelected) {
         for (final id in visibleIds) {
@@ -53,7 +55,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
     });
   }
 
-  Widget _buildSelectionBar(List<dynamic> visibleChats) {
+  Widget _buildSelectionBar(List<Chat> visibleChats) {
     final allSelected = visibleChats.isNotEmpty && visibleChats.every((c) => _selectedChatIds.contains(c.chatId));
 
     return Container(
@@ -148,10 +150,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final chatProvider = context.watch<ChatProvider>();
+    final chatListProvider = context.watch<ChatListProvider>();
     final currentUser = context.watch<ProfileProvider>().currentUserOrPlaceholder;
     final workshopsProvider = context.watch<WorkshopsProvider>();
-    final allChats = chatProvider.chats;
+    final allChats = chatListProvider.chats;
 
     final filteredChats = _searchQuery.isEmpty 
         ? allChats 
@@ -206,7 +208,45 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 ),
               ),
             Expanded(
-              child: filteredChats.isEmpty
+              child: chatListProvider.status == ViewStatus.loading &&
+                      allChats.isEmpty
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    )
+                  : chatListProvider.status == ViewStatus.failure &&
+                          allChats.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                chatListProvider.errorMessage ??
+                                    'تعذر تحميل المحادثات',
+                                style: GoogleFonts.tajawal(
+                                  color: Theme.of(context)
+                                      .extension<ShamsExtendedColors>()!
+                                      .textHint,
+                                  fontSize: 15,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 12),
+                              TextButton(
+                                onPressed: () =>
+                                    context.read<ChatListProvider>().load(),
+                                child: Text(
+                                  'إعادة المحاولة',
+                                  style: GoogleFonts.tajawal(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : filteredChats.isEmpty
                   ? Center(
                       child: _searchQuery.isEmpty
                           ? Column(
@@ -290,7 +330,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                             if (_selectedChatIds.isNotEmpty) {
                               _toggleSelection(chat.chatId);
                             } else {
-                              final chatProvider = context.read<ChatProvider>();
+                              final chatList = context.read<ChatListProvider>();
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -299,7 +339,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                   ),
                                 ),
                               ).then((_) {
-                                chatProvider.markAsRead(chat.chatId);
+                                chatList.markAsRead(chat.chatId);
                               });
                             }
                           },
@@ -372,41 +412,42 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     ),
                 );
 
-                try {
-                  await context.read<ChatProvider>().deleteMultipleChats(chatIds);
-                  _clearSelection();
-                  
-                  // Hide loading indicator
-                  if (context.mounted) Navigator.pop(context);
+                final chatList = context.read<ChatListProvider>();
+                final navigator = Navigator.of(context);
+                final messenger = ScaffoldMessenger.of(context);
+                final errorColor = Theme.of(context).colorScheme.error;
 
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          count == 1 ? 'تم حذف المحادثة بنجاح' : 'تم حذف المحادثات بنجاح',
-                          style: GoogleFonts.tajawal(),
-                        ),
-                        backgroundColor: Theme.of(context).colorScheme.error,
-                        behavior: SnackBarBehavior.floating,
+                final deleted = await chatList.deleteMultipleChats(chatIds);
+
+                // Hide loading indicator
+                navigator.pop();
+
+                if (!context.mounted) return;
+                if (deleted) {
+                  _clearSelection();
+                  messenger.showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        count == 1
+                            ? 'تم حذف المحادثة بنجاح'
+                            : 'تم حذف المحادثات بنجاح',
+                        style: GoogleFonts.tajawal(),
                       ),
-                    );
-                  }
-                } catch (e) {
-                  // Hide loading indicator
-                  if (context.mounted) Navigator.pop(context);
-                  
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'حدث خطأ أثناء الحذف: $e',
-                          style: GoogleFonts.tajawal(),
-                        ),
-                        backgroundColor: Theme.of(context).colorScheme.error,
-                        behavior: SnackBarBehavior.floating,
+                      backgroundColor: errorColor,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                } else {
+                  messenger.showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        chatList.errorMessage ?? 'حدث خطأ أثناء الحذف',
+                        style: GoogleFonts.tajawal(),
                       ),
-                    );
-                  }
+                      backgroundColor: errorColor,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
                 }
               },
               style: ElevatedButton.styleFrom(

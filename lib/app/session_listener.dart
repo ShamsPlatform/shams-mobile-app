@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/app/navigation.dart';
 import 'package:shams_mobile_app/core/presentation/resettable.dart';
 import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
-import 'package:shams_mobile_app/providers/chat_provider.dart';
+import 'package:shams_mobile_app/features/chat/presentation/providers/chat_list_provider.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/providers/notification_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
@@ -57,7 +57,7 @@ class _SessionListenerState extends State<SessionListener> {
         final currentUser = profileProvider.currentUserOrPlaceholder;
         context.read<WorkshopsProvider>().load();
         context.read<NotificationProvider>().fetchNotifications();
-        context.read<ChatProvider>().fetchChats();
+        context.read<ChatListProvider>().load();
         context.read<FeedProvider>().load();
 
         if (currentUser.id.isNotEmpty && currentUser.hasWorkshop) {
@@ -74,7 +74,7 @@ class _SessionListenerState extends State<SessionListener> {
           context.read<MyWorkshopProvider>(),
           context.read<WorkshopsProvider>(),
           context.read<FeedProvider>(),
-          context.read<ChatProvider>(),
+          context.read<ChatListProvider>(),
           context.read<NotificationProvider>(),
         ];
         for (final provider in resettables) {

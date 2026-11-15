@@ -1,61 +1,62 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shams_mobile_app/models/chat_model.dart';
+import 'package:shams_mobile_app/core/di/injection.dart';
+import 'package:shams_mobile_app/core/presentation/view_status.dart';
+import 'package:shams_mobile_app/features/chat/domain/entities/chat.dart';
+import 'package:shams_mobile_app/features/chat/presentation/providers/chat_list_provider.dart';
+import 'package:shams_mobile_app/features/chat/presentation/providers/conversation_provider.dart';
 import 'package:shams_mobile_app/widgets/message_bubble.dart';
 import 'package:shams_mobile_app/widgets/chat_input_field.dart';
 import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:provider/provider.dart';
-import 'package:shams_mobile_app/providers/chat_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
 import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
-import 'package:shams_mobile_app/models/message_model.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:shams_mobile_app/services/chat_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ChatConversationScreen — شاشة المحادثة الفردية
 //
-// • context.watch<T>() for reactive reads.
-// • context.read<T>() strictly inside callbacks.
+// • Scopes [ConversationProvider] per screen and closes its realtime channel on exit.
 // • Date dividers are inserted automatically between messages on different days.
 // ─────────────────────────────────────────────────────────────────────────────
 
-class ChatConversationScreen extends StatefulWidget {
+class ChatConversationScreen extends StatelessWidget {
   final String chatId;
 
   const ChatConversationScreen({super.key, required this.chatId});
 
   @override
-  State<ChatConversationScreen> createState() => _ChatConversationScreenState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<ConversationProvider>(
+      create: (ctx) {
+        final chatList = ctx.read<ChatListProvider>();
+        return sl<ConversationProvider>()
+          ..setSyncCallbacks(
+            onMessageSent: chatList.applySentMessage,
+            onCleared: chatList.clearChat,
+          )
+          ..open(chatId, initialChat: chatList.getChatById(chatId));
+      },
+      child: _ChatConversationView(chatId: chatId),
+    );
+  }
 }
 
-class _ChatConversationScreenState extends State<ChatConversationScreen> {
+class _ChatConversationView extends StatefulWidget {
+  final String chatId;
+
+  const _ChatConversationView({required this.chatId});
+
+  @override
+  State<_ChatConversationView> createState() => _ChatConversationViewState();
+}
+
+class _ChatConversationViewState extends State<_ChatConversationView> {
   bool _isSearching = false;
   String _searchQuery = '';
   bool _isMuted = false;
-  RealtimeChannel? _messageSubscription;
-
-  @override
-  void initState() {
-    super.initState();
-    _messageSubscription = ChatService.subscribeToMessages(
-      chatId: widget.chatId,
-      onNewMessage: (payload) {
-        if (mounted) {
-          context.read<ChatProvider>().fetchChats();
-        }
-      },
-    );
-  }
-
-  @override
-  void dispose() {
-    _messageSubscription?.unsubscribe();
-    super.dispose();
-  }
 
   Widget _buildChatAvatar(String? path, String name) {
     if (path == null || path.isEmpty) {
@@ -104,17 +105,30 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
     );
   }
 
-  void _addNewMessage(String text) {
+  Future<void> _addNewMessage(String text) async {
     if (text.trim().isEmpty) return;
-    final currentUser = context.read<ProfileProvider>().currentUserOrPlaceholder;
-    final newMsg = MessageModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+    final currentUser =
+        context.read<ProfileProvider>().currentUserOrPlaceholder;
+    final conversation = context.read<ConversationProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final errorColor = Theme.of(context).colorScheme.error;
+
+    final sent = await conversation.sendMessage(
       senderId: currentUser.id,
       text: text,
-      timestamp: DateTime.now(),
-      isRead: false,
     );
-    context.read<ChatProvider>().sendMessage(widget.chatId, newMsg);
+    if (!sent && mounted) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            conversation.errorMessage ?? 'تعذر إرسال الرسالة',
+            style: GoogleFonts.tajawal(),
+          ),
+          backgroundColor: errorColor,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   /// Returns a human-readable date label for a given [date].
@@ -141,17 +155,16 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final chatProvider = context.watch<ChatProvider>();
+    final conversation = context.watch<ConversationProvider>();
     final currentUser = context.watch<ProfileProvider>().currentUserOrPlaceholder;
-    final chat = chatProvider.chats.firstWhere(
-      (c) => c.chatId == widget.chatId,
-      orElse: () => ChatModel(
-        chatId: widget.chatId,
-        participants: const [],
-        messages: const [],
-        lastMessageTime: DateTime.now(),
-      ),
-    );
+    final chat = conversation.chat ??
+        context.watch<ChatListProvider>().getChatById(widget.chatId) ??
+        Chat(
+          chatId: widget.chatId,
+          participants: const [],
+          messages: const [],
+          lastMessageTime: DateTime.now(),
+        );
     final otherParticipant = chat.participants.isEmpty
         ? const AppUser(id: '', name: 'محادثة', email: '')
         : chat.participants.firstWhere(
@@ -307,7 +320,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
             Expanded(
               child: Builder(
                 builder: (context) {
-                  final allMessages = chat.messages;
+                  final allMessages = conversation.messages;
                   final filteredMessages = _searchQuery.isEmpty
                       ? allMessages
                       : allMessages.where((msg) {
@@ -315,6 +328,15 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                               .toLowerCase()
                               .contains(_searchQuery.toLowerCase());
                         }).toList();
+
+                  if (conversation.status == ViewStatus.loading &&
+                      allMessages.isEmpty) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    );
+                  }
 
                   // ── Empty chat state ──────────────────────────────────────
                   if (allMessages.isEmpty && _searchQuery.isEmpty) {
@@ -419,8 +441,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
             TextButton(
               onPressed: () {
                 Navigator.pop(ctx);
-                // context.read() inside a callback — correct usage.
-                context.read<ChatProvider>().clearChat(widget.chatId);
+                context.read<ConversationProvider>().clearMessages();
               },
               child: Text(
                 'مسح',

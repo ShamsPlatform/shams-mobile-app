@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shams_mobile_app/core/di/injection.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
+import 'package:shams_mobile_app/features/maintenance/presentation/providers/maintenance_request_provider.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/widgets/profile/maintenance_request_sheet.dart';
@@ -16,7 +18,7 @@ import 'package:shams_mobile_app/features/workshops/presentation/widgets/profile
 //
 // • Accepts [workshopId] in its constructor.
 // • Watches [WorkshopsProvider] for live updates to the workshop details and follow status.
-// • Dynamically connects to ChatProvider via maintenance request sheet.
+// • Connects to MaintenanceRequestProvider via maintenance request sheet.
 // ─────────────────────────────────────────────────────────────────────────────
 
 class WorkshopProfile extends StatefulWidget {
@@ -89,9 +91,12 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
     final workshopPosts =
         feedPosts.where((post) => post.workshopId == workshop.id).toList();
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+    return ChangeNotifierProvider(
+      create: (_) => sl<MaintenanceRequestProvider>(),
+      child: Builder(
+        builder: (context) => Directionality(
+          textDirection: TextDirection.rtl,
+          child: Scaffold(
         backgroundColor: Theme.of(context)
             .extension<ShamsExtendedColors>()!
             .backgroundLight,
@@ -186,6 +191,8 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
               const SizedBox(height: 120),
             ],
           ),
+        ),
+      ),
         ),
       ),
     );

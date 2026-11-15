@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/core/di/injection.dart';
 import 'package:shams_mobile_app/core/theme/theme_provider.dart';
 import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
-import 'package:shams_mobile_app/providers/chat_provider.dart';
+import 'package:shams_mobile_app/features/chat/presentation/providers/chat_list_provider.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/providers/notification_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
@@ -40,7 +40,7 @@ class AppProviders extends StatelessWidget {
         ),
         ChangeNotifierProvider(create: (_) => sl<ProfileProvider>()),
         ChangeNotifierProvider(create: (_) => sl<FeedProvider>()),
-        ChangeNotifierProvider(create: (_) => ChatProvider()),
+        ChangeNotifierProvider(create: (_) => sl<ChatListProvider>()),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
       child: child,

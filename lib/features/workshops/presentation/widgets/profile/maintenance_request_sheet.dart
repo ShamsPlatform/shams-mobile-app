@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/core/constants/app_constants.dart';
-import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
-import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
+import 'package:shams_mobile_app/features/chat/presentation/providers/chat_list_provider.dart';
+import 'package:shams_mobile_app/features/maintenance/domain/usecases/submit_maintenance_request_usecase.dart';
+import 'package:shams_mobile_app/features/maintenance/presentation/providers/maintenance_request_provider.dart';
 import 'package:shams_mobile_app/features/workshops/domain/entities/workshop.dart';
-import 'package:shams_mobile_app/providers/chat_provider.dart';
 import 'package:shams_mobile_app/views/chat/chat_conversation_screen.dart';
 
 /// Opens the modal bottom sheet for submitting a maintenance request to [workshop].
@@ -127,65 +127,45 @@ class _MaintenanceRequestSheetContentState
     final capacityVal = double.tryParse(_capacityController.text.trim());
     final problemDesc = _descController.text.trim();
 
-    final workshopData = AppUser(
-      id: workshop.ownerId,
-      name: workshop.name,
-      email: '${workshop.handle.replaceFirst('@', '')}@shams.com',
-      profileImageUrl: workshop.logoUrl,
+    final maintenanceProvider =
+        parentContext.read<MaintenanceRequestProvider>();
+    final chatListProvider = parentContext.read<ChatListProvider>();
+
+    final generatedChatId = await maintenanceProvider.submit(
+      SubmitMaintenanceRequestParams(
+        workshopId: workshop.id,
+        workshopOwnerId: workshop.ownerId,
+        serviceType: _selectedService!,
+        problemDescription: problemDesc,
+        systemCapacityKw: capacityVal,
+        inverterBrand: _selectedInverter,
+        batteryType: _selectedBattery,
+      ),
     );
 
-    final currentUser =
-        parentContext.read<ProfileProvider>().currentUserOrPlaceholder;
-    String generatedChatId = '';
-    try {
-      generatedChatId = await parentContext
-          .read<ChatProvider>()
-          .createMaintenanceChat(
-            currentUser: currentUser,
-            workshopId: workshop.id,
-            targetWorkshop: workshopData,
-            serviceType: _selectedService!,
-            problemDescription: problemDesc,
-            systemCapacityKw: capacityVal,
-            inverterBrand: _selectedInverter,
-            batteryType: _selectedBattery,
-          );
-    } catch (e) {
-      if (parentContext.mounted) {
-        ScaffoldMessenger.of(parentContext).showSnackBar(
-          SnackBar(
-            content: Text(
-              'فشل في إرسال الطلب: $e',
-              style: GoogleFonts.tajawal(color: Colors.white),
-            ),
-            backgroundColor: Theme.of(parentContext).colorScheme.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-      return;
-    }
+    if (!parentContext.mounted) return;
 
-    if (parentContext.mounted) {
-      if (generatedChatId.isNotEmpty) {
-        Navigator.push(
-          parentContext,
-          MaterialPageRoute(
-            builder: (_) => ChatConversationScreen(chatId: generatedChatId),
+    if (generatedChatId != null && generatedChatId.isNotEmpty) {
+      await chatListProvider.load(silent: true);
+      if (!parentContext.mounted) return;
+      Navigator.push(
+        parentContext,
+        MaterialPageRoute(
+          builder: (_) => ChatConversationScreen(chatId: generatedChatId),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(parentContext).showSnackBar(
+        SnackBar(
+          content: Text(
+            maintenanceProvider.errorMessage ??
+                'فشل في إرسال الطلب، يرجى المحاولة لاحقاً',
+            style: GoogleFonts.tajawal(color: Colors.white),
           ),
-        );
-      } else {
-        ScaffoldMessenger.of(parentContext).showSnackBar(
-          SnackBar(
-            content: Text(
-              'فشل في إرسال الطلب، يرجى المحاولة لاحقاً',
-              style: GoogleFonts.tajawal(color: Colors.white),
-            ),
-            backgroundColor: Theme.of(parentContext).colorScheme.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+          backgroundColor: Theme.of(parentContext).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
