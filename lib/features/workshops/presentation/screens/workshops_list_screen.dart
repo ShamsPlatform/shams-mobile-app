@@ -37,15 +37,39 @@ class WorkshopsListScreen extends StatefulWidget {
 
 class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final ScrollController _scrollController = ScrollController();
   // Local UI state — search query and selected city filters.
   List<String> _selectedCities = [];
   final List<String> _selectedServices = [];
   String _searchQuery = '';
 
   @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - 250) {
+      context.read<WorkshopsProvider>().loadMore();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     // ── Single source of truth: watch provider for live updates ──────────────
-    final workshops = context.watch<WorkshopsProvider>().workshops;
+    final workshopsProvider = context.watch<WorkshopsProvider>();
+    final workshops = workshopsProvider.workshops;
 
     // ── Smart filter: apply city + search query ───────────────────────────────
     final filteredWorkshops = workshops.where((workshop) {
@@ -192,22 +216,51 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
 
             // ── قائمة الورش ────────────────────────────────────────────────
             Expanded(
-              child: filteredWorkshops.isEmpty
-                  ? Center(
-                      child: Text(
-                        'لا توجد ورش في المحافظات المحددة.',
-                        style: GoogleFonts.tajawal(
-                          fontSize: 16,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.only(top: 8, bottom: 20),
-                      itemCount: filteredWorkshops.length,
-                      itemBuilder: (context, index) {
-                        final workshop = filteredWorkshops[index];
-                        return WorkshopCard(
+              child: RefreshIndicator(
+                onRefresh: () => context.read<WorkshopsProvider>().load(),
+                child: workshopsProvider.isLoading && workshops.isEmpty
+                    ? ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: const [
+                          SizedBox(height: 160),
+                          Center(child: CircularProgressIndicator()),
+                        ],
+                      )
+                    : filteredWorkshops.isEmpty
+                        ? ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: [
+                              const SizedBox(height: 160),
+                              Center(
+                                child: Text(
+                                  'لا توجد ورش في المحافظات المحددة.',
+                                  style: GoogleFonts.tajawal(
+                                    fontSize: 16,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : ListView.builder(
+                            controller: _scrollController,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.only(top: 8, bottom: 20),
+                            itemCount: filteredWorkshops.length +
+                                (workshopsProvider.isLoadingMore ? 1 : 0),
+                            itemBuilder: (context, index) {
+                              if (index >= filteredWorkshops.length) {
+                                return const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 16),
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              }
+                              final workshop = filteredWorkshops[index];
+                              return WorkshopCard(
                           username: workshop.name,
                           userHandle: workshop.handle,
                           imagePath: workshop.logoUrl ?? kDefaultWorkshopLogoAsset,
@@ -247,6 +300,7 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
                         );
                       },
                     ),
+              ),
             ),
           ],
         ),

@@ -230,7 +230,7 @@ void main() {
     });
   });
 
-  group('reset', () {
+  group('reset and pagination', () {
     test('clears workshops, synced state, status, and errorMessage', () async {
       when(
         () => getPublicWorkshops(any()),
@@ -241,7 +241,71 @@ void main() {
 
       expect(provider.workshops, isEmpty);
       expect(provider.status, ViewStatus.initial);
+      expect(provider.hasMore, isTrue);
+      expect(provider.isLoadingMore, isFalse);
       expect(provider.errorMessage, isNull);
+    });
+
+    test('loadMore appends unique pages and stops on short page', () async {
+      final paged = WorkshopsProvider(
+        getPublicWorkshops: getPublicWorkshops,
+        toggleFollow: toggleFollow,
+        pageSize: 1,
+      );
+
+      when(
+        () => getPublicWorkshops(
+          any(
+            that: predicate<GetPublicWorkshopsParams>(
+              (p) => p.limit == 1 && p.offset == 0,
+            ),
+          ),
+        ),
+      ).thenAnswer((_) async => const Ok([workshop1]));
+      when(
+        () => getPublicWorkshops(
+          any(
+            that: predicate<GetPublicWorkshopsParams>(
+              (p) => p.limit == 1 && p.offset == 1,
+            ),
+          ),
+        ),
+      ).thenAnswer((_) async => const Ok([workshop1, workshop2]));
+      when(
+        () => getPublicWorkshops(
+          any(
+            that: predicate<GetPublicWorkshopsParams>(
+              (p) => p.limit == 1 && p.offset == 3,
+            ),
+          ),
+        ),
+      ).thenAnswer((_) async => const Err(ServerFailure('page fail')));
+
+      await paged.load();
+      expect(paged.hasMore, isTrue);
+
+      await paged.loadMore();
+      expect(paged.workshops.map((w) => w.id), ['w1', 'w2']);
+
+      await paged.loadMore();
+      expect(paged.errorMessage, 'page fail');
+      expect(paged.workshops.map((w) => w.id), ['w1', 'w2']);
+
+      when(
+        () => getPublicWorkshops(
+          any(
+            that: predicate<GetPublicWorkshopsParams>(
+              (p) => p.limit == 1 && p.offset == 3,
+            ),
+          ),
+        ),
+      ).thenAnswer((_) async => const Ok([]));
+
+      await paged.loadMore();
+      expect(paged.hasMore, isFalse);
+
+      await paged.loadMore();
+      verify(() => getPublicWorkshops(any())).called(4);
     });
   });
 }

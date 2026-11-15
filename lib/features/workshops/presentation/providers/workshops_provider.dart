@@ -10,14 +10,19 @@ import 'package:shams_mobile_app/features/workshops/domain/usecases/toggle_follo
 
 /// State manager for the public workshops directory and follow actions.
 class WorkshopsProvider extends ChangeNotifier implements Resettable {
+  static const int defaultPageSize = 20;
+
   WorkshopsProvider({
     required GetPublicWorkshopsUseCase getPublicWorkshops,
     required ToggleFollowUseCase toggleFollow,
+    int pageSize = defaultPageSize,
   })  : _getPublicWorkshops = getPublicWorkshops,
-        _toggleFollow = toggleFollow;
+        _toggleFollow = toggleFollow,
+        _pageSize = pageSize;
 
   final GetPublicWorkshopsUseCase _getPublicWorkshops;
   final ToggleFollowUseCase _toggleFollow;
+  final int _pageSize;
 
   final List<Workshop> _workshops = [];
   MyWorkshop? _syncedMyWorkshop;
@@ -26,30 +31,74 @@ class WorkshopsProvider extends ChangeNotifier implements Resettable {
   String? _syncedPendingCoverPath;
 
   ViewStatus _status = ViewStatus.initial;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+  int _nextOffset = 0;
   String? _errorMessage;
 
   List<Workshop> get workshops => List.unmodifiable(_workshops);
   ViewStatus get status => _status;
   bool get isLoading => _status == ViewStatus.loading;
+  bool get hasMore => _hasMore;
+  bool get isLoadingMore => _isLoadingMore;
   String? get errorMessage => _errorMessage;
 
   Future<void> load() async {
     _status = ViewStatus.loading;
     _errorMessage = null;
+    _hasMore = true;
+    _isLoadingMore = false;
+    _nextOffset = 0;
     notifyListeners();
 
-    final result = await _getPublicWorkshops(const GetPublicWorkshopsParams());
+    final result = await _getPublicWorkshops(
+      GetPublicWorkshopsParams(limit: _pageSize, offset: 0),
+    );
     switch (result) {
       case Ok(:final data):
         _workshops
           ..clear()
           ..addAll(data);
+        _nextOffset = data.length;
+        _hasMore = data.length >= _pageSize;
         if (_syncedMyWorkshop != null) {
           _applySyncedWorkshopToList();
         }
         _status = ViewStatus.success;
       case Err(:final failure):
         _status = ViewStatus.failure;
+        _errorMessage = failure.message;
+    }
+    notifyListeners();
+  }
+
+  /// Appends the next directory page when more workshops remain on the server.
+  Future<void> loadMore() async {
+    if (_isLoadingMore || !_hasMore || _status == ViewStatus.loading) return;
+
+    _isLoadingMore = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    final result = await _getPublicWorkshops(
+      GetPublicWorkshopsParams(limit: _pageSize, offset: _nextOffset),
+    );
+    switch (result) {
+      case Ok(:final data):
+        final existingIds = _workshops.map((w) => w.id).toSet();
+        for (final workshop in data) {
+          if (existingIds.add(workshop.id)) {
+            _workshops.add(workshop);
+          }
+        }
+        _nextOffset += data.length;
+        _hasMore = data.length >= _pageSize;
+        if (_syncedMyWorkshop != null) {
+          _applySyncedWorkshopToList();
+        }
+        _isLoadingMore = false;
+      case Err(:final failure):
+        _isLoadingMore = false;
         _errorMessage = failure.message;
     }
     notifyListeners();
@@ -171,6 +220,9 @@ class WorkshopsProvider extends ChangeNotifier implements Resettable {
     _syncedPendingLogoPath = null;
     _syncedPendingCoverPath = null;
     _status = ViewStatus.initial;
+    _hasMore = true;
+    _isLoadingMore = false;
+    _nextOffset = 0;
     _errorMessage = null;
     notifyListeners();
   }

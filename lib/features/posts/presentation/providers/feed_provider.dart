@@ -13,6 +13,8 @@ import 'package:shams_mobile_app/features/posts/domain/usecases/toggle_post_like
 
 /// State manager for the home posts feed, likes, comments, and post hiding.
 class FeedProvider extends ChangeNotifier implements Resettable {
+  static const int defaultPageSize = 20;
+
   FeedProvider({
     required GetFeedUseCase getFeed,
     required TogglePostLikeUseCase toggleLike,
@@ -20,12 +22,14 @@ class FeedProvider extends ChangeNotifier implements Resettable {
     required DeleteCommentUseCase deleteComment,
     required ToggleCommentLikeUseCase toggleCommentLike,
     required HidePostUseCase hidePost,
+    int pageSize = defaultPageSize,
   })  : _getFeed = getFeed,
         _toggleLike = toggleLike,
         _addComment = addComment,
         _deleteComment = deleteComment,
         _toggleCommentLike = toggleCommentLike,
-        _hidePost = hidePost;
+        _hidePost = hidePost,
+        _pageSize = pageSize;
 
   final GetFeedUseCase _getFeed;
   final TogglePostLikeUseCase _toggleLike;
@@ -33,30 +37,70 @@ class FeedProvider extends ChangeNotifier implements Resettable {
   final DeleteCommentUseCase _deleteComment;
   final ToggleCommentLikeUseCase _toggleCommentLike;
   final HidePostUseCase _hidePost;
+  final int _pageSize;
 
   final List<Post> _posts = [];
   ViewStatus _status = ViewStatus.initial;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+  int _nextOffset = 0;
   String? _errorMessage;
 
   List<Post> get posts => List.unmodifiable(_posts);
   ViewStatus get status => _status;
   bool get isLoading => _status == ViewStatus.loading;
+  bool get hasMore => _hasMore;
+  bool get isLoadingMore => _isLoadingMore;
   String? get errorMessage => _errorMessage;
 
   Future<void> load() async {
     _status = ViewStatus.loading;
     _errorMessage = null;
+    _hasMore = true;
+    _isLoadingMore = false;
+    _nextOffset = 0;
     notifyListeners();
 
-    final result = await _getFeed(const GetFeedParams());
+    final result = await _getFeed(GetFeedParams(limit: _pageSize, offset: 0));
     switch (result) {
       case Ok(:final data):
         _posts
           ..clear()
           ..addAll(data);
+        _nextOffset = data.length;
+        _hasMore = data.length >= _pageSize;
         _status = ViewStatus.success;
       case Err(:final failure):
         _status = ViewStatus.failure;
+        _errorMessage = failure.message;
+    }
+    notifyListeners();
+  }
+
+  /// Appends the next page of posts when more items remain on the server.
+  Future<void> loadMore() async {
+    if (_isLoadingMore || !_hasMore || _status == ViewStatus.loading) return;
+
+    _isLoadingMore = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    final result = await _getFeed(
+      GetFeedParams(limit: _pageSize, offset: _nextOffset),
+    );
+    switch (result) {
+      case Ok(:final data):
+        final existingIds = _posts.map((p) => p.id).toSet();
+        for (final post in data) {
+          if (existingIds.add(post.id)) {
+            _posts.add(post);
+          }
+        }
+        _nextOffset += data.length;
+        _hasMore = data.length >= _pageSize;
+        _isLoadingMore = false;
+      case Err(:final failure):
+        _isLoadingMore = false;
         _errorMessage = failure.message;
     }
     notifyListeners();
@@ -176,6 +220,7 @@ class FeedProvider extends ChangeNotifier implements Resettable {
   /// Inserts [post] at the top of the feed (newest-first).
   void addPost(Post post) {
     _posts.insert(0, post);
+    _nextOffset++;
     notifyListeners();
   }
 
@@ -190,7 +235,11 @@ class FeedProvider extends ChangeNotifier implements Resettable {
 
   /// Permanently removes [postId] from the feed.
   void deletePost(String postId) {
+    final before = _posts.length;
     _posts.removeWhere((p) => p.id == postId);
+    if (_posts.length < before && _nextOffset > 0) {
+      _nextOffset--;
+    }
     notifyListeners();
   }
 
@@ -200,6 +249,7 @@ class FeedProvider extends ChangeNotifier implements Resettable {
     if (index == -1) return;
 
     final removed = _posts.removeAt(index);
+    if (_nextOffset > 0) _nextOffset--;
     _errorMessage = null;
     notifyListeners();
 
@@ -207,6 +257,7 @@ class FeedProvider extends ChangeNotifier implements Resettable {
     if (result case Err(:final failure)) {
       final restoreIndex = index <= _posts.length ? index : _posts.length;
       _posts.insert(restoreIndex, removed);
+      _nextOffset++;
       _errorMessage = failure.message;
       notifyListeners();
     }
@@ -216,6 +267,9 @@ class FeedProvider extends ChangeNotifier implements Resettable {
   void reset() {
     _posts.clear();
     _status = ViewStatus.initial;
+    _hasMore = true;
+    _isLoadingMore = false;
+    _nextOffset = 0;
     _errorMessage = null;
     notifyListeners();
   }

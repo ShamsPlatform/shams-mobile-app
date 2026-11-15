@@ -131,23 +131,28 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     int offset = 0,
   }) {
     return _guardDb(() async {
-      final posts = await _db
-          .from('posts')
-          .select('''
-          *,
-          profiles!posts_author_id_fkey(id, name, username, profile_image_url, is_verified),
-          workshops!posts_workshop_id_fkey(id, name, handle, logo_url)
-        ''')
-          .order('created_at', ascending: false)
-          .range(offset, offset + limit - 1);
-
       final hiddenRows = await _db
           .from('hidden_posts')
           .select('post_id')
           .eq('user_id', currentUserId);
+      final hiddenIds = hiddenRows
+          .map((r) => r['post_id'] as String?)
+          .whereType<String>()
+          .toList();
 
-      final hiddenIds = hiddenRows.map((r) => r['post_id'] as String).toSet();
-      return posts.where((p) => !hiddenIds.contains(p['id'])).toList();
+      var query = _db.from('posts').select('''
+          *,
+          profiles!posts_author_id_fkey(id, name, username, profile_image_url, is_verified),
+          workshops!posts_workshop_id_fkey(id, name, handle, logo_url)
+        ''');
+
+      if (hiddenIds.isNotEmpty) {
+        query = query.not('id', 'in', hiddenIds);
+      }
+
+      return await query
+          .order('created_at', ascending: false)
+          .range(offset, offset + limit - 1);
     });
   }
 

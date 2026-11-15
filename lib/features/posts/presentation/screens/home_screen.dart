@@ -38,7 +38,30 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final ScrollController _scrollController = ScrollController();
   String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - 250) {
+      context.read<FeedProvider>().loadMore();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,21 +152,31 @@ class _HomeScreenState extends State<HomeScreen> {
             (p.author?.name ?? '').toLowerCase().contains(_searchQuery.toLowerCase())
           ).toList();
 
-    return CustomScrollView(
-      slivers: [
-        // ── شريط البحث الثابت ────────────────────────────
-        SliverPersistentHeader(
-          pinned: true,
-          delegate: _SearchBarDelegate(child: _buildSearchBar(context)),
-        ),
+    return RefreshIndicator(
+      onRefresh: () => context.read<FeedProvider>().load(),
+      child: CustomScrollView(
+        controller: _scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          // ── شريط البحث الثابت ────────────────────────────
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _SearchBarDelegate(child: _buildSearchBar(context)),
+          ),
 
-        // ── فراغ علوي قبل المنشورات ───────────────────────
-        const SliverToBoxAdapter(child: SizedBox(height: 8)),
+          // ── فراغ علوي قبل المنشورات ───────────────────────
+          const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
-        // ── قائمة المنشورات ───────────────────────────────
-        if (filteredPosts.isEmpty)
-          SliverFillRemaining(
-            child: Center(
+          // ── قائمة المنشورات ───────────────────────────────
+          if (feedProvider.isLoading && allPosts.isEmpty)
+            const SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (filteredPosts.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
               child: _searchQuery.isEmpty
                   ? Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -264,9 +297,18 @@ class _HomeScreenState extends State<HomeScreen> {
             }, childCount: filteredPosts.length),
           ),
 
+        if (feedProvider.isLoadingMore)
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          ),
+
         // ── فراغ سفلي ─────────────────────────────────────
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
       ],
+      ),
     );
   }
 

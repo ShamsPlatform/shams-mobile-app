@@ -187,6 +187,84 @@ void main() {
     provider.reset();
     expect(provider.posts, isEmpty);
     expect(provider.status, ViewStatus.initial);
+    expect(provider.hasMore, isTrue);
+    expect(provider.isLoadingMore, isFalse);
     expect(provider.errorMessage, isNull);
+  });
+
+  test('loadMore paginates, deduplicates, stops on short page, and keeps posts on Err',
+      () async {
+    final pagedProvider = FeedProvider(
+      getFeed: getFeed,
+      toggleLike: toggleLike,
+      addComment: addComment,
+      deleteComment: deleteComment,
+      toggleCommentLike: toggleCommentLike,
+      hidePost: hidePost,
+      pageSize: 2,
+    );
+    final post3 = Post(
+      id: 'p3',
+      workshopId: 'w1',
+      textDetails: 'Post 3',
+      createdAt: now,
+    );
+
+    when(
+      () => getFeed(
+        any(
+          that: predicate<GetFeedParams>(
+            (p) => p.limit == 2 && p.offset == 0,
+          ),
+        ),
+      ),
+    ).thenAnswer((_) async => Ok([post1, post2]));
+    when(
+      () => getFeed(
+        any(
+          that: predicate<GetFeedParams>(
+            (p) => p.limit == 2 && p.offset == 2,
+          ),
+        ),
+      ),
+    ).thenAnswer((_) async => Ok([post2, post3]));
+
+    await pagedProvider.load();
+    expect(pagedProvider.hasMore, isTrue);
+
+    await pagedProvider.loadMore();
+    expect(pagedProvider.posts.map((p) => p.id), ['p1', 'p2', 'p3']);
+    expect(pagedProvider.isLoadingMore, isFalse);
+
+    when(
+      () => getFeed(
+        any(
+          that: predicate<GetFeedParams>(
+            (p) => p.limit == 2 && p.offset == 4,
+          ),
+        ),
+      ),
+    ).thenAnswer((_) async => const Err(ServerFailure('page err')));
+
+    await pagedProvider.loadMore();
+    expect(pagedProvider.posts.map((p) => p.id), ['p1', 'p2', 'p3']);
+    expect(pagedProvider.errorMessage, 'page err');
+    expect(pagedProvider.hasMore, isTrue);
+
+    when(
+      () => getFeed(
+        any(
+          that: predicate<GetFeedParams>(
+            (p) => p.limit == 2 && p.offset == 4,
+          ),
+        ),
+      ),
+    ).thenAnswer((_) async => const Ok([]));
+
+    await pagedProvider.loadMore();
+    expect(pagedProvider.hasMore, isFalse);
+
+    await pagedProvider.loadMore();
+    verify(() => getFeed(any())).called(4);
   });
 }
