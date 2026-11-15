@@ -33,6 +33,18 @@ import 'package:shams_mobile_app/features/profile/domain/repositories/profile_re
 import 'package:shams_mobile_app/features/profile/domain/usecases/get_my_profile_usecase.dart';
 import 'package:shams_mobile_app/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
+import 'package:shams_mobile_app/features/workshops/data/datasources/review_remote_data_source.dart';
+import 'package:shams_mobile_app/features/workshops/data/datasources/workshop_remote_data_source.dart';
+import 'package:shams_mobile_app/features/workshops/data/repositories/review_repository_impl.dart';
+import 'package:shams_mobile_app/features/workshops/data/repositories/workshop_repository_impl.dart';
+import 'package:shams_mobile_app/features/workshops/domain/repositories/review_repository.dart';
+import 'package:shams_mobile_app/features/workshops/domain/repositories/workshop_repository.dart';
+import 'package:shams_mobile_app/features/workshops/domain/usecases/create_workshop_usecase.dart';
+import 'package:shams_mobile_app/features/workshops/domain/usecases/get_my_workshop_usecase.dart';
+import 'package:shams_mobile_app/features/workshops/domain/usecases/get_public_workshops_usecase.dart';
+import 'package:shams_mobile_app/features/workshops/domain/usecases/toggle_follow_usecase.dart';
+import 'package:shams_mobile_app/features/workshops/domain/usecases/update_workshop_usecase.dart';
+import 'package:shams_mobile_app/features/workshops/domain/usecases/upload_workshop_image_usecase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -51,6 +63,7 @@ Future<void> initDependencies() async {
   _initAuth();
   _initProfile();
   _initPosts();
+  _initWorkshops();
 }
 
 void _initCore() {
@@ -129,4 +142,25 @@ void _initPosts() {
   sl.registerFactory(
     () => PostEditorProvider(createPost: sl(), updatePost: sl()),
   );
+}
+
+void _initWorkshops() {
+  sl.registerLazySingleton<WorkshopRemoteDataSource>(
+    () => WorkshopRemoteDataSourceImpl(sl(), sl()),
+  );
+  sl.registerLazySingleton<ReviewRemoteDataSource>(
+    () => ReviewRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<WorkshopRepository>(
+    () => WorkshopRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton<ReviewRepository>(
+    () => ReviewRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton(() => GetPublicWorkshopsUseCase(sl()));
+  sl.registerLazySingleton(() => GetMyWorkshopUseCase(sl(), sl()));
+  sl.registerLazySingleton(() => CreateWorkshopUseCase(sl(), sl()));
+  sl.registerLazySingleton(() => UpdateWorkshopUseCase(sl()));
+  sl.registerLazySingleton(() => UploadWorkshopImageUseCase(sl()));
+  sl.registerLazySingleton(() => ToggleFollowUseCase(sl()));
 }
