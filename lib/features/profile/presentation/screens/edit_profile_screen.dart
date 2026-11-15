@@ -110,10 +110,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       );
       Navigator.pop(context);
     } else {
+      final error = provider.errorMessage ?? '';
+      final errorText = error.startsWith('فشل رفع الصورة:')
+          ? error
+          : 'حدث خطأ أثناء حفظ التعديلات في السيرفر: $error';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'حدث خطأ أثناء حفظ التعديلات: ${provider.errorMessage ?? ''}',
+            errorText,
             style: GoogleFonts.tajawal(),
           ),
           backgroundColor: Theme.of(context).colorScheme.error, // لون أحمر للفشل

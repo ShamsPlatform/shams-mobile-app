@@ -611,10 +611,10 @@ stateDiagram-v2
 
 ### Exit criteria
 
-- [ ] `UserModel` no longer exists. `AppUser` is used everywhere.
+- [x] `UserModel` no longer exists. `AppUser` is used everywhere.
 - [ ] `ProfileProvider` has no Supabase import. Default-profile creation works for a fresh Google account.
 - [ ] Editing a profile (with and without a new photo) works, and the new avatar shows immediately (cache eviction).
-- [ ] Tests: `GetMyProfileUseCase`, `UpdateProfileUseCase`, profile repository, `ProfileProvider`.
+- [x] Tests: `GetMyProfileUseCase`, `UpdateProfileUseCase`, profile repository, `ProfileProvider`.
 
 ---
 
@@ -998,7 +998,7 @@ Run on a device or emulator, in light **and** dark mode, Arabic RTL layout.
 | 0. Preparation | `refactor/ca-p0-prep` | ✅ Completed | | | Device-backed read-only baseline captured; mutation and realtime paths were not run because no disposable multi-account setup was provided. |
 | 1. Core foundation | `refactor/ca-p1-core` | ✅ Completed | | | Implemented P1.1–P1.10; G1 checks, 22 unit tests, debug APK build, and Moto G 5G smoke checks (A1 startup, 4-tab navigation, A12 theme toggle + cold-restart persistence) passed. |
 | 2. Auth & session | `refactor/ca-p2-auth` | ✅ Completed | | | Implemented P2.1–P2.11 (`AuthProvider`, `CompleteSignUpUseCase`, reactive `AuthGate`, `SessionListener`, `Resettable` providers, migrated auth screens, single sign-out path, deleted legacy services); G1 checks, 49 unit tests, debug APK build, and Moto G 5G cold-start feed check passed (live OAuth/sign-up/multi-account sign-out not run without disposable accounts). |
-| 3. Profile & AppUser | `refactor/ca-p3-profile` | ⬜ Not started | | | |
+| 3. Profile & AppUser | `refactor/ca-p3-profile` | ✅ Completed | | | Implemented P3.1–P3.5 (deleted `UserModel`, moved profile screens & `ProfileProvider`, unit-tested `GetMyProfileUseCase`, `UpdateProfileUseCase`, `ProfileRepositoryImpl`, `ProfileProvider`, 62 tests & G1 checks pass, debug APK built; live device smoke/profile-edit/fresh-Google check not run — `ZN3222BNK7` unauthorized over adb and no disposable Google account). |
 | 4. Posts | `refactor/ca-p4-posts` | ⬜ Not started | | | B1 needs confirmation |
 | 5. Workshops | `refactor/ca-p5-workshops` | ⬜ Not started | | | |
 | 6. Chat & maintenance | `refactor/ca-p6-chat` | ⬜ Not started | | | |
