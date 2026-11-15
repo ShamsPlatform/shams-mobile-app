@@ -10,9 +10,10 @@ import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/providers/feed_provider.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
 import 'package:shams_mobile_app/models/public_workshop_model.dart';
+import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shams_mobile_app/views/notifications/notifications_screen.dart';
 import 'package:shams_mobile_app/views/workshops/workshop_profile_screen.dart';
-import 'package:shams_mobile_app/widgets/shams_drawer.dart';
+import 'package:shams_mobile_app/core/widgets/shams_drawer.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // (أُزيلت البيانات الوهمية، يتم جلبها الآن من FeedProvider)
@@ -39,7 +40,10 @@ class _HomeScreenState extends State<HomeScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         key: _scaffoldKey,
-        drawer: const ShamsDrawer(activeIndex: 0),
+        drawer: ShamsDrawer(
+          activeIndex: 0,
+          onSignOut: () => context.read<AuthProvider>().signOut(),
+        ),
         backgroundColor: Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
         // ── AppBar المُعاد استخدامه من widgets/appbar.dart ──────────
         appBar: ShamsPlatformAppBar(

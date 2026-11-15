@@ -10,9 +10,10 @@ import 'package:shams_mobile_app/widgets/workshop_card.dart';
 import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
 import 'package:shams_mobile_app/providers/workshop_provider.dart';
 import 'package:shams_mobile_app/providers/notification_provider.dart';
+import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shams_mobile_app/views/workshops/workshop_profile_screen.dart';
 import 'package:shams_mobile_app/views/notifications/notifications_screen.dart';
-import 'package:shams_mobile_app/widgets/shams_drawer.dart';
+import 'package:shams_mobile_app/core/widgets/shams_drawer.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WorkshopsListScreen — قائمة الورش العامة
@@ -56,7 +57,10 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         key: _scaffoldKey,
-        drawer: const ShamsDrawer(activeIndex: 1),
+        drawer: ShamsDrawer(
+          activeIndex: 1,
+          onSignOut: () => context.read<AuthProvider>().signOut(),
+        ),
         backgroundColor: Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
 
         // ── الشريط العلوي ──────────────────────────────────────────────────

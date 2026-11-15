@@ -11,15 +11,9 @@ import 'package:shams_mobile_app/views/workshops/workshop_dashboard_screen.dart'
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shams_mobile_app/providers/user_provider.dart';
-import 'package:shams_mobile_app/providers/notification_provider.dart';
-import 'package:shams_mobile_app/providers/chat_provider.dart';
-import 'package:shams_mobile_app/providers/feed_provider.dart';
-import 'package:shams_mobile_app/providers/workshop_provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:shams_mobile_app/app/auth_gate.dart';
 import 'package:shams_mobile_app/views/user_profile/edit_profile_screen.dart';
-import 'package:shams_mobile_app/services/local_storage_service.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 // UserProfileScreen — شاشة الملف الشخصي للمستخدم
 // ─────────────────────────────────────────────────────────────────────────────
@@ -826,24 +820,20 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () async {
-                        // 1. Clear all local session data to prevent cross-user state leaks
-                        context.read<UserProvider>().clearUserData();
-                        context.read<NotificationProvider>().clearNotifications();
-                        context.read<ChatProvider>().clearChats();
-                        context.read<FeedProvider>().clearFeed();
-                        context.read<WorkshopProvider>().clearWorkshopData();
-                        await LocalStorageService.clearLoginData();
-
-                        // 2. Sign out from Supabase
-                        await Supabase.instance.client.auth.signOut();
-                        if (context.mounted) {
-                          // 3. Navigate to AuthGate to reset the app state
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const AuthGate(),
+                        final authProvider = context.read<AuthProvider>();
+                        final ok = await authProvider.signOut();
+                        if (!ok && context.mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                authProvider.errorMessage ??
+                                    'حدث خطأ أثناء تسجيل الخروج',
+                                style: GoogleFonts.tajawal(),
+                              ),
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.error,
                             ),
-                            (Route<dynamic> route) => false,
                           );
                         }
                       },
