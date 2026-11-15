@@ -11,6 +11,7 @@ import 'package:shams_mobile_app/features/chat/domain/entities/message.dart';
 import 'package:shams_mobile_app/features/chat/domain/repositories/chat_repository.dart';
 import 'package:shams_mobile_app/features/chat/domain/usecases/delete_chats_usecase.dart';
 import 'package:shams_mobile_app/features/chat/domain/usecases/get_chat_by_id_usecase.dart';
+import 'package:shams_mobile_app/features/chat/domain/usecases/get_chat_id_by_maintenance_request_usecase.dart';
 import 'package:shams_mobile_app/features/chat/domain/usecases/get_chats_usecase.dart';
 import 'package:shams_mobile_app/features/chat/domain/usecases/get_messages_usecase.dart';
 import 'package:shams_mobile_app/features/chat/domain/usecases/get_or_create_chat_usecase.dart';
@@ -160,5 +161,14 @@ void main() {
       await sub.cancel();
       await controller.close();
     });
+  });
+
+  test('GetChatIdByMaintenanceRequestUseCase delegates requestId lookup', () async {
+    when(() => repo.getChatIdByMaintenanceRequest('req-1'))
+        .thenAnswer((_) async => const Ok('c1'));
+
+    final result = await GetChatIdByMaintenanceRequestUseCase(repo)('req-1');
+    expect(result, const Ok<String?>('c1'));
+    verify(() => repo.getChatIdByMaintenanceRequest('req-1')).called(1);
   });
 }
