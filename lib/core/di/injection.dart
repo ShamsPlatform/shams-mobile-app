@@ -45,6 +45,8 @@ import 'package:shams_mobile_app/features/workshops/domain/usecases/get_public_w
 import 'package:shams_mobile_app/features/workshops/domain/usecases/toggle_follow_usecase.dart';
 import 'package:shams_mobile_app/features/workshops/domain/usecases/update_workshop_usecase.dart';
 import 'package:shams_mobile_app/features/workshops/domain/usecases/upload_workshop_image_usecase.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/providers/my_workshop_provider.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -163,4 +165,20 @@ void _initWorkshops() {
   sl.registerLazySingleton(() => UpdateWorkshopUseCase(sl()));
   sl.registerLazySingleton(() => UploadWorkshopImageUseCase(sl()));
   sl.registerLazySingleton(() => ToggleFollowUseCase(sl()));
+  sl.registerFactory(
+    () => WorkshopsProvider(
+      getPublicWorkshops: sl(),
+      toggleFollow: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => MyWorkshopProvider(
+      getMyWorkshop: sl(),
+      getWorkshopPosts: sl(),
+      createWorkshop: sl(),
+      updateWorkshop: sl(),
+      uploadWorkshopImage: sl(),
+      deletePost: sl(),
+    ),
+  );
 }

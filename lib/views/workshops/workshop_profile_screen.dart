@@ -7,13 +7,14 @@ import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
 import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
 import 'package:shams_mobile_app/views/chat/chat_conversation_screen.dart';
-import 'package:shams_mobile_app/providers/workshop_provider.dart';
+import 'package:shams_mobile_app/features/workshops/domain/entities/workshop.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/constants/workshop_assets.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
 import 'package:shams_mobile_app/providers/chat_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/core/utils/formatters.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
-import 'package:shams_mobile_app/models/public_workshop_model.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WorkshopProfile — صفحة الملف الشخصي للورشة
@@ -143,11 +144,25 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
     });
   }
 
-  void _toggleFollow() {
-    context.read<WorkshopProvider>().toggleFollow(widget.workshopId);
+  Future<void> _toggleFollow() async {
+    final provider = context.read<WorkshopsProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final errorColor = Theme.of(context).colorScheme.error;
+    final ok = await provider.toggleFollow(widget.workshopId);
+    if (!ok && mounted) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            provider.errorMessage ?? 'تعذر تحديث المتابعة',
+            style: GoogleFonts.tajawal(),
+          ),
+          backgroundColor: errorColor,
+        ),
+      );
+    }
   }
 
-  void _showMaintenanceRequestSheet(BuildContext context, PublicWorkshopModel workshop) {
+  void _showMaintenanceRequestSheet(BuildContext context, Workshop workshop) {
     String? selectedService;
     String? selectedInverter;
     String? selectedBattery;
@@ -293,7 +308,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
                             id: workshop.ownerId, // Real owner user ID!
                             name: workshop.name,
                             email: '${workshop.handle.replaceFirst('@', '')}@shams.com',
-                            profileImageUrl: workshop.logoPath,
+                            profileImageUrl: workshop.logoUrl,
                           );
 
                           // 4. Create the maintenance chat session
@@ -393,8 +408,8 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
   @override
   Widget build(BuildContext context) {
     // ── Single source of truth: watch provider for live updates ──────────────
-    final workshopProvider = context.watch<WorkshopProvider>();
-    final workshop = workshopProvider.getWorkshopById(widget.workshopId);
+    final workshopsProvider = context.watch<WorkshopsProvider>();
+    final workshop = workshopsProvider.getWorkshopById(widget.workshopId);
 
     if (workshop == null) {
       return Directionality(
@@ -519,7 +534,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
     );
   }
 
-  Widget _buildHeader(BuildContext context, PublicWorkshopModel workshop) {
+  Widget _buildHeader(BuildContext context, Workshop workshop) {
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -528,7 +543,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
           height: 220,
           width: double.infinity,
           color: Theme.of(context).extension<ShamsExtendedColors>()!.borderLight,
-          child: _buildCoverImage(workshop.coverImagePath),
+          child: _buildCoverImage(workshop.coverUrl ?? kDefaultWorkshopCoverAsset),
         ),
         // Overlay for better back button visibility
         Positioned.fill(
@@ -565,7 +580,10 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
                   color: Theme.of(context).extension<ShamsExtendedColors>()!.borderLight,
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: _buildProfileImage(workshop.logoPath, workshop.name),
+                child: _buildProfileImage(
+                  workshop.logoUrl ?? kDefaultWorkshopLogoAsset,
+                  workshop.name,
+                ),
               ),
             ),
           ),
@@ -574,7 +592,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
     );
   }
 
-  Widget _buildWorkshopInfo(PublicWorkshopModel workshop, bool isFollowing) {
+  Widget _buildWorkshopInfo(Workshop workshop, bool isFollowing) {
     return Column(
       children: [
         Text(
@@ -730,7 +748,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
     );
   }
 
-  Widget _buildWorkLogSection(PublicWorkshopModel workshop) {
+  Widget _buildWorkLogSection(Workshop workshop) {
     final feedPosts = context.watch<FeedProvider>().posts;
     final workshopPosts = feedPosts.where((post) => post.workshopId == workshop.id).toList();
 

@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/core/di/injection.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/post_editor_provider.dart';
-import 'package:shams_mobile_app/providers/workshop_provider.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/providers/my_workshop_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
@@ -150,7 +150,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       return;
     }
 
-    final myWorkshop = context.read<WorkshopProvider>().myWorkshop;
+    final myWorkshop = context.read<MyWorkshopProvider>().myWorkshop;
     final currentUser = context.read<ProfileProvider>().currentUserOrPlaceholder;
     final workshopId = myWorkshop?.id ?? currentUser.id;
     final editor = editorContext.read<PostEditorProvider>();
@@ -174,7 +174,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     Navigator.pop(context); // Dismiss loading
 
     if (newPost != null) {
-      context.read<WorkshopProvider>().addPost(newPost);
+      context.read<MyWorkshopProvider>().addPost(newPost);
       context.read<FeedProvider>().addPost(newPost);
       Navigator.pop(context); // Go back
     } else {

@@ -8,7 +8,8 @@ import 'package:shams_mobile_app/core/widgets/appbar.dart';
 import 'package:shams_mobile_app/core/widgets/city_filter.dart';
 import 'package:shams_mobile_app/widgets/workshop_card.dart';
 import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
-import 'package:shams_mobile_app/providers/workshop_provider.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/constants/workshop_assets.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
 import 'package:shams_mobile_app/providers/notification_provider.dart';
 import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
@@ -43,7 +44,7 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
   @override
   Widget build(BuildContext context) {
     // ── Single source of truth: watch provider for live updates ──────────────
-    final workshops = context.watch<WorkshopProvider>().publicWorkshops;
+    final workshops = context.watch<WorkshopsProvider>().workshops;
 
     // ── Smart filter: apply city + search query ───────────────────────────────
     final filteredWorkshops = workshops.where((workshop) {
@@ -200,16 +201,33 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
                         return WorkshopCard(
                           username: workshop.name,
                           userHandle: workshop.handle,
-                          imagePath: workshop.logoPath,
-                          coverImagePath: workshop.coverImagePath,
+                          imagePath: workshop.logoUrl ?? kDefaultWorkshopLogoAsset,
+                          coverImagePath:
+                              workshop.coverUrl ?? kDefaultWorkshopCoverAsset,
                           cityName: workshop.city,
                           rating: workshop.rating,
                           // isFollowing reflects live provider state via watch()
                           isFollowing: workshop.isFollowing,
                           // context.read() inside callback — correct usage.
-                          onFollowToggle: (_) => context
-                              .read<WorkshopProvider>()
-                              .toggleFollow(workshop.id),
+                          onFollowToggle: (_) async {
+                            final provider = context.read<WorkshopsProvider>();
+                            final messenger = ScaffoldMessenger.of(context);
+                            final errorColor =
+                                Theme.of(context).colorScheme.error;
+                            final ok = await provider.toggleFollow(workshop.id);
+                            if (!ok && mounted) {
+                              messenger.showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    provider.errorMessage ??
+                                        'تعذر تحديث المتابعة',
+                                    style: GoogleFonts.tajawal(),
+                                  ),
+                                  backgroundColor: errorColor,
+                                ),
+                              );
+                            }
+                          },
                           onEnterTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(

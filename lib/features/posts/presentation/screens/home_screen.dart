@@ -8,8 +8,9 @@ import 'package:shams_mobile_app/features/posts/presentation/screens/post_detail
 import 'package:shams_mobile_app/features/posts/presentation/widgets/comments_component.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
-import 'package:shams_mobile_app/providers/workshop_provider.dart';
-import 'package:shams_mobile_app/models/public_workshop_model.dart';
+import 'package:shams_mobile_app/features/workshops/domain/entities/workshop.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/constants/workshop_assets.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
 import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/screens/about_shams_screen.dart';
@@ -165,22 +166,28 @@ class _HomeScreenState extends State<HomeScreen> {
             delegate: SliverChildBuilderDelegate((context, index) {
               final post = filteredPosts[index];
               // Resolve workshop for the post's owner display
-              final workshops = context.watch<WorkshopProvider>().publicWorkshops;
-              PublicWorkshopModel? postWorkshop;
+              final workshops = context.watch<WorkshopsProvider>().workshops;
+              Workshop? postWorkshop;
               if (post.workshopId != null) {
-                try {
-                  postWorkshop = workshops.firstWhere((w) => w.id == post.workshopId);
-                } catch (_) {}
+                for (final w in workshops) {
+                  if (w.id == post.workshopId) {
+                    postWorkshop = w;
+                    break;
+                  }
+                }
               }
               if (postWorkshop == null && post.author != null) {
-                try {
-                  postWorkshop = workshops.firstWhere((w) => w.id == post.author!.id);
-                } catch (_) {}
+                for (final w in workshops) {
+                  if (w.id == post.author!.id) {
+                    postWorkshop = w;
+                    break;
+                  }
+                }
               }
-              
+
               final displayName = postWorkshop?.name ?? post.author?.name ?? 'مستخدم غير معروف';
               final displayHandle = postWorkshop?.handle ?? (post.author?.email != null ? '@${post.author!.email.split('@').first}' : '@unknown');
-              final displayAvatar = postWorkshop?.logoPath ?? post.author?.profileImageUrl ?? 'assets/images/logo/shams logo.png';
+              final displayAvatar = postWorkshop?.logoUrl ?? post.author?.profileImageUrl ?? kDefaultWorkshopLogoAsset;
 
               return GestureDetector(
                 // Pass only the postId — PostDetailScreen reads all live data
@@ -211,19 +218,25 @@ class _HomeScreenState extends State<HomeScreen> {
                   onShareTap: () => _onShare(context),
                   onMenuTap: () => _showPostMenu(context),
                    onUserTap: () {
-                    final workshops = context.read<WorkshopProvider>().publicWorkshops;
-                    PublicWorkshopModel? targetWorkshop;
-                    
+                    final workshops = context.read<WorkshopsProvider>().workshops;
+                    Workshop? targetWorkshop;
+
                     if (post.workshopId != null) {
-                      try {
-                        targetWorkshop = workshops.firstWhere((w) => w.id == post.workshopId);
-                      } catch (_) {}
+                      for (final w in workshops) {
+                        if (w.id == post.workshopId) {
+                          targetWorkshop = w;
+                          break;
+                        }
+                      }
                     }
-                    
+
                     if (targetWorkshop == null && post.author != null) {
-                      try {
-                        targetWorkshop = workshops.firstWhere((w) => w.id == post.author!.id);
-                      } catch (_) {}
+                      for (final w in workshops) {
+                        if (w.id == post.author!.id) {
+                          targetWorkshop = w;
+                          break;
+                        }
+                      }
                     }
                     
                     final targetId = targetWorkshop?.id ?? post.author?.id;

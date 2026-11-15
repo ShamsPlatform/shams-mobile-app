@@ -8,7 +8,8 @@ import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/providers/chat_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
-import 'package:shams_mobile_app/providers/workshop_provider.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/constants/workshop_assets.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class ChatListScreen extends StatefulWidget {
@@ -149,7 +150,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   Widget build(BuildContext context) {
     final chatProvider = context.watch<ChatProvider>();
     final currentUser = context.watch<ProfileProvider>().currentUserOrPlaceholder;
-    final workshopProvider = context.watch<WorkshopProvider>();
+    final workshopsProvider = context.watch<WorkshopsProvider>();
     final allChats = chatProvider.chats;
 
     final filteredChats = _searchQuery.isEmpty 
@@ -157,7 +158,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
         : allChats.where((c) {
             if (c.participants.isEmpty) return false;
             final otherParticipant = c.participants.firstWhere((p) => p.id != currentUser.id, orElse: () => c.participants.first);
-            final workshopMatch = workshopProvider.getWorkshopByOwnerId(otherParticipant.id);
+            final workshopMatch = workshopsProvider.getWorkshopByOwnerId(otherParticipant.id);
             final displayName = workshopMatch != null ? workshopMatch.name : otherParticipant.name;
             return displayName.toLowerCase().contains(_searchQuery.toLowerCase());
           }).toList();
@@ -268,9 +269,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                 orElse: () => chat.participants.first
                               );
                         
-                        final workshopMatch = workshopProvider.getWorkshopByOwnerId(otherParticipant.id);
+                        final workshopMatch = workshopsProvider.getWorkshopByOwnerId(otherParticipant.id);
                         final displayName = workshopMatch != null ? workshopMatch.name : otherParticipant.name;
-                        final displayAvatar = workshopMatch != null ? workshopMatch.logoPath : (otherParticipant.profileImageUrl ?? 'assets/images/logo/shams logo.png');
+                        final displayAvatar = workshopMatch != null
+                            ? (workshopMatch.logoUrl ?? kDefaultWorkshopLogoAsset)
+                            : (otherParticipant.profileImageUrl ?? kDefaultWorkshopLogoAsset);
 
                         final lastMessage = chat.messages.isNotEmpty ? chat.messages.first.text : 'لا توجد رسائل';
                         final unreadCount = chat.messages.where((m) => !m.isRead && m.senderId != currentUser.id).length;

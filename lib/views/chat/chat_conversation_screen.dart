@@ -9,7 +9,7 @@ import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/providers/chat_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
-import 'package:shams_mobile_app/providers/workshop_provider.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
 import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/models/message_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -162,11 +162,12 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
     String displayName = otherParticipant.name;
     String? displayAvatar = otherParticipant.profileImageUrl;
 
-    final workshopProvider = context.watch<WorkshopProvider>();
-    final workshopMatch = workshopProvider.getWorkshopByOwnerId(otherParticipant.id);
+    final workshopsProvider = context.watch<WorkshopsProvider>();
+    final workshopMatch =
+        workshopsProvider.getWorkshopByOwnerId(otherParticipant.id);
     if (workshopMatch != null) {
       displayName = workshopMatch.name;
-      displayAvatar = workshopMatch.logoPath;
+      displayAvatar = workshopMatch.logoUrl ?? displayAvatar;
     }
 
     return Directionality(

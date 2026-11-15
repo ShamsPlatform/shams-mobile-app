@@ -11,12 +11,10 @@ import 'package:shams_mobile_app/core/widgets/image_source_sheet.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
 import 'package:shams_mobile_app/core/widgets/scrollable_image_picker.dart';
 import 'package:shams_mobile_app/features/auth/presentation/widgets/username_field.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
-import 'package:shams_mobile_app/providers/workshop_provider.dart';
-import 'package:shams_mobile_app/models/workshop_data.dart';
-import 'package:shams_mobile_app/services/workshop_service.dart';
+import 'package:shams_mobile_app/features/workshops/domain/repositories/workshop_repository.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/providers/my_workshop_provider.dart';
 
 class AddWorkshopScreen extends StatefulWidget {
   const AddWorkshopScreen({super.key});
@@ -104,41 +102,25 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final user = Supabase.instance.client.auth.currentUser;
-      if (user == null) throw Exception('المستخدم غير مسجل الدخول');
-
-      // 1. Create workshop in database and upload images
-      final data = await WorkshopService.createWorkshop(
-        name: name,
-        city: _selectedCity!,
-        address: _selectedCity!,
-        description: description,
-        handle: '@$username',
-        logo: _profileImage,
-        cover: _coverImage,
-        galleryImages: _images,
-        yearsOfExperience: years,
+      final myWorkshopProvider = context.read<MyWorkshopProvider>();
+      final profileProvider = context.read<ProfileProvider>();
+      final created = await myWorkshopProvider.create(
+        CreateWorkshopParams(
+          name: name,
+          city: _selectedCity!,
+          address: _selectedCity!,
+          description: description,
+          handle: '@$username',
+          logoPath: _profileImage?.path,
+          coverPath: _coverImage?.path,
+          galleryPaths: _images.map((f) => f.path).toList(),
+          yearsOfExperience: years,
+        ),
       );
 
-      // Create WorkshopData instance
-      final newWorkshop = WorkshopData(
-        id: data['id'] ?? user.id,
-        ownerId: user.id,
-        name: name,
-        username: username,
-        city: _selectedCity!,
-        description: description,
-        yearsOfExperience: years,
-        profileImage: _profileImage,
-        coverImage: _coverImage,
-        extraImages: List.from(_images),
-      );
-
-      // 3. Update local state
-      if (mounted) {
-        context.read<WorkshopProvider>().setMyWorkshop(newWorkshop);
-        context.read<ProfileProvider>().updateWorkshopStatus(true);
-        
+      if (!mounted) return;
+      if (created != null) {
+        profileProvider.updateWorkshopStatus(true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('تم إضافة الورشة بنجاح!', style: GoogleFonts.tajawal()),
@@ -146,10 +128,8 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
           ),
         );
         Navigator.pop(context);
-      }
-    } catch (e) {
-      if (mounted) {
-        _showError('فشل إنشاء الورشة: $e');
+      } else {
+        _showError(myWorkshopProvider.errorMessage ?? 'فشل إنشاء الورشة');
       }
     } finally {
       if (mounted) {

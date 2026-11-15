@@ -7,7 +7,8 @@ import 'package:shams_mobile_app/providers/chat_provider.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/providers/notification_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
-import 'package:shams_mobile_app/providers/workshop_provider.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/providers/my_workshop_provider.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
 
 /// Bridges [AuthProvider] state transitions to session-level side effects:
 /// - On [AuthStatus.authenticated]: pops nested routes and triggers initial data loads once.
@@ -54,22 +55,24 @@ class _SessionListenerState extends State<SessionListener> {
         if (!mounted || _sessionEpoch != epoch) return;
 
         final currentUser = profileProvider.currentUserOrPlaceholder;
-        context.read<WorkshopProvider>().fetchPublicWorkshops();
+        context.read<WorkshopsProvider>().load();
         context.read<NotificationProvider>().fetchNotifications();
         context.read<ChatProvider>().fetchChats();
         context.read<FeedProvider>().load();
 
         if (currentUser.id.isNotEmpty && currentUser.hasWorkshop) {
           final username = currentUser.username ?? 'owner';
-          await context
-              .read<WorkshopProvider>()
-              .fetchMyWorkshop(currentUser.id, username);
+          await context.read<MyWorkshopProvider>().load(
+                userId: currentUser.id,
+                fallbackUsername: username,
+              );
         }
       case AuthStatus.unauthenticated:
         rootNavigatorKey.currentState?.popUntil((route) => route.isFirst);
         final resettables = <Resettable>[
           context.read<ProfileProvider>(),
-          context.read<WorkshopProvider>(),
+          context.read<MyWorkshopProvider>(),
+          context.read<WorkshopsProvider>(),
           context.read<FeedProvider>(),
           context.read<ChatProvider>(),
           context.read<NotificationProvider>(),

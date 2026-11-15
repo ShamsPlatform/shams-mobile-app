@@ -7,7 +7,7 @@ import 'package:shams_mobile_app/core/di/injection.dart';
 import 'package:shams_mobile_app/features/posts/domain/entities/post.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/post_editor_provider.dart';
-import 'package:shams_mobile_app/providers/workshop_provider.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/providers/my_workshop_provider.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/features/posts/presentation/screens/create_post_screen.dart'; // إعادة استخدام MediaFile و _AttachmentThumbnail
 
@@ -168,7 +168,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
     Navigator.pop(context); // Dismiss loading
 
     if (updatedPost != null) {
-      context.read<WorkshopProvider>().updatePost(updatedPost);
+      context.read<MyWorkshopProvider>().updatePost(updatedPost);
       context.read<FeedProvider>().updatePost(updatedPost);
       Navigator.pop(context); // Go back
     } else {
