@@ -5,7 +5,6 @@ import 'package:shams_mobile_app/features/workshops/data/models/review_model.dar
 import 'package:shams_mobile_app/features/workshops/domain/entities/review.dart';
 import 'package:shams_mobile_app/features/workshops/domain/repositories/review_repository.dart';
 
-/// Not used by UI yet.
 class ReviewRepositoryImpl implements ReviewRepository {
   ReviewRepositoryImpl(this._remote);
 

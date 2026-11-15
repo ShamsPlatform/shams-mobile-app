@@ -10,6 +10,7 @@ class WorkshopCard extends StatefulWidget {
   final String coverImagePath;
   final String cityName;
   final double rating;
+  final int? reviewCount;
   final bool isFollowing;
   final int? followersCount;
   final ValueChanged<bool>? onFollowToggle;
@@ -24,6 +25,7 @@ class WorkshopCard extends StatefulWidget {
     required this.coverImagePath,
     required this.cityName,
     required this.rating,
+    this.reviewCount,
     required this.isFollowing,
     this.followersCount,
     this.onFollowToggle,
@@ -267,7 +269,9 @@ class _WorkshopCardState extends State<WorkshopCard>
                   size: 16, color: colorScheme.secondary),
               const SizedBox(width: 4),
               Text(
-                '${widget.rating}/5',
+                (widget.reviewCount ?? (widget.rating > 0 ? 1 : 0)) > 0
+                    ? '${widget.rating.toStringAsFixed(1)}/5'
+                    : 'جديد',
                 style: GoogleFonts.tajawal(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,

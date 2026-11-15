@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/core/di/injection.dart';
+import 'package:shams_mobile_app/core/presentation/view_status.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
+import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shams_mobile_app/features/maintenance/presentation/providers/maintenance_request_provider.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/providers/workshop_reviews_provider.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/widgets/profile/maintenance_request_sheet.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/widgets/profile/workshop_profile_header.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/widgets/profile/workshop_profile_info.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/widgets/profile/workshop_reviews_section.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/widgets/profile/workshop_work_log_section.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -35,6 +39,43 @@ class WorkshopProfile extends StatefulWidget {
 
 class _WorkshopProfileState extends State<WorkshopProfile> {
   bool _isSearching = false;
+  late final WorkshopReviewsProvider _reviewsProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    _reviewsProvider = sl<WorkshopReviewsProvider>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadReviews();
+    });
+  }
+
+  @override
+  void dispose() {
+    _reviewsProvider.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadReviews() async {
+    if (!mounted) return;
+    final workshop =
+        context.read<WorkshopsProvider>().getWorkshopById(widget.workshopId);
+    await _reviewsProvider.load(
+      widget.workshopId,
+      initialReviews: workshop?.reviews ?? const [],
+    );
+    if (!mounted || _reviewsProvider.status != ViewStatus.success) return;
+    _syncWorkshopReviewSummary();
+  }
+
+  void _syncWorkshopReviewSummary() {
+    if (!mounted) return;
+    context.read<WorkshopsProvider>().updateReviewSummary(
+          widget.workshopId,
+          rating: _reviewsProvider.averageRating,
+          reviewCount: _reviewsProvider.reviewCount,
+        );
+  }
 
   Future<void> _toggleFollow() async {
     final provider = context.read<WorkshopsProvider>();
@@ -90,9 +131,20 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
     final feedPosts = context.watch<FeedProvider>().posts;
     final workshopPosts =
         feedPosts.where((post) => post.workshopId == workshop.id).toList();
+    final currentUserId = context.select<AuthProvider, String?>(
+      (auth) => auth.currentUser?.id,
+    );
+    final isOwner = currentUserId != null && workshop.ownerId == currentUserId;
 
-    return ChangeNotifierProvider(
-      create: (_) => sl<MaintenanceRequestProvider>(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => sl<MaintenanceRequestProvider>(),
+        ),
+        ChangeNotifierProvider.value(
+          value: _reviewsProvider,
+        ),
+      ],
       child: Builder(
         builder: (context) => Directionality(
           textDirection: TextDirection.rtl,
@@ -181,10 +233,29 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
                 ),
               WorkshopProfileHeader(workshop: workshop),
               const SizedBox(height: 55),
-              WorkshopProfileInfo(
-                workshop: workshop,
-                isFollowing: isFollowing,
-                onToggleFollow: _toggleFollow,
+              Consumer<WorkshopReviewsProvider>(
+                builder: (context, reviewsProvider, _) {
+                  final liveWorkshop =
+                      reviewsProvider.status == ViewStatus.success
+                          ? workshop.copyWith(
+                              rating: reviewsProvider.averageRating,
+                              reviewCount: reviewsProvider.reviewCount,
+                            )
+                          : workshop;
+                  return WorkshopProfileInfo(
+                    workshop: liveWorkshop,
+                    isFollowing: isFollowing,
+                    onToggleFollow: _toggleFollow,
+                  );
+                },
+              ),
+              const SizedBox(height: 25),
+              WorkshopReviewsSection(
+                workshopId: workshop.id,
+                workshopName: workshop.name,
+                isOwner: isOwner,
+                currentUserId: currentUserId,
+                onReviewsChanged: _syncWorkshopReviewSummary,
               ),
               const SizedBox(height: 25),
               WorkshopWorkLogSection(posts: workshopPosts),

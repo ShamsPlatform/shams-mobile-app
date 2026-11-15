@@ -268,6 +268,7 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
                               workshop.coverUrl ?? kDefaultWorkshopCoverAsset,
                           cityName: workshop.city,
                           rating: workshop.rating,
+                          reviewCount: workshop.reviewCount,
                           // isFollowing reflects live provider state via watch()
                           isFollowing: workshop.isFollowing,
                           // context.read() inside callback — correct usage.

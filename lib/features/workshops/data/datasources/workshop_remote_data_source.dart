@@ -14,6 +14,10 @@ abstract interface class WorkshopRemoteDataSource {
 
   Future<Set<String>> fetchFollowedWorkshopIds(List<String> workshopIds);
 
+  Future<List<Map<String, dynamic>>> fetchReviewRatingsForWorkshops(
+    List<String> workshopIds,
+  );
+
   Future<bool> isFollowing(String workshopId);
 
   Future<Map<String, dynamic>?> fetchMyWorkshop(String userId);
@@ -267,6 +271,20 @@ class WorkshopRemoteDataSourceImpl implements WorkshopRemoteDataSource {
   Future<void> deleteWorkshop(String workshopId) {
     return _guardDb(() async {
       await _db.from('workshops').delete().eq('id', workshopId);
+    });
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchReviewRatingsForWorkshops(
+    List<String> workshopIds,
+  ) {
+    return _guardDb(() async {
+      if (workshopIds.isEmpty) return const <Map<String, dynamic>>[];
+      final rows = await _db
+          .from('reviews')
+          .select('workshop_id, rating')
+          .inFilter('workshop_id', workshopIds);
+      return List<Map<String, dynamic>>.from(rows);
     });
   }
 }

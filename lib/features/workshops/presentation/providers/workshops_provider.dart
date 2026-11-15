@@ -168,6 +168,31 @@ class WorkshopsProvider extends ChangeNotifier implements Resettable {
     notifyListeners();
   }
 
+  /// Updates cached rating and review count for [workshopId] in the directory.
+  void updateReviewSummary(
+    String workshopId, {
+    required double rating,
+    required int reviewCount,
+  }) {
+    final index = _workshops.indexWhere((w) => w.id == workshopId);
+    if (index == -1) return;
+    final existing = _workshops[index];
+    if (existing.rating == rating && existing.reviewCount == reviewCount) {
+      return;
+    }
+    _workshops[index] = existing.copyWith(
+      rating: rating,
+      reviewCount: reviewCount,
+    );
+    if (_syncedMyWorkshop != null && _syncedMyWorkshop!.id == workshopId) {
+      _syncedMyWorkshop = _syncedMyWorkshop!.copyWith(
+        rating: rating,
+        reviewCount: reviewCount,
+      );
+    }
+    notifyListeners();
+  }
+
   void _applySyncedWorkshopToList() {
     final myWorkshop = _syncedMyWorkshop;
     if (myWorkshop == null) return;

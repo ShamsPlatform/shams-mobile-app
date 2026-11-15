@@ -37,12 +37,19 @@ class WorkshopRepositoryImpl implements WorkshopRepository {
       final followedIds = workshopIds.isNotEmpty
           ? await _remote.fetchFollowedWorkshopIds(workshopIds)
           : <String>{};
+      final reviewSummaries = await _fetchReviewSummaries(workshopIds);
 
       return rows.map((row) {
         final id = row['id'] as String? ?? '';
-        return WorkshopModel.fromJson(
+        final workshop = WorkshopModel.fromJson(
           row,
           isFollowing: followedIds.contains(id),
+        );
+        if (reviewSummaries == null) return workshop;
+        final summary = reviewSummaries[id];
+        return workshop.copyWith(
+          rating: summary?.average ?? 0.0,
+          reviewCount: summary?.count ?? 0,
         );
       }).toList();
     });
@@ -66,13 +73,51 @@ class WorkshopRepositoryImpl implements WorkshopRepository {
           debugPrint('Error fetching followers count: $e');
         }
       }
+      final reviewSummaries = workshopId.isNotEmpty
+          ? await _fetchReviewSummaries([workshopId])
+          : null;
 
-      return MyWorkshopModel.fromJson(
+      final myWorkshop = MyWorkshopModel.fromJson(
         row,
         followersCount: followersCount,
         fallbackUsername: fallbackUsername,
       );
+      if (reviewSummaries == null) return myWorkshop;
+      final summary = reviewSummaries[workshopId];
+      return myWorkshop.copyWith(
+        rating: summary?.average ?? 0.0,
+        reviewCount: summary?.count ?? 0,
+      );
     });
+  }
+
+  Future<Map<String, ({double average, int count})>?> _fetchReviewSummaries(
+    List<String> workshopIds,
+  ) async {
+    if (workshopIds.isEmpty) return const {};
+    try {
+      final rows = await _remote.fetchReviewRatingsForWorkshops(workshopIds);
+      final totals = <String, ({double sum, int count})>{};
+      for (final row in rows) {
+        final workshopId = row['workshop_id'] as String?;
+        final rating = (row['rating'] as num?)?.toDouble();
+        if (workshopId == null || workshopId.isEmpty || rating == null) {
+          continue;
+        }
+        final current = totals[workshopId];
+        totals[workshopId] = (
+          sum: (current?.sum ?? 0.0) + rating,
+          count: (current?.count ?? 0) + 1,
+        );
+      }
+      return totals.map((id, agg) {
+        final avg = double.parse((agg.sum / agg.count).toStringAsFixed(1));
+        return MapEntry(id, (average: avg, count: agg.count));
+      });
+    } catch (e) {
+      debugPrint('Error fetching review summaries: $e');
+      return null;
+    }
   }
 
   @override

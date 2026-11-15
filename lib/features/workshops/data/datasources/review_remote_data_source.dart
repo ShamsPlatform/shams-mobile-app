@@ -2,27 +2,21 @@ import 'package:shams_mobile_app/core/error/exceptions.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Remote data source for workshop reviews.
-///
-/// Not used by UI yet.
 abstract interface class ReviewRemoteDataSource {
-  // Not used by UI yet.
   Future<Map<String, dynamic>> addReview({
     required String workshopId,
     required double rating,
     required String comment,
   });
 
-  // Not used by UI yet.
   Future<List<Map<String, dynamic>>> fetchWorkshopReviews(String workshopId);
 
-  // Not used by UI yet.
   Future<void> updateReview({
     required String reviewId,
     double? rating,
     String? comment,
   });
 
-  // Not used by UI yet.
   Future<void> deleteReview(String reviewId);
 }
 

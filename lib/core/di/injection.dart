@@ -75,6 +75,11 @@ import 'package:shams_mobile_app/features/workshops/domain/usecases/toggle_follo
 import 'package:shams_mobile_app/features/workshops/domain/usecases/update_workshop_usecase.dart';
 import 'package:shams_mobile_app/features/workshops/domain/usecases/upload_workshop_image_usecase.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/my_workshop_provider.dart';
+import 'package:shams_mobile_app/features/workshops/domain/usecases/add_review_usecase.dart';
+import 'package:shams_mobile_app/features/workshops/domain/usecases/delete_review_usecase.dart';
+import 'package:shams_mobile_app/features/workshops/domain/usecases/get_workshop_reviews_usecase.dart';
+import 'package:shams_mobile_app/features/workshops/domain/usecases/update_review_usecase.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/providers/workshop_reviews_provider.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -197,10 +202,22 @@ void _initWorkshops() {
   sl.registerLazySingleton(() => UpdateWorkshopUseCase(sl()));
   sl.registerLazySingleton(() => UploadWorkshopImageUseCase(sl()));
   sl.registerLazySingleton(() => ToggleFollowUseCase(sl()));
+  sl.registerLazySingleton(() => GetWorkshopReviewsUseCase(sl()));
+  sl.registerLazySingleton(() => AddReviewUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateReviewUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteReviewUseCase(sl()));
   sl.registerFactory(
     () => WorkshopsProvider(
       getPublicWorkshops: sl(),
       toggleFollow: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => WorkshopReviewsProvider(
+      getWorkshopReviews: sl(),
+      addReview: sl(),
+      updateReview: sl(),
+      deleteReview: sl(),
     ),
   );
   sl.registerFactory(

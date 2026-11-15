@@ -54,7 +54,9 @@ class WorkshopProfileInfo extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Text(
-              '${workshop.rating}/5',
+              workshop.reviewCount > 0 || workshop.rating > 0
+                  ? '${workshop.rating.toStringAsFixed(1)}/5'
+                  : 'جديد',
               style: GoogleFonts.tajawal(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,

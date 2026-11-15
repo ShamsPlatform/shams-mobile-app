@@ -37,6 +37,10 @@ final class NotFoundFailure extends Failure {
   const NotFoundFailure(super.message);
 }
 
+final class ValidationFailure extends Failure {
+  const ValidationFailure(super.message);
+}
+
 final class UnknownFailure extends Failure {
   const UnknownFailure([super.message = 'حدث خطأ غير متوقع']);
 }

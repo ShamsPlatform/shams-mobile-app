@@ -308,4 +308,21 @@ void main() {
       verify(() => getPublicWorkshops(any())).called(4);
     });
   });
+
+  group('updateReviewSummary', () {
+    test('updates matching workshop rating and reviewCount in directory',
+        () async {
+      when(() => getPublicWorkshops(any()))
+          .thenAnswer((_) async => const Ok([workshop1, workshop2]));
+      await provider.load();
+
+      provider.updateReviewSummary('w1', rating: 4.9, reviewCount: 14);
+      provider.updateReviewSummary('missing', rating: 3.0, reviewCount: 1);
+
+      final updated = provider.getWorkshopById('w1')!;
+      expect(updated.rating, 4.9);
+      expect(updated.reviewCount, 14);
+      expect(provider.getWorkshopById('w2')!.rating, 4.0);
+    });
+  });
 }

@@ -56,7 +56,8 @@ void main() {
       verifyNever(() => remote.isFollowing(any()));
     });
 
-    test('maps rows and batches follow status in a single call', () async {
+    test('maps rows and batches follow status and review summaries in single calls',
+        () async {
       when(
         () => remote.fetchPublicWorkshops(
           cityFilter: null,
@@ -65,12 +66,32 @@ void main() {
         ),
       ).thenAnswer(
         (_) async => [
-          {'id': 'w1', 'owner_id': 'u1', 'name': 'W1'},
-          {'id': 'w2', 'owner_id': 'u2', 'name': 'W2'},
+          {
+            'id': 'w1',
+            'owner_id': 'u1',
+            'name': 'W1',
+            'rating': 4.8,
+            'review_count': 99,
+          },
+          {
+            'id': 'w2',
+            'owner_id': 'u2',
+            'name': 'W2',
+            'rating': 4.5,
+            'review_count': 12,
+          },
         ],
       );
       when(() => remote.fetchFollowedWorkshopIds(['w1', 'w2']))
           .thenAnswer((_) async => {'w1'});
+      when(() => remote.fetchReviewRatingsForWorkshops(['w1', 'w2']))
+          .thenAnswer(
+        (_) async => [
+          {'workshop_id': 'w1', 'rating': 5},
+          {'workshop_id': 'w1', 'rating': 4},
+          {'workshop_id': 'w1', 'rating': 5},
+        ],
+      );
 
       final result = await repository.getPublicWorkshops();
 
@@ -78,9 +99,37 @@ void main() {
       final workshops = (result as Ok<List<Workshop>>).data;
       expect(workshops, hasLength(2));
       expect(workshops[0].isFollowing, isTrue);
+      expect(workshops[0].rating, 4.7);
+      expect(workshops[0].reviewCount, 3);
       expect(workshops[1].isFollowing, isFalse);
+      expect(workshops[1].rating, 0.0);
+      expect(workshops[1].reviewCount, 0);
       verify(() => remote.fetchFollowedWorkshopIds(['w1', 'w2'])).called(1);
+      verify(() => remote.fetchReviewRatingsForWorkshops(['w1', 'w2'])).called(1);
       verifyNever(() => remote.isFollowing(any()));
+    });
+
+    test('keeps row rating if review summary query fails', () async {
+      when(
+        () => remote.fetchPublicWorkshops(
+          cityFilter: null,
+          limit: 20,
+          offset: 0,
+        ),
+      ).thenAnswer(
+        (_) async => [
+          {'id': 'w1', 'owner_id': 'u1', 'name': 'W1', 'rating': 4.2, 'review_count': 2},
+        ],
+      );
+      when(() => remote.fetchFollowedWorkshopIds(['w1']))
+          .thenAnswer((_) async => <String>{});
+      when(() => remote.fetchReviewRatingsForWorkshops(['w1']))
+          .thenThrow(const ServerException('reviews unavailable'));
+
+      final result = await repository.getPublicWorkshops();
+
+      final workshops = (result as Ok<List<Workshop>>).data;
+      expect(workshops.single.rating, 4.2);
     });
 
     test('maps ServerException to ServerFailure', () async {
@@ -109,11 +158,17 @@ void main() {
       verifyNever(() => remote.fetchFollowersCount(any()));
     });
 
-    test('fetches followers count and maps MyWorkshop', () async {
+    test('fetches followers count and review summary and maps MyWorkshop', () async {
       when(() => remote.fetchMyWorkshop('u1')).thenAnswer(
         (_) async => {'id': 'w1', 'owner_id': 'u1', 'name': 'Mine'},
       );
       when(() => remote.fetchFollowersCount('w1')).thenAnswer((_) async => 9);
+      when(() => remote.fetchReviewRatingsForWorkshops(['w1'])).thenAnswer(
+        (_) async => [
+          {'workshop_id': 'w1', 'rating': 5},
+          {'workshop_id': 'w1', 'rating': 4},
+        ],
+      );
 
       final result = await repository.getMyWorkshop(
         userId: 'u1',
@@ -124,6 +179,8 @@ void main() {
       expect(w.id, 'w1');
       expect(w.username, 'owner');
       expect(w.followersCount, 9);
+      expect(w.rating, 4.5);
+      expect(w.reviewCount, 2);
     });
 
     test('falls back to 0 followers if followers query fails', () async {
@@ -132,6 +189,8 @@ void main() {
       );
       when(() => remote.fetchFollowersCount('w1'))
           .thenThrow(const ServerException('count failed'));
+      when(() => remote.fetchReviewRatingsForWorkshops(['w1']))
+          .thenAnswer((_) async => []);
 
       final result = await repository.getMyWorkshop(userId: 'u1');
 
