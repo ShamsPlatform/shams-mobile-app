@@ -12,6 +12,8 @@ import 'package:shams_mobile_app/providers/workshop_provider.dart';
 import 'package:shams_mobile_app/models/public_workshop_model.dart';
 import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
+import 'package:shams_mobile_app/features/profile/presentation/screens/about_shams_screen.dart';
+import 'package:shams_mobile_app/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:shams_mobile_app/views/notifications/notifications_screen.dart';
 import 'package:shams_mobile_app/views/workshops/workshop_profile_screen.dart';
 import 'package:shams_mobile_app/core/widgets/shams_drawer.dart';
@@ -44,6 +46,14 @@ class _HomeScreenState extends State<HomeScreen> {
         drawer: ShamsDrawer(
           activeIndex: 0,
           currentUser: context.watch<ProfileProvider>().currentUserOrPlaceholder,
+          onEditProfileTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+          ),
+          onAboutTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AboutShamsScreen()),
+          ),
           onSignOut: () => context.read<AuthProvider>().signOut(),
         ),
         backgroundColor: Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,

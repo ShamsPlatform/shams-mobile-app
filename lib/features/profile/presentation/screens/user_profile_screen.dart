@@ -5,15 +5,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
 import 'package:shams_mobile_app/views/user_profile/add_workshop_screen.dart';
-import 'package:shams_mobile_app/views/user_profile/privacy_security_screen.dart';
-import 'package:shams_mobile_app/views/user_profile/about_shams_screen.dart';
+import 'package:shams_mobile_app/features/profile/presentation/screens/privacy_security_screen.dart';
+import 'package:shams_mobile_app/features/profile/presentation/screens/about_shams_screen.dart';
 import 'package:shams_mobile_app/views/workshops/workshop_dashboard_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
-import 'package:shams_mobile_app/views/user_profile/edit_profile_screen.dart';
+import 'package:shams_mobile_app/features/profile/presentation/screens/edit_profile_screen.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 // UserProfileScreen — شاشة الملف الشخصي للمستخدم
 // ─────────────────────────────────────────────────────────────────────────────
