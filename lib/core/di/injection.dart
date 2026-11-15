@@ -11,6 +11,7 @@ import 'package:shams_mobile_app/features/auth/domain/usecases/sign_in_with_emai
 import 'package:shams_mobile_app/features/auth/domain/usecases/sign_in_with_google_usecase.dart';
 import 'package:shams_mobile_app/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:shams_mobile_app/features/auth/domain/usecases/watch_auth_state_usecase.dart';
+import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shams_mobile_app/features/profile/data/datasources/profile_remote_data_source.dart';
 import 'package:shams_mobile_app/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:shams_mobile_app/features/profile/domain/repositories/profile_repository.dart';
@@ -55,6 +56,16 @@ void _initAuth() {
   sl.registerLazySingleton(() => SignOutUseCase(sl()));
   sl.registerLazySingleton(() => WatchAuthStateUseCase(sl()));
   sl.registerLazySingleton(() => GetCurrentAuthUserUseCase(sl()));
+  sl.registerFactory(
+    () => AuthProvider(
+      watchAuthState: sl(),
+      getCurrentAuthUser: sl(),
+      signInWithEmail: sl(),
+      signInWithGoogle: sl(),
+      completeSignUp: sl(),
+      signOut: sl(),
+    ),
+  );
 }
 
 void _initProfile() {
