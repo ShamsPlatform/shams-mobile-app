@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
@@ -24,6 +25,7 @@ class _CityMultiSelectFilterState extends State<CityMultiSelectFilter> {
   final List<String> _selectedCities = [];
 
   void _showMultiSelectDialog() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -34,7 +36,7 @@ class _CityMultiSelectFilterState extends State<CityMultiSelectFilter> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16)),
               title: Text(
-                'اختر المحافظات',
+                l10n.selectGovernorates,
                 style: GoogleFonts.tajawal(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.primary),
@@ -74,7 +76,7 @@ class _CityMultiSelectFilterState extends State<CityMultiSelectFilter> {
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: Text(
-                    'تم',
+                    l10n.done,
                     style: GoogleFonts.tajawal(
                         color: colorScheme.primary,
                         fontWeight: FontWeight.bold),
@@ -97,6 +99,7 @@ class _CityMultiSelectFilterState extends State<CityMultiSelectFilter> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,7 +124,7 @@ class _CityMultiSelectFilterState extends State<CityMultiSelectFilter> {
                     size: 20, color: colorScheme.onSurface),
                 const SizedBox(width: 8),
                 Text(
-                  'المحافظات',
+                  l10n.governorates,
                   style: GoogleFonts.tajawal(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -160,7 +163,7 @@ class _CityMultiSelectFilterState extends State<CityMultiSelectFilter> {
             child: Row(
               children: _selectedCities.map((city) {
                 return Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
+                  padding: const EdgeInsetsDirectional.only(start: 8.0),
                   child: InputChip(
                     label: Text(
                       city,

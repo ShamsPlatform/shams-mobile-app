@@ -1,16 +1,17 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 class InlineSearchBar extends StatelessWidget {
-  final String hintText;
+  final String? hintText;
   final ValueChanged<String>? onChanged;
   final VoidCallback? onClose;
   final EdgeInsetsGeometry padding;
 
   const InlineSearchBar({
     super.key,
-    this.hintText = 'ابحث هنا...',
+    this.hintText,
     this.onChanged,
     this.onClose,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -20,6 +21,9 @@ class InlineSearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
+    final l10n = AppLocalizations.of(context)!;
+    final effectiveHint = hintText ?? l10n.searchHint;
+    final textDir = Directionality.of(context);
 
     return Container(
       color: colorScheme.surface,
@@ -35,7 +39,6 @@ class InlineSearchBar extends StatelessWidget {
           ),
         ),
         child: Row(
-          textDirection: TextDirection.rtl,
           children: [
             const SizedBox(width: 14),
             Icon(
@@ -47,13 +50,13 @@ class InlineSearchBar extends StatelessWidget {
             Expanded(
               child: TextField(
                 onChanged: onChanged,
-                textDirection: TextDirection.rtl,
+                textDirection: textDir,
                 style: GoogleFonts.tajawal(
                   fontSize: 14,
                   color: colorScheme.onSurface,
                 ),
                 decoration: InputDecoration(
-                  hintText: hintText,
+                  hintText: effectiveHint,
                   hintStyle: GoogleFonts.tajawal(
                     fontSize: 13.5,
                     color: ext.textHint,

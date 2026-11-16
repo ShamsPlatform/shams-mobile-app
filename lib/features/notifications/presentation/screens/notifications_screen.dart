@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/core/presentation/view_status.dart';
@@ -22,9 +22,7 @@ class NotificationsScreen extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: ext.backgroundLight,
         appBar: AppBar(
           title: Text(
@@ -81,7 +79,7 @@ class NotificationsScreen extends StatelessWidget {
                         direction: DismissDirection.endToStart,
                         background: Container(
                           color: colorScheme.error,
-                          alignment: Alignment.centerRight,
+                          alignment: AlignmentDirectional.centerEnd,
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: const Icon(
                             Icons.delete_rounded,
@@ -117,8 +115,7 @@ class NotificationsScreen extends StatelessWidget {
                       );
                     },
                   ),
-      ),
-    );
+      );
   }
 
   Future<void> _handleNotifTap(
@@ -242,3 +239,4 @@ class NotificationsScreen extends StatelessWidget {
     );
   }
 }
+

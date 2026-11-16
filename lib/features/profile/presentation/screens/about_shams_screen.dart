@@ -26,7 +26,7 @@ class AboutShamsScreen extends StatelessWidget {
           ),
           actions: [
             Padding(
-              padding: const EdgeInsets.only(right: 8.0),
+              padding: const EdgeInsetsDirectional.only(end: 8.0),
               child: IconButton(
                 icon: Icon(
                   Icons.arrow_forward,
@@ -77,7 +77,7 @@ class AboutShamsScreen extends StatelessWidget {
 
               // ── لماذا تختارنا؟ ────────────────────────────────────────────
               Align(
-                alignment: Alignment.centerRight,
+                alignment: AlignmentDirectional.centerEnd,
                 child: _buildSectionHeader(context, 'لماذا تختارنا؟'),
               ),
               const SizedBox(height: 16),
