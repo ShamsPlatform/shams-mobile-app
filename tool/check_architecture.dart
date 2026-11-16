@@ -18,9 +18,9 @@ const _allowedTopLevelDirs = {'app', 'core', 'features'};
 const _allowedTopLevelFiles = {'main.dart'};
 
 final _legacyImportPattern = RegExp(
-  r'''['"]package:shams_mobile_app/(models|providers|services|utils|views|widgets)/''',
+  r'''['\"]package:shams_mobile_app/(models|providers|services|utils|views|widgets)/''',
 );
-final _relativeImportPattern = RegExp(r'''^(import|export)\s+['"]\.\.?/''');
+final _relativeImportPattern = RegExp(r'''^(import|export)\s+['\"]\.\.?/''');
 final _featurePathPattern = RegExp(r'^lib/features/([^/]+)/');
 final _featureDataImportPattern = RegExp(
   r'package:shams_mobile_app/features/([^/]+)/data/',
@@ -36,6 +36,7 @@ final _supabaseAllowedPaths = <RegExp>[
 final _sharedPrefsAllowedPaths = <RegExp>[
   RegExp(r'^lib/core/di/injection\.dart$'),
   RegExp(r'^lib/core/theme/theme_storage\.dart$'),
+  RegExp(r'^lib/core/l10n/language_storage\.dart$'),
   RegExp(r'^lib/features/[^/]+/data/datasources/'),
 ];
 

@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:shams_mobile_app/core/data/datasources/file_storage_data_source.dart';
+import 'package:shams_mobile_app/core/l10n/language_storage.dart';
 import 'package:shams_mobile_app/core/theme/theme_storage.dart';
 import 'package:shams_mobile_app/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:shams_mobile_app/features/auth/data/datasources/auth_remote_data_source.dart';
@@ -111,6 +112,7 @@ void _initCore() {
     () => FileStorageDataSourceImpl(sl()),
   );
   sl.registerLazySingleton<ThemeStorage>(() => ThemeStorage(sl()));
+  sl.registerLazySingleton<LanguageStorage>(() => LanguageStorage(sl()));
 }
 
 void _initAuth() {

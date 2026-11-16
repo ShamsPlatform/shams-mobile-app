@@ -4,6 +4,7 @@ import 'package:shams_mobile_app/app/app.dart';
 import 'package:shams_mobile_app/app/app_providers.dart';
 import 'package:shams_mobile_app/core/config/env.dart';
 import 'package:shams_mobile_app/core/di/injection.dart';
+import 'package:shams_mobile_app/core/l10n/language_provider.dart';
 import 'package:shams_mobile_app/core/theme/theme_provider.dart';
 import 'package:shams_mobile_app/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -25,5 +26,13 @@ Future<void> main() async {
   await sl<AuthLocalDataSource>().clearLegacyKeys();
   final themeProvider = ThemeProvider(sl());
   await themeProvider.loadSavedTheme();
-  runApp(AppProviders(themeProvider: themeProvider, child: const ShamsApp()));
+  final languageProvider = LanguageProvider(sl());
+  await languageProvider.loadSavedLocale();
+  runApp(
+    AppProviders(
+      themeProvider: themeProvider,
+      languageProvider: languageProvider,
+      child: const ShamsApp(),
+    ),
+  );
 }
