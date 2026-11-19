@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
@@ -83,9 +83,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
@@ -210,8 +208,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _inputLabel(String label) {

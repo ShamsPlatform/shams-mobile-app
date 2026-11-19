@@ -1,11 +1,13 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/app/auth_gate.dart';
 import 'package:shams_mobile_app/app/navigation.dart';
 import 'package:shams_mobile_app/app/session_listener.dart';
-import 'package:shams_mobile_app/core/theme/theme_provider.dart';
+import 'package:shams_mobile_app/core/l10n/language_provider.dart';
 import 'package:shams_mobile_app/core/theme/shams_theme.dart';
+import 'package:shams_mobile_app/core/theme/theme_provider.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 
 /// Root widget of the Shams Platform application.
 class ShamsApp extends StatelessWidget {
@@ -14,12 +16,13 @@ class ShamsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
+    final languageProvider = context.watch<LanguageProvider>();
 
     return MaterialApp(
       navigatorKey: rootNavigatorKey,
 
       // ── App Identity ────────────────────────────────────────────
-      title: 'شمس',
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       debugShowCheckedModeBanner: false,
 
       // ── Theme ───────────────────────────────────────────────────
@@ -28,12 +31,13 @@ class ShamsApp extends StatelessWidget {
       themeMode: themeProvider.themeMode,
 
       // ── Locale & RTL ────────────────────────────────────────────
-      locale: const Locale('ar', 'SA'),
+      locale: languageProvider.currentLocale,
       supportedLocales: const [
         Locale('ar', 'SA'), // Arabic (Saudi Arabia) — primary
-        Locale('en', 'US'), // English — fallback
+        Locale('en', 'US'), // English — secondary
       ],
       localizationsDelegates: const [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,

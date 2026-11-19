@@ -1,0 +1,215 @@
+{
+  "@@locale": "ar",
+  "appTitle": "شمس",
+  "@appTitle": {"description": "The title of the application"},
+
+  "editProfile": "تعديل الملف",
+  "@editProfile": {"description": "Edit profile button label"},
+
+  "myBusiness": "إدارة أعمالي",
+  "@myBusiness": {"description": "My business section header"},
+
+  "settingsPreferences": "الإعدادات والتفضيلات",
+  "@settingsPreferences": {"description": "Settings section header"},
+
+  "notifications": "الإشعارات",
+  "@notifications": {"description": "Notifications setting label"},
+
+  "privacySecurity": "الخصوصية والأمان",
+  "@privacySecurity": {"description": "Privacy and security setting label"},
+
+  "changeLanguage": "تغيير اللغة",
+  "@changeLanguage": {"description": "Change language setting label"},
+
+  "contactSupport": "تواصل مع الدعم",
+  "@contactSupport": {"description": "Contact support setting label"},
+
+  "technicalSupport": "تواصل مع الدعم الفني",
+  "@technicalSupport": {"description": "Technical support sheet title"},
+
+  "aboutShams": "عن شمس",
+  "@aboutShams": {"description": "About Shams setting label"},
+
+  "shareApp": "مشاركة التطبيق",
+  "@shareApp": {"description": "Share app button label"},
+
+  "shareAppText": "حمّل تطبيق شمس وانضم إلينا الآن!\nhttps://shams.app/download",
+  "@shareAppText": {"description": "Share app message text"},
+
+  "logout": "تسجيل الخروج",
+  "@logout": {"description": "Logout button label"},
+
+  "logoutTitle": "تسجيل الخروج",
+  "@logoutTitle": {"description": "Logout sheet title"},
+
+  "logoutConfirm": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
+  "@logoutConfirm": {"description": "Logout confirmation message"},
+
+  "logoutError": "حدث خطأ أثناء تسجيل الخروج",
+  "@logoutError": {"description": "Logout error message"},
+
+  "cancel": "إلغاء",
+  "@cancel": {"description": "Cancel button label"},
+
+  "save": "حفظ",
+  "@save": {"description": "Save button label"},
+
+  "workshopDashboard": "لوحة تحكم الورشة",
+  "@workshopDashboard": {"description": "Workshop dashboard tile title"},
+
+  "workshopDashboardSubtitle": "إدارة منشوراتك وإحصاءات ورشتك",
+  "@workshopDashboardSubtitle": {"description": "Workshop dashboard tile subtitle"},
+
+  "addNewWorkshop": "إضافة ورشة جديدة",
+  "@addNewWorkshop": {"description": "Add new workshop tile title"},
+
+  "addNewWorkshopSubtitle": "انقر هنا لإضافة تفاصيل الورشة",
+  "@addNewWorkshopSubtitle": {"description": "Add new workshop tile subtitle"},
+
+  "workshopCreatedSuccess": "تم إنشاء الورشة بنجاح! 🎉",
+  "@workshopCreatedSuccess": {"description": "Workshop created success message"},
+
+  "arabic": "عربي",
+  "@arabic": {"description": "Arabic language label"},
+
+  "english": "English",
+  "@english": {"description": "English language label"},
+
+  "arabicOption": "عربي (AR)",
+  "@arabicOption": {"description": "Arabic option in language picker"},
+
+  "englishOption": "English (EN)",
+  "@englishOption": {"description": "English option in language picker"},
+
+  "home": "الصفحة الرئيسية",
+  "@home": {"description": "Home navigation label"},
+
+  "workshops": "قائمة الورش",
+  "@workshops": {"description": "Workshops navigation label"},
+
+  "myChats": "محادثاتي",
+  "@myChats": {"description": "My chats navigation label"},
+
+  "governorates": "المحافظات",
+  "@governorates": {"description": "Governorates filter button label"},
+
+  "selectGovernorates": "اختر المحافظات",
+  "@selectGovernorates": {"description": "Select governorates dialog title"},
+
+  "done": "تم",
+  "@done": {"description": "Done button label"},
+
+  "readMore": "قراءة المزيد...",
+  "@readMore": {"description": "Read more button label"},
+
+  "showLess": "عرض أقل",
+  "@showLess": {"description": "Show less button label"},
+
+  "chooseFromGallery": "اختر من المعرض",
+  "@chooseFromGallery": {"description": "Choose from gallery option"},
+
+  "takePhoto": "التقط صورة",
+  "@takePhoto": {"description": "Take photo option"},
+
+  "whatsapp": "واتساب",
+  "@whatsapp": {"description": "WhatsApp contact option"},
+
+  "phoneCall": "اتصال هاتفي",
+  "@phoneCall": {"description": "Phone call contact option"},
+
+  "email": "إيميل",
+  "@email": {"description": "Email contact option"},
+
+  "emailFull": "البريد الإلكتروني",
+  "@emailFull": {"description": "Email full label"},
+
+  "whatsappError": "لم نتمكن من فتح تطبيق واتساب. يرجى التأكد من تثبيت التطبيق.",
+  "@whatsappError": {"description": "WhatsApp launch error"},
+
+  "phoneError": "تعذر إجراء الاتصال الهاتفي حالياً.",
+  "@phoneError": {"description": "Phone call launch error"},
+
+  "emailError": "لم نتمكن من فتح تطبيق البريد الإلكتروني.",
+  "@emailError": {"description": "Email launch error"},
+
+  "signin": "تسجيل الدخول",
+  "@signin": {"description": "Sign in label"},
+
+  "signup": "إنشاء حساب",
+  "@signup": {"description": "Sign up label"},
+
+  "password": "كلمة المرور",
+  "@password": {"description": "Password label"},
+
+  "workshopOwner": "صاحب ورشة 🛠️",
+  "@workshopOwner": {"description": "Workshop owner badge"},
+
+  "shamsClient": "عميل شمس ☀️",
+  "@shamsClient": {"description": "Shams client badge"},
+
+  "editMyProfile": "تعديل الملف الشخصي",
+  "@editMyProfile": {"description": "Edit profile drawer item"},
+
+  "myMaintenanceRequests": "طلبات الصيانة الخاصة بي",
+  "@myMaintenanceRequests": {"description": "My maintenance requests drawer item"},
+
+  "aboutShamsPlatform": "عن منصة شمس",
+  "@aboutShamsPlatform": {"description": "About shams platform drawer item"},
+
+  "technicalSupportContact": "الدعم الفني والاتصال",
+  "@technicalSupportContact": {"description": "Technical support drawer item"},
+
+  "nowRelative": "الآن",
+  "@nowRelative": {"description": "Relative time: now"},
+
+  "minutesAgo": "منذ {count} دقيقة",
+  "@minutesAgo": {
+    "description": "Relative time: minutes ago",
+    "placeholders": {"count": {"type": "int"}}
+  },
+
+  "hoursAgo": "منذ {count} ساعة",
+  "@hoursAgo": {
+    "description": "Relative time: hours ago",
+    "placeholders": {"count": {"type": "int"}}
+  },
+
+  "daysAgo": "منذ {count} يوم",
+  "@daysAgo": {
+    "description": "Relative time: days ago",
+    "placeholders": {"count": {"type": "int"}}
+  },
+
+  "inlineSearchHint": "ابحث عن ورشة...",
+  "@inlineSearchHint": {"description": "Inline search bar hint text"},
+
+  "searchHint": "ابحث هنا...",
+  "@searchHint": {"description": "Generic search hint text"},
+
+  "homeNav": "الرئيسية",
+  "@homeNav": {"description": "Home bottom nav label"},
+
+  "workshopsNav": "الورش",
+  "@workshopsNav": {"description": "Workshops bottom nav label"},
+
+  "followNav": "المتابعة",
+  "@followNav": {"description": "Follow bottom nav label"},
+
+  "profileNav": "الملف",
+  "@profileNav": {"description": "Profile bottom nav label"},
+
+  "technicalSupportTitle": "تواصل مع الدعم الفني",
+  "@technicalSupportTitle": {"description": "Technical support sheet title"},
+
+  "welcomeBack": "مرحباً بك مجدداً",
+  "@welcomeBack": {"description": "Welcome back title on signin"},
+
+  "dontHaveAccount": "ليس لديك حساب؟",
+  "@dontHaveAccount": {"description": "Don't have account label"},
+
+  "alreadyHaveAccount": "لديك حساب بالفعل؟",
+  "@alreadyHaveAccount": {"description": "Already have account label"},
+
+  "profileLoadError": "فشل تحميل الملف الشخصي",
+  "@profileLoadError": {"description": "Profile load error message"}
+}

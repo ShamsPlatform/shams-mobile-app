@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
@@ -9,6 +10,8 @@ import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 class ShamsNavItem {
   final IconData activeIcon;
   final IconData inactiveIcon;
+  /// Static label — used only when caller passes custom items.
+  /// For the default items the bar resolves labels from l10n.
   final String label;
 
   const ShamsNavItem({
@@ -34,24 +37,34 @@ class ShamsBottomNavBar extends StatelessWidget {
     ShamsNavItem(
       activeIcon: Icons.home_rounded,
       inactiveIcon: Icons.home_outlined,
-      label: 'الرئيسية',
+      label: 'homeNav',   // key resolved below
     ),
     ShamsNavItem(
       activeIcon: Icons.build_rounded,
       inactiveIcon: Icons.build_outlined,
-      label: 'الورش',
+      label: 'workshopsNav',
     ),
     ShamsNavItem(
       activeIcon: Icons.people_alt_rounded,
       inactiveIcon: Icons.people_alt_outlined,
-      label: 'المتابعة',
+      label: 'followNav',
     ),
     ShamsNavItem(
       activeIcon: Icons.person_rounded,
       inactiveIcon: Icons.person_outline_rounded,
-      label: 'الملف',
+      label: 'profileNav',
     ),
   ];
+
+  String _resolveLabel(AppLocalizations l10n, String key) {
+    switch (key) {
+      case 'homeNav': return l10n.homeNav;
+      case 'workshopsNav': return l10n.workshopsNav;
+      case 'followNav': return l10n.followNav;
+      case 'profileNav': return l10n.profileNav;
+      default: return key;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +72,7 @@ class ShamsBottomNavBar extends StatelessWidget {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final colorScheme = Theme.of(context).colorScheme;
     final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       decoration: BoxDecoration(
@@ -83,19 +97,18 @@ class ShamsBottomNavBar extends StatelessWidget {
         top: false,
         child: SizedBox(
           height: 64 + bottomPadding,
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Row(
-              children: List.generate(navItems.length, (index) {
-                return Expanded(
-                  child: _NavBarItem(
-                    item: navItems[index],
-                    isActive: index == currentIndex,
-                    onTap: () => onTap(index),
-                  ),
-                );
-              }),
-            ),
+          child: Row(
+            children: List.generate(navItems.length, (index) {
+              return Expanded(
+                child: _NavBarItem(
+                  label: _resolveLabel(l10n, navItems[index].label),
+                  activeIcon: navItems[index].activeIcon,
+                  inactiveIcon: navItems[index].inactiveIcon,
+                  isActive: index == currentIndex,
+                  onTap: () => onTap(index),
+                ),
+              );
+            }),
           ),
         ),
       ),
@@ -108,12 +121,16 @@ class ShamsBottomNavBar extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _NavBarItem extends StatefulWidget {
-  final ShamsNavItem item;
+  final String label;
+  final IconData activeIcon;
+  final IconData inactiveIcon;
   final bool isActive;
   final VoidCallback onTap;
 
   const _NavBarItem({
-    required this.item,
+    required this.label,
+    required this.activeIcon,
+    required this.inactiveIcon,
     required this.isActive,
     required this.onTap,
   });
@@ -191,9 +208,7 @@ class _NavBarItemState extends State<_NavBarItem>
               ScaleTransition(
                 scale: _scaleAnim,
                 child: Icon(
-                  widget.isActive
-                      ? widget.item.activeIcon
-                      : widget.item.inactiveIcon,
+                  widget.isActive ? widget.activeIcon : widget.inactiveIcon,
                   size: widget.isActive ? _iconSizeAnim.value : 24,
                   color: widget.isActive
                       ? colorScheme.secondary
@@ -215,7 +230,7 @@ class _NavBarItemState extends State<_NavBarItem>
                       ? colorScheme.secondary
                       : colorScheme.onSurfaceVariant,
                 ),
-                child: Text(widget.item.label),
+                child: Text(widget.label),
               ),
             ],
           );

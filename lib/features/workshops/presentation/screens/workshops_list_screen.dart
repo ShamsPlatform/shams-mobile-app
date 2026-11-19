@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -82,9 +82,7 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
       return matchesCity && matchesSearch && matchesService;
     }).toList();
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+    return Scaffold(
         key: _scaffoldKey,
         drawer: ShamsDrawer(
           activeIndex: 1,
@@ -166,7 +164,7 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
                     final service = ShamsConstants.solarServiceTypes[index];
                     final isSelected = _selectedServices.contains(service);
                     return Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
+                      padding: const EdgeInsetsDirectional.only(start: 8.0),
                       child: FilterChip(
                           label: Text(
                             service,
@@ -305,7 +303,7 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 }
+

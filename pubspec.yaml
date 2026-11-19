@@ -10,9 +10,10 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Localizations (required for Arabic RTL support)
+  # Localizations (required for Arabic RTL support + code generation)
   flutter_localizations:
     sdk: flutter
+  intl: any
 
   # Backend
   supabase_flutter: ^2.8.4
@@ -38,6 +39,7 @@ dev_dependencies:
   mocktail: ^1.0.5
 
 flutter:
+  generate: true
   uses-material-design: true
 
   assets:
