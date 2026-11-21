@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -132,9 +132,7 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+    return Scaffold(
         backgroundColor:
             Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
         appBar: AppBar(
@@ -251,8 +249,7 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _inputLabel(String label) {
@@ -308,3 +305,4 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
     );
   }
 }
+

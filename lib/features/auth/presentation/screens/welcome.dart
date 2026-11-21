@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
@@ -11,9 +11,7 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+    return Scaffold(
         backgroundColor:
             Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
         body: SafeArea(
@@ -79,8 +77,7 @@ class WelcomeScreen extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildFeatureCard(BuildContext context, IconData icon, String label) {
@@ -115,3 +112,4 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 }
+

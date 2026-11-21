@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
@@ -108,7 +108,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
         ),
         if (hasError)
           Padding(
-            padding: const EdgeInsets.only(top: 6, right: 8),
+            padding: const EdgeInsetsDirectional.only(top: 6, end: 8),
             child: Row(
               children: [
                 Icon(Icons.info_outline_rounded,

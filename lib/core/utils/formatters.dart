@@ -1,19 +1,40 @@
 /// Formatting helpers extracted from legacy models and widgets (F6).
 ///
-/// Produces the exact same strings as the legacy inline formatting logic.
-String formatRelativeTime(DateTime dateTime, {DateTime? now}) {
+/// All outputs are locale-neutral: callers in the presentation layer are
+/// responsible for providing localized labels so that the domain/util layer
+/// remains Flutter-free and free of hard-coded Arabic strings.
+///
+/// Example (presentation layer usage):
+/// ```dart
+/// final l10n = AppLocalizations.of(context)!;
+/// final label = formatRelativeTime(
+///   post.createdAt,
+///   nowLabel: l10n.nowRelative,
+///   minutesLabel: (n) => l10n.minutesAgo(n),
+///   hoursLabel:   (n) => l10n.hoursAgo(n),
+///   daysLabel:    (n) => l10n.daysAgo(n),
+/// );
+/// ```
+String formatRelativeTime(
+  DateTime dateTime, {
+  DateTime? now,
+  String nowLabel = 'الآن',
+  String Function(int count)? minutesLabel,
+  String Function(int count)? hoursLabel,
+  String Function(int count)? daysLabel,
+}) {
   final reference = now ?? DateTime.now();
   final diff = reference.difference(dateTime);
   if (diff.inDays > 7) {
     return '${dateTime.year}-${dateTime.month}-${dateTime.day}';
   } else if (diff.inDays >= 1) {
-    return 'منذ ${diff.inDays} يوم';
+    return daysLabel != null ? daysLabel(diff.inDays) : 'منذ ${diff.inDays} يوم';
   } else if (diff.inHours >= 1) {
-    return 'منذ ${diff.inHours} ساعة';
+    return hoursLabel != null ? hoursLabel(diff.inHours) : 'منذ ${diff.inHours} ساعة';
   } else if (diff.inMinutes >= 1) {
-    return 'منذ ${diff.inMinutes} دقيقة';
+    return minutesLabel != null ? minutesLabel(diff.inMinutes) : 'منذ ${diff.inMinutes} دقيقة';
   } else {
-    return 'الآن';
+    return nowLabel;
   }
 }
 

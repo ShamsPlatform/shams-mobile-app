@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -131,9 +131,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     final currentUser = context.watch<ProfileProvider>().currentUserOrPlaceholder;
 
-    return Directionality(
-      textDirection: TextDirection.rtl, // لضمان الاتجاه من اليمين لليسار
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface, // الخلفية البيضاء السادة كما في التصميم
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
@@ -301,15 +299,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
             ],
           ),
-        ),
-      ),
-    );
+        )
+      );
   }
 
   // ويدجت مساعدة لبناء عنوان الحقل
   Widget _buildInputLabel(String label) {
     return Align(
-      alignment: Alignment.centerRight,
+      alignment: AlignmentDirectional.centerStart,
       child: Text(
         label,
         style: GoogleFonts.tajawal(
@@ -359,3 +356,4 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
 }
+

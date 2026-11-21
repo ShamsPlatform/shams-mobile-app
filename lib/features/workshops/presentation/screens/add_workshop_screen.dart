@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -153,9 +153,7 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
@@ -297,8 +295,7 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 
   // ─── Media Header: cover image + centred profile avatar ─────────────────────
@@ -548,3 +545,4 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
     );
   }
 }
+
