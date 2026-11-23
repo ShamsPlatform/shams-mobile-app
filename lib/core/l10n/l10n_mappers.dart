@@ -1,9 +1,20 @@
 import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/utils/formatters.dart';
 
-/// Presentation-layer helpers for translating canonical DB constants,
-/// domain/validation messages, and relative timestamps without leaking
-/// Flutter or localization dependencies into `domain/`.
+const List<String> _technicalDbErrorMarkers = [
+  'violates check constraint',
+  'violates row-level security',
+  'violates foreign key constraint',
+  'violates unique constraint',
+  'new row for relation',
+  'null value in column',
+  'permission denied for',
+  'invalid input syntax',
+  'notifications_type_check',
+];
+
+/// Translates known Arabic domain/validation/data error messages into the
+/// active locale while passing unknown messages through.
 extension AppLocalizationsMappers on AppLocalizations {
   /// Formats [dateTime] as a localized relative timestamp string.
   String formatRelativeTimeLocalized(DateTime dateTime, {DateTime? now}) {
@@ -100,9 +111,14 @@ extension AppLocalizationsMappers on AppLocalizations {
   }
 
   /// Translates known Arabic domain/validation/data error messages into the
-  /// active locale while passing unknown messages through.
+  /// active locale while sanitizing raw database/SQL errors into [fallback].
   String localizeErrorMessage(String? rawMessage, {String? fallback}) {
     if (rawMessage == null || rawMessage.isEmpty) {
+      return fallback ?? errUnexpected;
+    }
+
+    final lower = rawMessage.toLowerCase();
+    if (_technicalDbErrorMarkers.any(lower.contains)) {
       return fallback ?? errUnexpected;
     }
 

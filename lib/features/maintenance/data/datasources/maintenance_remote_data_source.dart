@@ -44,6 +44,10 @@ class MaintenanceRemoteDataSourceImpl implements MaintenanceRemoteDataSource {
     try {
       return await action();
     } on PostgrestException catch (e) {
+      debugPrint(
+        'Maintenance PostgrestException [${e.code}]: ${e.message} '
+        '(details: ${e.details}, hint: ${e.hint})',
+      );
       throw ServerException(e.message);
     } on AuthException catch (e) {
       throw AppAuthException(e.message);

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shams_mobile_app/core/error/exceptions.dart';
 import 'package:shams_mobile_app/features/chat/data/datasources/chat_remote_data_source.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -127,5 +128,42 @@ void main() {
     expect(result['id'], 'm1');
     verifyNever(() => db.from('chat_participants'));
     verifyNever(() => db.from('notifications'));
+  });
+
+  test('sendMessage maps PostgrestException to ServerException', () async {
+    final db = MockSupabaseClient();
+    final auth = MockGoTrueClient();
+    const user = User(
+      id: 'sender-1',
+      appMetadata: {},
+      userMetadata: {},
+      aud: 'authenticated',
+      createdAt: '2026-01-01T00:00:00.000Z',
+    );
+    when(() => db.auth).thenReturn(auth);
+    when(() => auth.currentUser).thenReturn(user);
+    when(() => db.from('messages')).thenThrow(
+      const PostgrestException(
+        message:
+            'new row for relation "notifications" violates check constraint "notifications_type_check"',
+        code: '23514',
+      ),
+    );
+
+    final dataSource = ChatRemoteDataSourceImpl(
+      db,
+      useDbNotificationTriggers: true,
+    );
+
+    await expectLater(
+      dataSource.sendMessage(chatId: 'c1', text: 'مرحباً'),
+      throwsA(
+        isA<ServerException>().having(
+          (e) => e.message,
+          'message',
+          contains('notifications_type_check'),
+        ),
+      ),
+    );
   });
 }

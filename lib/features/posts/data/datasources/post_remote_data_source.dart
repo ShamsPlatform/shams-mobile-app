@@ -87,6 +87,10 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     try {
       return await action();
     } on PostgrestException catch (e) {
+      debugPrint(
+        'Post PostgrestException [${e.code}]: ${e.message} '
+        '(details: ${e.details}, hint: ${e.hint})',
+      );
       throw ServerException(e.message);
     } on AuthException catch (e) {
       throw AppAuthException(e.message);

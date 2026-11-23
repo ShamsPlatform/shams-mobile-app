@@ -223,5 +223,25 @@ void main() {
       en.localizeErrorMessage(null, fallback: en.errUnexpected),
       en.errUnexpected,
     );
+    expect(
+      en.localizeErrorMessage(
+        'new row for relation "notifications" violates check constraint "notifications_type_check"',
+        fallback: en.maintenanceRequestFailed,
+      ),
+      en.maintenanceRequestFailed,
+    );
+    expect(
+      ar.localizeErrorMessage(
+        'new row for relation "notifications" violates check constraint "notifications_type_check"',
+        fallback: ar.failedToSendMessage,
+      ),
+      ar.failedToSendMessage,
+    );
+    expect(
+      en.localizeErrorMessage(
+        'new row violates row-level security policy for table "messages"',
+      ),
+      en.errUnexpected,
+    );
   });
 }

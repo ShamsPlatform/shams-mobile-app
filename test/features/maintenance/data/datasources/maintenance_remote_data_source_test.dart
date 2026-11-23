@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shams_mobile_app/core/error/exceptions.dart';
 import 'package:shams_mobile_app/features/maintenance/data/datasources/maintenance_remote_data_source.dart';
 import 'package:shams_mobile_app/features/maintenance/domain/repositories/maintenance_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -132,5 +133,48 @@ void main() {
     expect(requestCalls, 2);
     verifyNever(() => db.from('workshops'));
     verifyNever(() => db.from('notifications'));
+  });
+
+  test('createRequest maps PostgrestException to ServerException', () async {
+    final db = MockSupabaseClient();
+    final auth = MockGoTrueClient();
+    const user = User(
+      id: 'client-1',
+      appMetadata: {},
+      userMetadata: {},
+      aud: 'authenticated',
+      createdAt: '2026-01-01T00:00:00.000Z',
+    );
+    when(() => db.auth).thenReturn(auth);
+    when(() => auth.currentUser).thenReturn(user);
+    when(() => db.from('maintenance_requests')).thenThrow(
+      const PostgrestException(
+        message:
+            'new row for relation "notifications" violates check constraint "notifications_type_check"',
+        code: '23514',
+      ),
+    );
+
+    final dataSource = MaintenanceRemoteDataSourceImpl(
+      db,
+      useDbNotificationTriggers: true,
+    );
+
+    await expectLater(
+      dataSource.createRequest(
+        const CreateMaintenanceRequestParams(
+          workshopId: 'w1',
+          serviceType: 'صيانة',
+          problemDescription: 'فحص البطارية',
+        ),
+      ),
+      throwsA(
+        isA<ServerException>().having(
+          (e) => e.message,
+          'message',
+          contains('notifications_type_check'),
+        ),
+      ),
+    );
   });
 }
