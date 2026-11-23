@@ -1,9 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-
-/// PostCard — بطاقة منشور تفاعلية بتصميم Shams Platform
-import 'dart:io';
 
 class PostCard extends StatefulWidget {
   final String username;
@@ -142,33 +141,6 @@ class _PostCardState extends State<PostCard>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _MenuButton(onTap: widget.onMenuTap, ext: ext, colorScheme: colorScheme),
-          const Spacer(),
-          GestureDetector(
-            onTap: widget.onUserTap,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  widget.username,
-                  style: GoogleFonts.tajawal(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-                Text(
-                  widget.userHandle,
-                  style: GoogleFonts.tajawal(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: colorScheme.primary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 10),
           GestureDetector(
             onTap: widget.onUserTap,
             child: _Avatar(
@@ -179,12 +151,46 @@ class _PostCardState extends State<PostCard>
               ext: ext,
             ),
           ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: GestureDetector(
+              onTap: widget.onUserTap,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.username,
+                    style: GoogleFonts.tajawal(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: colorScheme.onSurface,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    widget.userHandle,
+                    style: GoogleFonts.tajawal(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: colorScheme.primary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          _MenuButton(onTap: widget.onMenuTap, ext: ext, colorScheme: colorScheme),
         ],
       ),
     );
   }
 
   Widget _buildContent(ColorScheme colorScheme) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14),
       child: Column(
@@ -193,7 +199,7 @@ class _PostCardState extends State<PostCard>
           AnimatedCrossFade(
             firstChild: Text(
               widget.content,
-              textAlign: TextAlign.right,
+              textAlign: TextAlign.start,
               maxLines: widget.maxLines,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.tajawal(
@@ -204,7 +210,7 @@ class _PostCardState extends State<PostCard>
             ),
             secondChild: Text(
               widget.content,
-              textAlign: TextAlign.right,
+              textAlign: TextAlign.start,
               style: GoogleFonts.tajawal(
                 fontSize: 14.5,
                 height: 1.65,
@@ -222,7 +228,7 @@ class _PostCardState extends State<PostCard>
               child: Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
-                  _isExpanded ? 'عرض أقل' : 'قراءة المزيد...',
+                  _isExpanded ? l10n.showLess : l10n.readMore,
                   style: GoogleFonts.tajawal(
                     fontSize: 13.5,
                     fontWeight: FontWeight.w600,
@@ -244,7 +250,7 @@ class _PostCardState extends State<PostCard>
         style: GoogleFonts.tajawal(fontSize: 14.5, height: 1.65),
       ),
       maxLines: widget.maxLines,
-      textDirection: TextDirection.rtl,
+      textDirection: Directionality.of(context),
     )..layout(maxWidth: double.infinity);
     return tp.didExceedMaxLines;
   }
@@ -257,7 +263,7 @@ class _PostCardState extends State<PostCard>
       child: ClipRRect(
         borderRadius: BorderRadius.circular(14),
         child: Stack(
-          alignment: Alignment.bottomLeft,
+          alignment: AlignmentDirectional.bottomEnd,
           children: [
             SizedBox(
               height: 210,
@@ -426,7 +432,7 @@ class _Avatar extends StatelessWidget {
       color: ext.avatarFallbackBg,
       child: Center(
         child: Text(
-          username.isNotEmpty ? username[0] : '؟',
+          username.isNotEmpty ? username[0].toUpperCase() : '?',
           style: GoogleFonts.tajawal(
             fontSize: 20,
             fontWeight: FontWeight.w700,

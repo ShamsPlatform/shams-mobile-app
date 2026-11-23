@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 class WorkshopCard extends StatefulWidget {
@@ -129,7 +131,7 @@ class _WorkshopCardState extends State<WorkshopCard>
       color: ext.avatarFallbackBg,
       child: Center(
         child: Text(
-          name.isNotEmpty ? name[0] : '؟',
+          name.isNotEmpty ? name[0].toUpperCase() : '?',
           style: GoogleFonts.tajawal(
             fontWeight: FontWeight.w700,
             color: colorScheme.primary,
@@ -199,9 +201,9 @@ class _WorkshopCardState extends State<WorkshopCard>
             child: _buildCoverImage(widget.coverImagePath, ext, colorScheme),
           ),
           // Profile circle
-          Positioned(
+          PositionedDirectional(
             bottom: 0,
-            right: 16,
+            start: 16,
             child: Container(
               width: 60,
               height: 60,
@@ -257,7 +259,7 @@ class _WorkshopCardState extends State<WorkshopCard>
                   size: 16, color: colorScheme.onSurfaceVariant),
               const SizedBox(width: 4),
               Text(
-                widget.cityName,
+                AppLocalizations.of(context)!.localizeCity(widget.cityName),
                 style: GoogleFonts.tajawal(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
@@ -271,7 +273,7 @@ class _WorkshopCardState extends State<WorkshopCard>
               Text(
                 (widget.reviewCount ?? (widget.rating > 0 ? 1 : 0)) > 0
                     ? '${widget.rating.toStringAsFixed(1)}/5'
-                    : 'جديد',
+                    : AppLocalizations.of(context)!.newLabel,
                 style: GoogleFonts.tajawal(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -288,7 +290,9 @@ class _WorkshopCardState extends State<WorkshopCard>
                 child: ScaleTransition(
                   scale: _followScaleAnim,
                   child: _ActionBtn(
-                    label: _isFollowing ? 'إلغاء المتابعة' : 'متابعة',
+                    label: _isFollowing
+                        ? AppLocalizations.of(context)!.unfollow
+                        : AppLocalizations.of(context)!.follow,
                     isPrimary: !_isFollowing,
                     onTap: _handleFollowTap,
                     colorScheme: colorScheme,
@@ -299,7 +303,7 @@ class _WorkshopCardState extends State<WorkshopCard>
               const SizedBox(width: 16),
               Expanded(
                 child: _ActionBtn(
-                  label: 'دخول الورشة',
+                  label: AppLocalizations.of(context)!.enterWorkshop,
                   isPrimary: true,
                   onTap: widget.onEnterTap ?? () {},
                   colorScheme: colorScheme,

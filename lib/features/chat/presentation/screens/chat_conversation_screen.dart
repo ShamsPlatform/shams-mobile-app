@@ -1,19 +1,21 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/core/di/injection.dart';
+import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/presentation/view_status.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
+import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
 import 'package:shams_mobile_app/features/chat/domain/entities/chat.dart';
 import 'package:shams_mobile_app/features/chat/presentation/providers/chat_list_provider.dart';
 import 'package:shams_mobile_app/features/chat/presentation/providers/conversation_provider.dart';
-import 'package:shams_mobile_app/features/chat/presentation/widgets/message_bubble.dart';
 import 'package:shams_mobile_app/features/chat/presentation/widgets/chat_input_field.dart';
-import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
-import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import 'package:provider/provider.dart';
+import 'package:shams_mobile_app/features/chat/presentation/widgets/message_bubble.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
-import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ChatConversationScreen — شاشة المحادثة الفردية
@@ -94,7 +96,7 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
       color: Theme.of(context).extension<ShamsExtendedColors>()!.avatarFallbackBg,
       child: Center(
         child: Text(
-          name.isNotEmpty ? name[0] : '؟',
+          name.isNotEmpty ? name[0].toUpperCase() : '?',
           style: GoogleFonts.tajawal(
             fontWeight: FontWeight.w700,
             color: Theme.of(context).colorScheme.primary,
@@ -107,6 +109,7 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
 
   Future<void> _addNewMessage(String text) async {
     if (text.trim().isEmpty) return;
+    final l10n = AppLocalizations.of(context)!;
     final currentUser =
         context.read<ProfileProvider>().currentUserOrPlaceholder;
     final conversation = context.read<ConversationProvider>();
@@ -121,7 +124,10 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            conversation.errorMessage ?? 'تعذر إرسال الرسالة',
+            l10n.localizeErrorMessage(
+              conversation.errorMessage,
+              fallback: l10n.failedToSendMessage,
+            ),
             style: GoogleFonts.tajawal(),
           ),
           backgroundColor: errorColor,
@@ -132,20 +138,16 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
   }
 
   /// Returns a human-readable date label for a given [date].
-  String _formatDateLabel(DateTime date) {
+  String _formatDateLabel(DateTime date, AppLocalizations l10n) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
     final msgDay = DateTime(date.year, date.month, date.day);
 
-    if (msgDay == today) return 'اليوم';
-    if (msgDay == yesterday) return 'أمس';
+    if (msgDay == today) return l10n.today;
+    if (msgDay == yesterday) return l10n.yesterday;
 
-    const arabicMonths = [
-      'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-      'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
-    ];
-    return '${date.day} ${arabicMonths[date.month - 1]} ${date.year}';
+    return '${date.day} ${l10n.localizedMonthName(date.month)} ${date.year}';
   }
 
   /// Returns true if [a] and [b] are on different calendar days.
@@ -155,6 +157,7 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final conversation = context.watch<ConversationProvider>();
     final currentUser = context.watch<ProfileProvider>().currentUserOrPlaceholder;
     final chat = conversation.chat ??
@@ -166,7 +169,7 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
           lastMessageTime: DateTime.now(),
         );
     final otherParticipant = chat.participants.isEmpty
-        ? const AppUser(id: '', name: 'محادثة', email: '')
+        ? AppUser(id: '', name: l10n.chatFallbackTitle, email: '')
         : chat.participants.firstWhere(
             (p) => p.id != currentUser.id,
             orElse: () => chat.participants.first,
@@ -183,9 +186,7 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
       displayAvatar = workshopMatch.logoUrl ?? displayAvatar;
     }
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
@@ -193,7 +194,7 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
           titleSpacing: 0,
           leading: IconButton(
             icon: Icon(
-              Icons.arrow_forward_rounded,
+              Icons.arrow_back_rounded,
               color: Theme.of(context).colorScheme.onSurface,
             ),
             onPressed: () => Navigator.pop(context),
@@ -235,7 +236,7 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
                   ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          _isMuted ? 'تم كتم إشعارات هذه المحادثة' : 'تم تفعيل إشعارات هذه المحادثة',
+                          _isMuted ? l10n.chatMuted : l10n.chatUnmuted,
                           style: GoogleFonts.tajawal(),
                         ),
                         backgroundColor:
@@ -259,7 +260,7 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
                     children: [
                       const Icon(Icons.search_rounded, size: 20),
                       const SizedBox(width: 8),
-                      Text('بحث', style: GoogleFonts.tajawal()),
+                      Text(l10n.search, style: GoogleFonts.tajawal()),
                     ],
                   ),
                 ),
@@ -273,7 +274,7 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        _isMuted ? 'تفعيل الإشعارات' : 'كتم الإشعارات',
+                        _isMuted ? l10n.enableNotifications : l10n.muteNotifications,
                         style: GoogleFonts.tajawal(),
                       ),
                     ],
@@ -290,7 +291,7 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'مسح المحادثة',
+                        l10n.clearChat,
                         style: GoogleFonts.tajawal(
                           color: Theme.of(context).colorScheme.error,
                         ),
@@ -306,7 +307,7 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
           children: [
             if (_isSearching)
               InlineSearchBar(
-                hintText: 'ابحث في المحادثة...',
+                hintText: l10n.searchInChatHint,
                 onChanged: (val) {
                   setState(() => _searchQuery = val);
                 },
@@ -340,14 +341,14 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
 
                   // ── Empty chat state ──────────────────────────────────────
                   if (allMessages.isEmpty && _searchQuery.isEmpty) {
-                    return _buildEmptyChatState();
+                    return _buildEmptyChatState(l10n);
                   }
 
                   // ── No search results ─────────────────────────────────────
                   if (filteredMessages.isEmpty && _searchQuery.isNotEmpty) {
                     return Center(
                       child: Text(
-                        'لا توجد نتائج لـ "$_searchQuery"',
+                        l10n.noResultsFor(_searchQuery),
                         style: GoogleFonts.tajawal(
                           color: Theme.of(context)
                               .extension<ShamsExtendedColors>()!
@@ -387,7 +388,7 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
                             isRead: msg.isRead,
                           ),
                           if (showDivider)
-                            _DateDivider(label: _formatDateLabel(msg.timestamp)),
+                            _DateDivider(label: _formatDateLabel(msg.timestamp, l10n)),
                         ],
                       );
                     },
@@ -399,8 +400,7 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
             ChatInputField(onSendMessage: _addNewMessage),
           ],
         ),
-      ),
-    );
+      );
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -414,50 +414,48 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
 
   /// Confirmation dialog before wiping all messages.
   void _showClearChatDialog() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog<void>(
       context: context,
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(
-            'مسح المحادثة',
-            style: GoogleFonts.tajawal(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.error,
-            ),
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          l10n.clearChat,
+          style: GoogleFonts.tajawal(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.error,
           ),
-          content: Text(
-            'هل أنت متأكد أنك تريد مسح جميع الرسائل في هذه المحادثة؟',
-            style: GoogleFonts.tajawal(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+        ),
+        content: Text(
+          l10n.clearChatConfirm,
+          style: GoogleFonts.tajawal(
+            color: Theme.of(context).colorScheme.onSurface,
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text('إلغاء', style: GoogleFonts.tajawal(color: Colors.grey)),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(ctx);
-                context.read<ConversationProvider>().clearMessages();
-              },
-              child: Text(
-                'مسح',
-                style: GoogleFonts.tajawal(
-                  color: Theme.of(context).colorScheme.error,
-                  fontWeight: FontWeight.bold,
-                ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancel, style: GoogleFonts.tajawal(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              context.read<ConversationProvider>().clearMessages();
+            },
+            child: Text(
+              l10n.clearAction,
+              style: GoogleFonts.tajawal(
+                color: Theme.of(context).colorScheme.error,
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildEmptyChatState() {
+  Widget _buildEmptyChatState(AppLocalizations l10n) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -472,7 +470,7 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
           ),
           const SizedBox(height: 16),
           Text(
-            'لا توجد رسائل بعد',
+            l10n.noMessagesYet,
             style: GoogleFonts.tajawal(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -481,7 +479,7 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
           ),
           const SizedBox(height: 6),
           Text(
-            'ابدأ المحادثة الآن!',
+            l10n.startConversationNow,
             style: GoogleFonts.tajawal(
               fontSize: 13,
               color: Theme.of(context)

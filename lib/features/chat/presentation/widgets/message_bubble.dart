@@ -28,7 +28,8 @@ class MessageBubble extends StatelessWidget {
         : colorScheme.onSurfaceVariant;
 
     return Align(
-      alignment: isMe ? Alignment.centerLeft : Alignment.centerRight,
+      alignment:
+          isMe ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 16.0),
         padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
@@ -37,11 +38,11 @@ class MessageBubble extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: bubbleColor,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(16),
-            topRight: Radius.circular(isMe ? 16 : 0),
-            bottomRight: const Radius.circular(16),
-            bottomLeft: Radius.circular(isMe ? 0 : 16),
+          borderRadius: BorderRadiusDirectional.only(
+            topStart: Radius.circular(isMe ? 16 : 0),
+            topEnd: const Radius.circular(16),
+            bottomStart: const Radius.circular(16),
+            bottomEnd: Radius.circular(isMe ? 0 : 16),
           ),
         ),
         child: Column(

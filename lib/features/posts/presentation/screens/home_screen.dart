@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/appbar.dart';
-import 'package:shams_mobile_app/features/posts/presentation/widgets/post_card.dart';
 import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
+import 'package:shams_mobile_app/core/widgets/shams_drawer.dart';
+import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shams_mobile_app/features/notifications/presentation/providers/notification_provider.dart';
+import 'package:shams_mobile_app/features/notifications/presentation/screens/notifications_screen.dart';
+import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/features/posts/presentation/screens/post_detail_screen.dart';
 import 'package:shams_mobile_app/features/posts/presentation/widgets/comments_component.dart';
-import 'package:provider/provider.dart';
-import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
-import 'package:shams_mobile_app/features/workshops/domain/entities/workshop.dart';
-import 'package:shams_mobile_app/features/workshops/presentation/constants/workshop_assets.dart';
-import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
-import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shams_mobile_app/features/posts/presentation/widgets/post_card.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/screens/about_shams_screen.dart';
 import 'package:shams_mobile_app/features/profile/presentation/screens/edit_profile_screen.dart';
-import 'package:shams_mobile_app/features/notifications/presentation/providers/notification_provider.dart';
-import 'package:shams_mobile_app/features/notifications/presentation/screens/notifications_screen.dart';
+import 'package:shams_mobile_app/features/workshops/domain/entities/workshop.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/constants/workshop_assets.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/screens/workshop_dashboard_screen.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/screens/workshop_profile_screen.dart';
-import 'package:shams_mobile_app/core/widgets/shams_drawer.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // (أُزيلت البيانات الوهمية، يتم جلبها الآن من FeedProvider)
@@ -65,47 +66,44 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        key: _scaffoldKey,
-        drawer: ShamsDrawer(
-          activeIndex: 0,
-          currentUser: context.watch<ProfileProvider>().currentUserOrPlaceholder,
-          onEditProfileTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const EditProfileScreen()),
-          ),
-          onAboutTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AboutShamsScreen()),
-          ),
-          onWorkshopDashboardTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const WorkshopDashboardScreen(),
-            ),
-          ),
-          onSignOut: () => context.read<AuthProvider>().signOut(),
+    return Scaffold(
+      key: _scaffoldKey,
+      drawer: ShamsDrawer(
+        activeIndex: 0,
+        currentUser: context.watch<ProfileProvider>().currentUserOrPlaceholder,
+        onEditProfileTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const EditProfileScreen()),
         ),
-        backgroundColor: Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
-        // ── AppBar المُعاد استخدامه من widgets/appbar.dart ──────────
-        appBar: ShamsPlatformAppBar(
-          unreadNotifications:
-              context.select<NotificationProvider, int>((p) => p.unreadCount),
-          onMenuTap: () {
-            _scaffoldKey.currentState?.openDrawer();
-          },
-          onNotificationTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const NotificationsScreen()),
-            );
-          },
-          // onDarkModeTap intentionally omitted — AppBar uses ThemeProvider.toggleTheme() by default
+        onAboutTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AboutShamsScreen()),
         ),
-        body: _buildBody(context),
+        onWorkshopDashboardTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const WorkshopDashboardScreen(),
+          ),
+        ),
+        onSignOut: () => context.read<AuthProvider>().signOut(),
       ),
+      backgroundColor: Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
+      // ── AppBar المُعاد استخدامه من widgets/appbar.dart ──────────
+      appBar: ShamsPlatformAppBar(
+        unreadNotifications:
+            context.select<NotificationProvider, int>((p) => p.unreadCount),
+        onMenuTap: () {
+          _scaffoldKey.currentState?.openDrawer();
+        },
+        onNotificationTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+          );
+        },
+        // onDarkModeTap intentionally omitted — AppBar uses ThemeProvider.toggleTheme() by default
+      ),
+      body: _buildBody(context),
     );
   }
 
@@ -114,6 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildSearchBar(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
+    final l10n = AppLocalizations.of(context)!;
 
     return Material(
       color: colorScheme.surface,
@@ -122,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           InlineSearchBar(
-            hintText: 'ابحث عن قبليات، مشاريع أو قطع غيار...',
+            hintText: l10n.homeSearchHint,
             onChanged: (val) {
               setState(() {
                 _searchQuery = val;
@@ -143,6 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildBody(BuildContext context) {
     final feedProvider = context.watch<FeedProvider>();
+    final l10n = AppLocalizations.of(context)!;
     final allPosts = feedProvider.posts;
 
     final filteredPosts = _searchQuery.isEmpty 
@@ -188,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'لا توجد منشورات حتى الآن',
+                          l10n.noPostsYet,
                           style: GoogleFonts.tajawal(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -198,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     )
                   : Text(
-                      'لا توجد نتائج لـ "$_searchQuery"',
+                      l10n.noResultsFor(_searchQuery),
                       style: GoogleFonts.tajawal(
                           color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 16),
                     ),
@@ -228,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
               }
 
-              final displayName = postWorkshop?.name ?? post.author?.name ?? 'مستخدم غير معروف';
+              final displayName = postWorkshop?.name ?? post.author?.name ?? l10n.unknownUser;
               final displayHandle = postWorkshop?.handle ?? (post.author?.email != null ? '@${post.author!.email.split('@').first}' : '@unknown');
               final displayAvatar = postWorkshop?.logoUrl ?? post.author?.profileImageUrl ?? kDefaultWorkshopLogoAsset;
 
@@ -313,10 +313,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onShare(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'تمت مشاركة المنشور',
+          l10n.postShared,
           style: GoogleFonts.tajawal(
               color: Theme.of(context).colorScheme.onInverseSurface),
         ),
@@ -332,50 +333,48 @@ class _HomeScreenState extends State<HomeScreen> {
   // ─── قائمة خيارات المنشور ─────────────────────────────────────────────────
 
   void _showPostMenu(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 20),
-                decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .extension<ShamsExtendedColors>()!
-                      .handleBar,
-                  borderRadius: BorderRadius.circular(99),
-                ),
+      builder: (_) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius:
+              const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .extension<ShamsExtendedColors>()!
+                    .handleBar,
+                borderRadius: BorderRadius.circular(99),
               ),
-              _MenuOption(
-                icon: Icons.bookmark_border_rounded,
-                label: 'حفظ المنشور',
-                onTap: () => Navigator.pop(context),
-              ),
-              _MenuOption(
-                icon: Icons.person_add_outlined,
-                label: 'متابعة الحساب',
-                onTap: () => Navigator.pop(context),
-              ),
-              _MenuOption(
-                icon: Icons.flag_outlined,
-                label: 'الإبلاغ عن المنشور',
-                color: Theme.of(context).colorScheme.error,
-                onTap: () => Navigator.pop(context),
-              ),
-            ],
-          ),
+            ),
+            _MenuOption(
+              icon: Icons.bookmark_border_rounded,
+              label: l10n.savePost,
+              onTap: () => Navigator.pop(context),
+            ),
+            _MenuOption(
+              icon: Icons.person_add_outlined,
+              label: l10n.followAccount,
+              onTap: () => Navigator.pop(context),
+            ),
+            _MenuOption(
+              icon: Icons.flag_outlined,
+              label: l10n.reportPost,
+              color: Theme.of(context).colorScheme.error,
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
         ),
       ),
     );

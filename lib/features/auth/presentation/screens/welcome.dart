@@ -1,5 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
 import 'package:shams_mobile_app/core/widgets/outlined_button.dart';
@@ -11,6 +12,7 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
         backgroundColor:
             Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
@@ -24,7 +26,7 @@ class WelcomeScreen extends StatelessWidget {
                 Image.asset('assets/images/logo/shams logo.png', height: 100),
                 const SizedBox(height: 16),
                 Text(
-                  'شمس',
+                  l10n.appTitle,
                   style: GoogleFonts.tajawal(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -32,7 +34,7 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'طاقة موثوقة.. لمجتمع متصل',
+                  l10n.welcomeTagline,
                   style: GoogleFonts.tajawal(
                     fontSize: 14,
                     color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
@@ -42,9 +44,9 @@ class WelcomeScreen extends StatelessWidget {
                 // ── بطاقات المميزات (Feature Highlights) ──
                 Row(
                   children: [
-                    _buildFeatureCard(context, Icons.bolt_rounded, 'كفاءة عالية'),
+                    _buildFeatureCard(context, Icons.bolt_rounded, l10n.highEfficiency),
                     const SizedBox(width: 16),
-                    _buildFeatureCard(context, Icons.settings_suggest_rounded, 'تحكم ذكي'),
+                    _buildFeatureCard(context, Icons.settings_suggest_rounded, l10n.smartControl),
                   ],
                 ),
                 const Spacer(),
@@ -53,7 +55,7 @@ class WelcomeScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 52,
                   child: CustomSolidButton(
-                    title: 'إنشاء حساب',
+                    title: l10n.signup,
                     onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SignUpScreen())),
                   ),
                 ),
@@ -62,13 +64,13 @@ class WelcomeScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 52,
                   child: CustomOutlinedButton(
-                    title: 'تسجيل الدخول',
+                    title: l10n.signin,
                     onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SignInScreen())),
                   ),
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'شروط الخدمة من خلال الاستمرار، أنت توافق على شروط الخدمة',
+                  l10n.termsOfServiceNotice,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.tajawal(fontSize: 11, color: const Color(0xFFBFC3CE)),
                 ),

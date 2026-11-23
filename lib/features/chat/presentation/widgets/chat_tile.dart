@@ -57,7 +57,7 @@ class ChatTile extends StatelessWidget {
       color: ext.avatarFallbackBg,
       child: Center(
         child: Text(
-          name.isNotEmpty ? name[0] : '؟',
+          name.isNotEmpty ? name[0].toUpperCase() : '?',
           style: GoogleFonts.tajawal(
             fontWeight: FontWeight.w700,
             color: colorScheme.primary,
@@ -111,9 +111,9 @@ class ChatTile extends StatelessWidget {
                       ),
                     ),
                   if (isOnline)
-                    Positioned(
+                    PositionedDirectional(
                       bottom: 2,
-                      right: 2,
+                      end: 2,
                       child: Container(
                         width: 14,
                         height: 14,

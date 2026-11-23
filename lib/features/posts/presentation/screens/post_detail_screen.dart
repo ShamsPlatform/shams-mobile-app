@@ -2,12 +2,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import 'package:shams_mobile_app/core/utils/formatters.dart';
-import 'package:shams_mobile_app/features/posts/presentation/widgets/post_card.dart';
-import 'package:shams_mobile_app/features/posts/presentation/widgets/comments_component.dart';
-
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
+import 'package:shams_mobile_app/features/posts/presentation/widgets/comments_component.dart';
+import 'package:shams_mobile_app/features/posts/presentation/widgets/post_card.dart';
 import 'package:shams_mobile_app/features/workshops/domain/entities/workshop.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/constants/workshop_assets.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
@@ -35,22 +35,20 @@ class PostDetailScreen extends StatelessWidget {
     // calls notifyListeners(), guaranteeing the UI is always up-to-date.
     final feed = context.watch<FeedProvider>();
     final post = feed.getPostById(postId);
+    final l10n = AppLocalizations.of(context)!;
 
     // Guard: if the post was deleted while open, pop back gracefully.
     if (post == null) {
-      return Directionality(
-        textDirection: TextDirection.rtl,
-        child: Scaffold(
-          backgroundColor:
-              Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
-          appBar: _buildAppBar(context),
-          body: Center(
-            child: Text(
-              'لم يُعثر على المنشور',
-              style: GoogleFonts.tajawal(
-                fontSize: 16,
-                color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
-              ),
+      return Scaffold(
+        backgroundColor:
+            Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
+        appBar: _buildAppBar(context),
+        body: Center(
+          child: Text(
+            l10n.postNotFound,
+            style: GoogleFonts.tajawal(
+              fontSize: 16,
+              color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
             ),
           ),
         ),
@@ -78,86 +76,83 @@ class PostDetailScreen extends StatelessWidget {
     }
 
     // Derived display values — computed inside build, never stored in state.
-    final username = postWorkshop?.name ?? post.author?.name ?? 'مستخدم غير معروف';
+    final username = postWorkshop?.name ?? post.author?.name ?? l10n.unknownUser;
     final userHandle = postWorkshop?.handle ?? (post.author?.email != null ? '@${post.author!.email.split('@').first}' : '@unknown');
     final avatarPath = postWorkshop?.logoUrl ?? post.author?.profileImageUrl ?? kDefaultWorkshopLogoAsset;
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor:
-            Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
+    return Scaffold(
+      backgroundColor:
+          Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
 
-        // ── AppBar ───────────────────────────────────────────────────────────
-        appBar: _buildAppBar(context),
+      // ── AppBar ───────────────────────────────────────────────────────────
+      appBar: _buildAppBar(context),
 
-        // ── Body ─────────────────────────────────────────────────────────────
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── بطاقة المنشور الكاملة ──────────────────────────────────────
-              PostCard(
-                username: username,
-                userHandle: userHandle,
-                avatarPath: avatarPath,
-                content: post.textDetails,
-                imagePaths: post.images.isNotEmpty ? post.images : null,
-                likesCount: post.likesCount,
-                commentsCount: post.comments.length,
-                sharesCount: 0,
-                isLiked: post.isLiked,
-                // Show full text — no truncation on the detail screen.
-                maxLines: 999,
-                // context.read() inside a callback — correct usage.
-                onLikeToggle: (_) =>
-                    context.read<FeedProvider>().toggleLike(postId),
-                onCommentTap: () => _openCommentsSheet(context),
-                onShareTap: () => _onShare(context),
-                onMenuTap: () => _showMenu(context),
-                onUserTap: () {
-                  final workshops = context.read<WorkshopsProvider>().workshops;
-                  Workshop? targetWorkshop;
+      // ── Body ─────────────────────────────────────────────────────────────
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── بطاقة المنشور الكاملة ──────────────────────────────────────
+            PostCard(
+              username: username,
+              userHandle: userHandle,
+              avatarPath: avatarPath,
+              content: post.textDetails,
+              imagePaths: post.images.isNotEmpty ? post.images : null,
+              likesCount: post.likesCount,
+              commentsCount: post.comments.length,
+              sharesCount: 0,
+              isLiked: post.isLiked,
+              // Show full text — no truncation on the detail screen.
+              maxLines: 999,
+              // context.read() inside a callback — correct usage.
+              onLikeToggle: (_) =>
+                  context.read<FeedProvider>().toggleLike(postId),
+              onCommentTap: () => _openCommentsSheet(context),
+              onShareTap: () => _onShare(context),
+              onMenuTap: () => _showMenu(context),
+              onUserTap: () {
+                final workshops = context.read<WorkshopsProvider>().workshops;
+                Workshop? targetWorkshop;
 
-                  if (post.workshopId != null) {
-                    for (final w in workshops) {
-                      if (w.id == post.workshopId) {
-                        targetWorkshop = w;
-                        break;
-                      }
+                if (post.workshopId != null) {
+                  for (final w in workshops) {
+                    if (w.id == post.workshopId) {
+                      targetWorkshop = w;
+                      break;
                     }
                   }
+                }
 
-                  if (targetWorkshop == null && post.author != null) {
-                    for (final w in workshops) {
-                      if (w.id == post.author!.id) {
-                        targetWorkshop = w;
-                        break;
-                      }
+                if (targetWorkshop == null && post.author != null) {
+                  for (final w in workshops) {
+                    if (w.id == post.author!.id) {
+                      targetWorkshop = w;
+                      break;
                     }
                   }
-                  
-                  final targetId = targetWorkshop?.id ?? post.author?.id;
-                  if (targetId != null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => WorkshopProfile(workshopId: targetId),
-                      ),
-                    );
-                  }
-                },
-              ),
+                }
+                
+                final targetId = targetWorkshop?.id ?? post.author?.id;
+                if (targetId != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => WorkshopProfile(workshopId: targetId),
+                    ),
+                  );
+                }
+              },
+            ),
 
-              const SizedBox(height: 8),
+            const SizedBox(height: 8),
 
-              // ── قسم التعليقات ─────────────────────────────────────────────
-              _CommentsSection(postId: postId),
+            // ── قسم التعليقات ─────────────────────────────────────────────
+            _CommentsSection(postId: postId),
 
-              const SizedBox(height: 20),
-            ],
-          ),
+            const SizedBox(height: 20),
+          ],
         ),
       ),
     );
@@ -171,10 +166,11 @@ class PostDetailScreen extends StatelessWidget {
   }
 
   void _onShare(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'تمت مشاركة المنشور',
+          l10n.postShared,
           style: GoogleFonts.tajawal(
             color: Theme.of(context).colorScheme.onPrimary,
           ),
@@ -188,54 +184,53 @@ class PostDetailScreen extends StatelessWidget {
   }
 
   void _showMenu(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 20),
-                decoration: BoxDecoration(
-                  color:
-                      Theme.of(context).extension<ShamsExtendedColors>()!.handleBar,
-                  borderRadius: BorderRadius.circular(99),
-                ),
+      builder: (_) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color:
+                    Theme.of(context).extension<ShamsExtendedColors>()!.handleBar,
+                borderRadius: BorderRadius.circular(99),
               ),
-              _MenuOption(
-                icon: Icons.bookmark_border_rounded,
-                label: 'حفظ المنشور',
-                onTap: () => Navigator.pop(context),
-              ),
-              _MenuOption(
-                icon: Icons.person_add_outlined,
-                label: 'متابعة الحساب',
-                onTap: () => Navigator.pop(context),
-              ),
-              _MenuOption(
-                icon: Icons.flag_outlined,
-                label: 'الإبلاغ عن المنشور',
-                color: Theme.of(context).colorScheme.error,
-                onTap: () => Navigator.pop(context),
-              ),
-            ],
-          ),
+            ),
+            _MenuOption(
+              icon: Icons.bookmark_border_rounded,
+              label: l10n.savePost,
+              onTap: () => Navigator.pop(context),
+            ),
+            _MenuOption(
+              icon: Icons.person_add_outlined,
+              label: l10n.followAccount,
+              onTap: () => Navigator.pop(context),
+            ),
+            _MenuOption(
+              icon: Icons.flag_outlined,
+              label: l10n.reportPost,
+              color: Theme.of(context).colorScheme.error,
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
         ),
       ),
     );
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return PreferredSize(
       preferredSize: const Size.fromHeight(kToolbarHeight),
       child: Container(
@@ -266,7 +261,7 @@ class PostDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    'تفاصيل المنشور',
+                    l10n.postDetails,
                     style: GoogleFonts.tajawal(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
@@ -310,6 +305,7 @@ class _CommentsSection extends StatelessWidget {
     // Watch FeedProvider directly to make this section perfectly reactive
     final feed = context.watch<FeedProvider>();
     final post = feed.getPostById(postId);
+    final l10n = AppLocalizations.of(context)!;
 
     if (post == null) return const SizedBox.shrink();
     final comments = post.comments;
@@ -336,7 +332,7 @@ class _CommentsSection extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  'التعليقات',
+                  l10n.comments,
                   style: GoogleFonts.tajawal(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -368,7 +364,7 @@ class _CommentsSection extends StatelessWidget {
                 GestureDetector(
                   onTap: () => _openSheet(context),
                   child: Text(
-                    'عرض الكل',
+                    l10n.viewAll,
                     style: GoogleFonts.tajawal(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -395,7 +391,7 @@ class _CommentsSection extends StatelessWidget {
                       'assets/images/logo/shams logo.png',
                   userName: comment.user.name,
                   text: comment.text,
-                  timeAgo: formatRelativeTime(comment.createdAt),
+                  timeAgo: l10n.formatRelativeTimeLocalized(comment.createdAt),
                 ),
                 if (comment != comments.take(2).last)
                   const Divider(
@@ -430,7 +426,7 @@ class _CommentsSection extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'اكتب تعليقك هنا...',
+                    l10n.writeCommentHint,
                     style: GoogleFonts.tajawal(
                       fontSize: 13.5,
                       color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
@@ -503,7 +499,9 @@ class _PreviewComment extends StatelessWidget {
                                 .avatarFallbackBg,
                             child: Center(
                               child: Text(
-                                userName.isNotEmpty ? userName[0] : '؟',
+                                userName.isNotEmpty
+                                    ? userName[0].toUpperCase()
+                                    : '?',
                                 style: GoogleFonts.tajawal(
                                   fontWeight: FontWeight.w700,
                                   color: Theme.of(context).colorScheme.primary,
@@ -522,7 +520,9 @@ class _PreviewComment extends StatelessWidget {
                                     .avatarFallbackBg,
                                 child: Center(
                                   child: Text(
-                                    userName.isNotEmpty ? userName[0] : '؟',
+                                    userName.isNotEmpty
+                                        ? userName[0].toUpperCase()
+                                        : '?',
                                     style: GoogleFonts.tajawal(
                                       fontWeight: FontWeight.w700,
                                       color: Theme.of(context).colorScheme.primary,
@@ -537,7 +537,9 @@ class _PreviewComment extends StatelessWidget {
                                   .avatarFallbackBg,
                               child: Center(
                                 child: Text(
-                                  userName.isNotEmpty ? userName[0] : '؟',
+                                  userName.isNotEmpty
+                                      ? userName[0].toUpperCase()
+                                      : '?',
                                   style: GoogleFonts.tajawal(
                                     fontWeight: FontWeight.w700,
                                     color: Theme.of(context).colorScheme.primary,

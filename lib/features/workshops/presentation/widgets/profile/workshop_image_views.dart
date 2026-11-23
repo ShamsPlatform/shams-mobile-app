@@ -98,7 +98,7 @@ class WorkshopAvatarImage extends StatelessWidget {
       color: Theme.of(context).extension<ShamsExtendedColors>()!.avatarFallbackBg,
       child: Center(
         child: Text(
-          name.isNotEmpty ? name[0] : '؟',
+          name.isNotEmpty ? name[0].toUpperCase() : '?',
           style: GoogleFonts.tajawal(
             fontWeight: FontWeight.w700,
             color: Theme.of(context).colorScheme.primary,

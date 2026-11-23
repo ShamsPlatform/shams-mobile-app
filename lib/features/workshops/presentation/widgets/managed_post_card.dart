@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 class ManagedPostCard extends StatefulWidget {
@@ -83,25 +84,28 @@ class _ManagedPostCardState extends State<ManagedPostCard> {
                     if (value == 'edit') widget.onEdit();
                     if (value == 'delete') widget.onDelete();
                   },
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 'edit',
-                      child: Text(
-                        'تعديل',
-                        style: GoogleFonts.tajawal(fontSize: 14),
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'delete',
-                      child: Text(
-                        'حذف',
-                        style: GoogleFonts.tajawal(
-                          fontSize: 14,
-                          color: Colors.red,
+                  itemBuilder: (context) {
+                    final l10n = AppLocalizations.of(context)!;
+                    return [
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Text(
+                          l10n.edit,
+                          style: GoogleFonts.tajawal(fontSize: 14),
                         ),
                       ),
-                    ),
-                  ],
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Text(
+                          l10n.delete,
+                          style: GoogleFonts.tajawal(
+                            fontSize: 14,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ),
+                    ];
+                  },
                 ),
                 // شارة الوقت (مثال: منذ يومين)
                 Container(
@@ -191,11 +195,11 @@ class _ManagedPostCardState extends State<ManagedPostCard> {
                         },
                       ),
 
-                      // عداد الصور (يسار تحت)
+                      // عداد الصور
                       if (widget.imagePaths.length > 1)
-                        Positioned(
+                        PositionedDirectional(
                           bottom: 12,
-                          left: 12,
+                          end: 12,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,
@@ -311,10 +315,10 @@ class _ManagedPostCardState extends State<ManagedPostCard> {
               ),
             ),
           ),
-          // بطاقة "فيديو" في الأسفل يسار
-          Positioned(
+          // بطاقة "فيديو" في الأسفل
+          PositionedDirectional(
             bottom: 10,
-            left: 10,
+            end: 10,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
@@ -331,7 +335,7 @@ class _ManagedPostCardState extends State<ManagedPostCard> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    'فيديو',
+                    AppLocalizations.of(context)!.video,
                     style: GoogleFonts.tajawal(
                       color: Colors.white,
                       fontSize: 11,

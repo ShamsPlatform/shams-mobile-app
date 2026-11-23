@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 class ShamsCommentTile extends StatelessWidget {
@@ -70,7 +71,7 @@ class ShamsCommentTile extends StatelessWidget {
                           Icon(Icons.thumb_up_alt_outlined, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
                           const SizedBox(width: 4),
                           Text(
-                            'إعجاب',
+                            AppLocalizations.of(context)!.like,
                             style: textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                           ),
                         ],

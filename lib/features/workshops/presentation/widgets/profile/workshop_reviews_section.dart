@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/presentation/view_status.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/features/workshops/domain/entities/review.dart';
@@ -47,33 +49,31 @@ class WorkshopReviewsSection extends StatelessWidget {
     WorkshopReviewsProvider provider,
     Review review,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          title: Text(
-            'حذف التقييم',
-            style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
-          ),
-          content: Text(
-            'هل أنت متأكد من رغبتك في حذف تقييمك لهذه الورشة؟',
-            style: GoogleFonts.tajawal(),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: Text('إلغاء', style: GoogleFonts.tajawal()),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(dialogContext).colorScheme.error,
-              ),
-              child: Text('حذف', style: GoogleFonts.tajawal()),
-            ),
-          ],
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          l10n.deleteReviewTitle,
+          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
         ),
+        content: Text(
+          l10n.deleteReviewConfirm,
+          style: GoogleFonts.tajawal(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.cancel, style: GoogleFonts.tajawal()),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(dialogContext).colorScheme.error,
+            ),
+            child: Text(l10n.delete, style: GoogleFonts.tajawal()),
+          ),
+        ],
       ),
     );
     if (confirmed != true || !context.mounted) return;
@@ -87,14 +87,17 @@ class WorkshopReviewsSection extends StatelessWidget {
       onReviewsChanged?.call();
       messenger.showSnackBar(
         SnackBar(
-          content: Text('تم حذف التقييم', style: GoogleFonts.tajawal()),
+          content: Text(l10n.reviewDeletedSuccess, style: GoogleFonts.tajawal()),
         ),
       );
     } else {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            provider.errorMessage ?? 'تعذر حذف التقييم',
+            l10n.localizeErrorMessage(
+              provider.errorMessage,
+              fallback: l10n.reviewDeleteFailed,
+            ),
             style: GoogleFonts.tajawal(),
           ),
           backgroundColor: errorColor,
@@ -105,6 +108,7 @@ class WorkshopReviewsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final ext = theme.extension<ShamsExtendedColors>();
@@ -132,7 +136,7 @@ class WorkshopReviewsSection extends StatelessWidget {
                 child: Row(
                   children: [
                     Text(
-                      'التقييمات والآراء',
+                      l10n.reviewsAndOpinions,
                       style: GoogleFonts.tajawal(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -160,7 +164,7 @@ class WorkshopReviewsSection extends StatelessWidget {
                           const SizedBox(width: 3),
                           Text(
                             reviews.isEmpty
-                                ? 'جديد'
+                                ? l10n.newLabel
                                 : '${provider.averageRating.toStringAsFixed(1)} (${provider.reviewCount})',
                             style: GoogleFonts.tajawal(
                               fontSize: 12,
@@ -188,7 +192,9 @@ class WorkshopReviewsSection extends StatelessWidget {
                     size: 16,
                   ),
                   label: Text(
-                    existingUserReview == null ? 'أضف تقييمك' : 'تعديل تقييمي',
+                    existingUserReview == null
+                        ? l10n.addYourReview
+                        : l10n.editMyReview,
                     style: GoogleFonts.tajawal(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
@@ -207,7 +213,10 @@ class WorkshopReviewsSection extends StatelessWidget {
             Column(
               children: [
                 Text(
-                  provider.errorMessage ?? 'تعذر تحميل التقييمات',
+                  l10n.localizeErrorMessage(
+                    provider.errorMessage,
+                    fallback: l10n.failedToLoadReviews,
+                  ),
                   style: GoogleFonts.tajawal(
                     fontSize: 13,
                     color: colorScheme.error,
@@ -219,7 +228,7 @@ class WorkshopReviewsSection extends StatelessWidget {
                   onPressed: () => provider.load(workshopId),
                   icon: const Icon(Icons.refresh_rounded, size: 18),
                   label: Text(
-                    'إعادة المحاولة',
+                    l10n.retry,
                     style: GoogleFonts.tajawal(fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -237,7 +246,7 @@ class WorkshopReviewsSection extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'لا توجد تقييمات لهذه الورشة حتى الآن',
+                    l10n.noReviewsYet,
                     style: GoogleFonts.tajawal(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -248,7 +257,7 @@ class WorkshopReviewsSection extends StatelessWidget {
                   if (canReview) ...[
                     const SizedBox(height: 4),
                     Text(
-                      'كن أول من يشارك تجربته مع هذه الورشة',
+                      l10n.beFirstToReview,
                       style: GoogleFonts.tajawal(
                         fontSize: 12,
                         color: ext?.textHint ?? ShamsColors.textHint,
@@ -322,12 +331,13 @@ class _ReviewTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final ext = theme.extension<ShamsExtendedColors>();
     final displayName = review.reviewer.name.trim().isNotEmpty
         ? review.reviewer.name
-        : (review.reviewer.username ?? 'مستخدم');
+        : (review.reviewer.username ?? l10n.userFallback);
     final filledStars = review.rating.round().clamp(0, 5);
 
     return Column(
@@ -404,13 +414,13 @@ class _ReviewTile extends StatelessWidget {
             ),
             if (isAuthor) ...[
               IconButton(
-                tooltip: 'تعديل التقييم',
+                tooltip: l10n.editReview,
                 onPressed: isSubmitting ? null : onEdit,
                 icon: const Icon(Icons.edit_outlined, size: 18),
                 visualDensity: VisualDensity.compact,
               ),
               IconButton(
-                tooltip: 'حذف التقييم',
+                tooltip: l10n.deleteReviewTitle,
                 onPressed: isSubmitting ? null : onDelete,
                 icon: Icon(
                   Icons.delete_outline,

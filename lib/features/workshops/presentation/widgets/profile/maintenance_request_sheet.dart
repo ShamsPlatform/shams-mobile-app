@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/core/constants/app_constants.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
 import 'package:shams_mobile_app/features/chat/presentation/providers/chat_list_provider.dart';
@@ -17,12 +19,9 @@ void showMaintenanceRequestSheet(BuildContext context, Workshop workshop) {
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (bCtx) => Directionality(
-      textDirection: TextDirection.rtl,
-      child: _MaintenanceRequestSheetContent(
-        parentContext: parentContext,
-        workshop: workshop,
-      ),
+    builder: (bCtx) => _MaintenanceRequestSheetContent(
+      parentContext: parentContext,
+      workshop: workshop,
     ),
   );
 }
@@ -94,12 +93,14 @@ class _MaintenanceRequestSheetContentState
   Future<void> _submit() async {
     final parentContext = widget.parentContext;
     final workshop = widget.workshop;
+    final sheetL10n = AppLocalizations.of(context)!;
+    final parentL10n = AppLocalizations.of(parentContext)!;
 
     if (_selectedService == null || _descController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'يرجى تحديد نوع الخدمة وتفاصيل المشكلة',
+            sheetL10n.selectServiceAndDetails,
             style: GoogleFonts.tajawal(color: Colors.white),
           ),
           backgroundColor: Theme.of(context).colorScheme.error,
@@ -115,7 +116,7 @@ class _MaintenanceRequestSheetContentState
     ScaffoldMessenger.of(parentContext).showSnackBar(
       SnackBar(
         content: Text(
-          'جاري إرسال الطلب وإنشاء المحادثة...',
+          parentL10n.sendingMaintenanceRequest,
           style: GoogleFonts.tajawal(color: Colors.white),
         ),
         backgroundColor: Theme.of(parentContext).colorScheme.primary,
@@ -158,8 +159,10 @@ class _MaintenanceRequestSheetContentState
       ScaffoldMessenger.of(parentContext).showSnackBar(
         SnackBar(
           content: Text(
-            maintenanceProvider.errorMessage ??
-                'فشل في إرسال الطلب، يرجى المحاولة لاحقاً',
+            parentL10n.localizeErrorMessage(
+              maintenanceProvider.errorMessage,
+              fallback: parentL10n.maintenanceRequestFailed,
+            ),
             style: GoogleFonts.tajawal(color: Colors.white),
           ),
           backgroundColor: Theme.of(parentContext).colorScheme.error,
@@ -171,6 +174,7 @@ class _MaintenanceRequestSheetContentState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final decoration = _inputDecoration(context);
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -199,7 +203,7 @@ class _MaintenanceRequestSheetContentState
               ),
               const SizedBox(height: 20),
               Text(
-                'طلب خدمة صيانة من ${widget.workshop.name}',
+                l10n.requestMaintenanceFrom(widget.workshop.name),
                 style: GoogleFonts.tajawal(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -210,14 +214,17 @@ class _MaintenanceRequestSheetContentState
               DropdownButtonFormField<String>(
                 initialValue: _selectedService,
                 hint: Text(
-                  'نوع الخدمة المطلوبة',
+                  l10n.requiredServiceType,
                   style: GoogleFonts.tajawal(fontSize: 14),
                 ),
                 items: ShamsConstants.solarServiceTypes
                     .map(
                       (s) => DropdownMenuItem(
                         value: s,
-                        child: Text(s, style: GoogleFonts.tajawal(fontSize: 14)),
+                        child: Text(
+                          l10n.localizeServiceType(s),
+                          style: GoogleFonts.tajawal(fontSize: 14),
+                        ),
                       ),
                     )
                     .toList(),
@@ -228,14 +235,17 @@ class _MaintenanceRequestSheetContentState
               DropdownButtonFormField<String>(
                 initialValue: _selectedInverter,
                 hint: Text(
-                  'نوع المحول (الإنفرتر)',
+                  l10n.inverterType,
                   style: GoogleFonts.tajawal(fontSize: 14),
                 ),
                 items: ShamsConstants.inverterBrands
                     .map(
                       (s) => DropdownMenuItem(
                         value: s,
-                        child: Text(s, style: GoogleFonts.tajawal(fontSize: 14)),
+                        child: Text(
+                          l10n.localizeInverterBrand(s),
+                          style: GoogleFonts.tajawal(fontSize: 14),
+                        ),
                       ),
                     )
                     .toList(),
@@ -246,14 +256,17 @@ class _MaintenanceRequestSheetContentState
               DropdownButtonFormField<String>(
                 initialValue: _selectedBattery,
                 hint: Text(
-                  'نوع البطاريات',
+                  l10n.batteryType,
                   style: GoogleFonts.tajawal(fontSize: 14),
                 ),
                 items: ShamsConstants.batteryTypes
                     .map(
                       (s) => DropdownMenuItem(
                         value: s,
-                        child: Text(s, style: GoogleFonts.tajawal(fontSize: 14)),
+                        child: Text(
+                          l10n.localizeBatteryType(s),
+                          style: GoogleFonts.tajawal(fontSize: 14),
+                        ),
                       ),
                     )
                     .toList(),
@@ -265,7 +278,7 @@ class _MaintenanceRequestSheetContentState
                 controller: _capacityController,
                 keyboardType: TextInputType.number,
                 decoration: decoration.copyWith(
-                  hintText: 'حجم المنظومة (بالوات) - اختياري',
+                  hintText: l10n.systemSizeHint,
                 ),
                 style: GoogleFonts.tajawal(
                   fontSize: 14,
@@ -277,7 +290,7 @@ class _MaintenanceRequestSheetContentState
                 controller: _descController,
                 maxLines: 3,
                 decoration: decoration.copyWith(
-                  hintText: 'تفاصيل المشكلة (مثال: الشحن ضعيف وقت الظهيرة...)',
+                  hintText: l10n.problemDetailsHint,
                 ),
                 style: GoogleFonts.tajawal(
                   fontSize: 14,
@@ -286,7 +299,7 @@ class _MaintenanceRequestSheetContentState
               ),
               const SizedBox(height: 20),
               CustomSolidButton(
-                title: 'إرسال الطلب',
+                title: l10n.sendRequest,
                 onPressed: _submit,
               ),
             ],

@@ -1,8 +1,10 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
@@ -81,6 +83,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   // دالة الحفظ وإرسال البيانات للـ Provider
   Future<void> _saveChanges() async {
     setState(() => _isLoading = true);
+    final l10n = AppLocalizations.of(context)!;
 
     final provider = context.read<ProfileProvider>();
     final isSuccess = await provider.updateProfile(
@@ -101,7 +104,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'تم تحديث الملف الشخصي بنجاح',
+            l10n.profileUpdatedSuccess,
             style: GoogleFonts.tajawal(),
           ),
           backgroundColor: Theme.of(context).colorScheme.tertiary, // لون أخضر للنجاح
@@ -110,10 +113,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       );
       Navigator.pop(context);
     } else {
-      final error = provider.errorMessage ?? '';
-      final errorText = error.startsWith('فشل رفع الصورة:')
-          ? error
-          : 'حدث خطأ أثناء حفظ التعديلات في السيرفر: $error';
+      final rawError = provider.errorMessage ?? '';
+      final localizedError = l10n.localizeErrorMessage(rawError);
+      final errorText = rawError.startsWith('فشل رفع الصورة:')
+          ? localizedError
+          : l10n.saveEditsError(localizedError);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -130,6 +134,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final currentUser = context.watch<ProfileProvider>().currentUserOrPlaceholder;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface, // الخلفية البيضاء السادة كما في التصميم
@@ -138,13 +143,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           elevation: 0,
           leading: IconButton(
             icon: Icon(
-              Icons.arrow_forward_rounded,
+              Icons.arrow_back_rounded,
               color: Theme.of(context).colorScheme.onSurface,
-            ), // سهم خلف أسود
+            ),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
-            'تعديل الملف الشخصي',
+            l10n.editMyProfile,
             style: GoogleFonts.tajawal(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -172,8 +177,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             Color(0xFFFFA726),
                             Color(0xFFFFD600),
                           ], // البرتقالي والاصفر الشمسي
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                          begin: AlignmentDirectional.topStart,
+                          end: AlignmentDirectional.bottomEnd,
                         ),
                       ),
                       child: CircleAvatar(
@@ -186,10 +191,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               ),
                       ),
                     ),
-                    // أيقونة الكاميرا الصفراء في موضعها الصحيح (أسفل اليسار للمشاهد)
-                    Positioned(
+                    // أيقونة الكاميرا الصفراء في موضعها الصحيح
+                    PositionedDirectional(
                       bottom: 0,
-                      left: 0, // جهة اليسار برمجياً في الـ Stack الـ RTL
+                      end: 0,
                       child: GestureDetector(
                         onTap: _pickImage,
                         child: Container(
@@ -218,47 +223,41 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               // ── حقول الإدخال (Form Fields) - بتصميم الـ Border الجديد ──
 
               // حقل الاسم الكامل
-              _buildInputLabel('الاسم الكامل'),
+              _buildInputLabel(l10n.fullName),
               const SizedBox(height: 8),
               _buildCustomTextField(
                 controller: _nameController,
-                hintText: 'الاسم الكامل',
+                hintText: l10n.fullName,
                 icon: Icons.person_outline_rounded,
               ),
               const SizedBox(height: 24),
 
               // حقل اسم المستخدم
-              _buildInputLabel('اسم المستخدم'),
+              _buildInputLabel(l10n.username),
               const SizedBox(height: 8),
               _buildCustomTextField(
                 controller: _usernameController,
-                hintText: 'اسم المستخدم',
+                hintText: l10n.username,
                 icon: Icons.alternate_email_rounded,
               ),
               const SizedBox(height: 24),
 
-              // // حقل الموقع (Dropdown)
-              // _buildInputLabel('الموقع'),
-              // const SizedBox(height: 8),
-              // _buildDropdownField(),
-              // const SizedBox(height: 24),
-
               // حقل رقم الهاتف
-              _buildInputLabel('رقم الهاتف'),
+              _buildInputLabel(l10n.phoneNumber),
               const SizedBox(height: 8),
               _buildCustomTextField(
                 controller: _phoneController,
-                hintText: 'أدخل رقم الهاتف',
+                hintText: l10n.enterPhoneNumber,
                 icon: Icons.phone_outlined,
               ),
               const SizedBox(height: 24),
 
               // حقل نبذة شخصية
-              _buildInputLabel('نبذة شخصية'),
+              _buildInputLabel(l10n.bio),
               const SizedBox(height: 8),
               _buildCustomTextField(
                 controller: _bioController,
-                hintText: 'مهتم بالطاقة المتجددة...',
+                hintText: l10n.bioHint,
                 icon: Icons.info_outline_rounded,
               ),
               const SizedBox(height: 48),
@@ -289,7 +288,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           ),
                         )
                       : Text(
-                          'حفظ التغييرات',
+                          l10n.saveChanges,
                           style: GoogleFonts.tajawal(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

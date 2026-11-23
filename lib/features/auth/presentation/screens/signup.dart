@@ -1,6 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/outlined_button.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
@@ -33,16 +35,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _handleNext() {
+    final l10n = AppLocalizations.of(context)!;
     final email = _emailController.text.trim();
     final password = _passController.text.trim();
     final confirmPassword = _confirmPassController.text.trim();
 
     setState(() {
-      _emailError = !email.contains('@') ? 'البريد الإلكتروني غير صالح' : null;
+      _emailError = !email.contains('@') ? l10n.invalidEmail : null;
       _passError =
-          password.length < 6 ? 'كلمة المرور قصيرة جداً (6 أحرف على الأقل)' : null;
+          password.length < 6 ? l10n.passwordTooShort : null;
       _confirmPassError =
-          password != confirmPassword ? 'كلمتا المرور غير متطابقتين' : null;
+          password != confirmPassword ? l10n.passwordsDoNotMatch : null;
     });
 
     if (_emailError == null && _passError == null && _confirmPassError == null) {
@@ -59,6 +62,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _handleGoogleSignUp() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _isLoading = true);
     try {
       final authProvider = context.read<AuthProvider>();
@@ -67,7 +71,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              authProvider.errorMessage ?? 'حدث خطأ أثناء التسجيل',
+              l10n.localizeErrorMessage(
+                authProvider.errorMessage,
+                fallback: l10n.signUpError,
+              ),
               style: GoogleFonts.tajawal(),
             ),
             backgroundColor: Theme.of(context).colorScheme.error,
@@ -83,6 +90,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
         backgroundColor: Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
         appBar: AppBar(
@@ -96,9 +104,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
-              Text('انضم إلى مجتمع شمس', style: GoogleFonts.tajawal(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
+              Text(l10n.joinShamsCommunity, style: GoogleFonts.tajawal(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
               const SizedBox(height: 8),
-              Text('خطوتك الأولى لتجربة فريدة ومتميزة معنا', style: GoogleFonts.tajawal(fontSize: 14, color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint)),
+              Text(l10n.signUpSubtitle, style: GoogleFonts.tajawal(fontSize: 14, color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint)),
               const SizedBox(height: 32),
               // ── بطاقة الإدخال ──
               Container(
@@ -116,19 +124,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _inputLabel('البريد الإلكتروني'),
+                    _inputLabel(l10n.emailFull),
                     CustomTextField(hintText: 'example@mail.com', prefixIcon: Icons.email_outlined, controller: _emailController, errorText: _emailError),
                     const SizedBox(height: 16),
-                    _inputLabel('كلمة المرور'),
+                    _inputLabel(l10n.password),
                     CustomTextField(hintText: '••••••••', prefixIcon: Icons.lock_outline, isPassword: true, controller: _passController, errorText: _passError),
                     const SizedBox(height: 16),
-                    _inputLabel('تأكيد كلمة المرور'),
+                    _inputLabel(l10n.confirmPassword),
                     CustomTextField(hintText: '••••••••', prefixIcon: Icons.lock_outline, isPassword: true, controller: _confirmPassController, errorText: _confirmPassError),
                     const SizedBox(height: 32),
                     SizedBox(
                       width: double.infinity,
                       height: 50,
-                      child: CustomSolidButton(title: 'التالي', onPressed: _handleNext),
+                      child: CustomSolidButton(title: l10n.next, onPressed: _handleNext),
                     ),
                     const SizedBox(height: 20),
                     Row(
@@ -143,7 +151,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
-                            'أو إنشاء حساب عبر',
+                            l10n.orSignUpWith,
                             style: GoogleFonts.tajawal(
                               color: Theme.of(context)
                                   .extension<ShamsExtendedColors>()!
@@ -185,7 +193,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'لديك حساب بالفعل؟',
+                    l10n.alreadyHaveAccount,
                     style: GoogleFonts.tajawal(
                       color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
                     ),
@@ -196,7 +204,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       MaterialPageRoute(builder: (context) => const SignInScreen()),
                     ),
                     child: Text(
-                      'تسجيل الدخول',
+                      l10n.signin,
                       style: GoogleFonts.tajawal(
                         color: Theme.of(context).colorScheme.secondary,
                         fontWeight: FontWeight.bold,

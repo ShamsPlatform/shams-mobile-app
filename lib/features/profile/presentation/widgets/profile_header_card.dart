@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 /// Top profile card displaying avatar, edit button, display name, handle,
@@ -38,6 +39,7 @@ class ProfileHeaderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       width: double.infinity,
@@ -95,7 +97,7 @@ class ProfileHeaderCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'تعديل الملف',
+                        l10n.editProfile,
                         style: GoogleFonts.tajawal(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -110,7 +112,7 @@ class ProfileHeaderCard extends StatelessWidget {
           ),
           const SizedBox(height: 15),
           Align(
-            alignment: Alignment.centerRight,
+            alignment: AlignmentDirectional.centerStart,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -118,7 +120,9 @@ class ProfileHeaderCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text(
-                      currentUser.name,
+                      currentUser.name == 'جاري التحميل...'
+                          ? l10n.loadingLabel
+                          : currentUser.name,
                       style: GoogleFonts.tajawal(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/language_provider.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/features/profile/presentation/widgets/profile_business_section.dart';
 
@@ -25,67 +28,71 @@ class ProfileSettingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const ProfileSectionHeader(
-          title: 'الإعدادات والتفضيلات',
+        ProfileSectionHeader(
+          title: l10n.settingsPreferences,
           icon: Icons.settings_rounded,
         ),
         const SizedBox(height: 15),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 25),
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 25),
+          child: Material(
             color: colorScheme.surface,
             borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            children: [
-              _ProfileSettingTile(
-                icon: Icons.notifications_none_rounded,
-                title: 'الإشعارات',
-                showDivider: true,
-                trailing: SizedBox(
-                  height: 30,
-                  child: Transform.scale(
-                    scale: 0.8,
-                    child: Switch.adaptive(
-                      value: notificationsEnabled,
-                      onChanged: onNotificationsChanged,
-                      activeThumbColor: Colors.white,
-                      activeTrackColor: colorScheme.secondary,
+            clipBehavior: Clip.antiAlias,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Column(
+                children: [
+                  _ProfileSettingTile(
+                    icon: Icons.notifications_none_rounded,
+                    title: l10n.notifications,
+                    showDivider: true,
+                    trailing: SizedBox(
+                      height: 30,
+                      child: Transform.scale(
+                        scale: 0.8,
+                        child: Switch.adaptive(
+                          value: notificationsEnabled,
+                          onChanged: onNotificationsChanged,
+                          activeThumbColor: Colors.white,
+                          activeTrackColor: colorScheme.secondary,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  _ProfileSettingTile(
+                    icon: Icons.shield_outlined,
+                    title: l10n.privacySecurity,
+                    showDivider: true,
+                    onTap: onPrivacyTap,
+                  ),
+                  _ProfileSettingTile(
+                    icon: Icons.language_rounded,
+                    title: l10n.changeLanguage,
+                    trailing: const _LanguagePill(),
+                    showDivider: true,
+                    onTap: onLanguageTap,
+                  ),
+                  _ProfileSettingTile(
+                    icon: Icons.headset_mic_outlined,
+                    title: l10n.contactSupport,
+                    showDivider: true,
+                    onTap: onSupportTap,
+                  ),
+                  _ProfileSettingTile(
+                    icon: Icons.info_outline_rounded,
+                    title: l10n.aboutShams,
+                    showDivider: false,
+                    onTap: onAboutTap,
+                  ),
+                ],
               ),
-              _ProfileSettingTile(
-                icon: Icons.shield_outlined,
-                title: 'الخصوصية والأمان',
-                showDivider: true,
-                onTap: onPrivacyTap,
-              ),
-              _ProfileSettingTile(
-                icon: Icons.language_rounded,
-                title: 'تغيير اللغة',
-                trailing: const _LanguagePill(),
-                showDivider: true,
-                onTap: onLanguageTap,
-              ),
-              _ProfileSettingTile(
-                icon: Icons.headset_mic_outlined,
-                title: 'تواصل مع الدعم',
-                showDivider: true,
-                onTap: onSupportTap,
-              ),
-              _ProfileSettingTile(
-                icon: Icons.info_outline_rounded,
-                title: 'عن شمس',
-                showDivider: false,
-                onTap: onAboutTap,
-              ),
-            ],
+            ),
           ),
         ),
       ],
@@ -133,7 +140,7 @@ class _ProfileSettingTile extends StatelessWidget {
           ),
           title: Text(
             title,
-            textAlign: TextAlign.right,
+            textAlign: TextAlign.start,
             style: GoogleFonts.tajawal(
               fontSize: 15,
               fontWeight: FontWeight.w600,
@@ -141,7 +148,7 @@ class _ProfileSettingTile extends StatelessWidget {
             ),
           ),
           trailing: trailing ??
-              const Icon(Icons.chevron_left, color: Colors.grey, size: 20),
+              const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
         ),
         if (showDivider)
           Padding(
@@ -163,6 +170,8 @@ class _LanguagePill extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
+    final l10n = AppLocalizations.of(context)!;
+    final isArabic = context.watch<LanguageProvider>().isArabic;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -176,7 +185,7 @@ class _LanguagePill extends StatelessWidget {
           const Icon(Icons.keyboard_arrow_down, size: 16, color: Colors.grey),
           const SizedBox(width: 6),
           Text(
-            'عربي',
+            isArabic ? l10n.arabic : l10n.english,
             style: GoogleFonts.tajawal(
               fontSize: 13,
               fontWeight: FontWeight.bold,

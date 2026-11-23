@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 class AboutShamsScreen extends StatelessWidget {
@@ -7,107 +8,94 @@ class AboutShamsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surface,
+    final l10n = AppLocalizations.of(context)!;
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
 
-        // ── AppBar ──────────────────────────────────────────────────────────
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          surfaceTintColor: Colors.transparent,
-          centerTitle: false,
-          automaticallyImplyLeading: false,
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(1.0),
-            child: Container(color: Colors.grey.withValues(alpha: 0.1), height: 1.0),
+      // ── AppBar ──────────────────────────────────────────────────────────
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        centerTitle: false,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_rounded,
+            color: Theme.of(context).colorScheme.onSurface,
+            size: 26,
           ),
-          actions: [
-            Padding(
-              padding: const EdgeInsetsDirectional.only(end: 8.0),
-              child: IconButton(
-                icon: Icon(
-                  Icons.arrow_forward,
-                  color: Theme.of(context).colorScheme.onSurface,
-                  size: 26,
-                ),
-                onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pop(context),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(color: Colors.grey.withValues(alpha: 0.1), height: 1.0),
+        ),
+      ),
+
+      // ── Body ────────────────────────────────────────────────────────────
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // ── شعار التطبيق ──────────────────────────────────────────────
+            _buildLogo(context),
+            const SizedBox(height: 10),
+
+            // ── اسم التطبيق ───────────────────────────────────────────────
+            Text(
+              l10n.appTitle,
+              style: GoogleFonts.tajawal(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
+            const SizedBox(height: 28),
+
+            // ── من نحن؟ ──────────────────────────────────────────────────
+            _buildSectionHeader(context, l10n.whoWeAre),
+            const SizedBox(height: 10),
+            _buildBodyText(l10n.aboutDescription),
+            const SizedBox(height: 28),
+
+            // ── رؤيتنا ───────────────────────────────────────────────────
+            _buildVisionCard(context, l10n),
+            const SizedBox(height: 28),
+
+            // ── لماذا تختارنا؟ ────────────────────────────────────────────
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: _buildSectionHeader(context, l10n.whyChooseUs),
+            ),
+            const SizedBox(height: 16),
+            _buildFeaturesGrid(context, l10n),
+            const SizedBox(height: 36),
+
+            // ── وسائل التواصل ─────────────────────────────────────────────
+            _buildSocialRow(context),
+            const SizedBox(height: 16),
+
+            // ── رقم الإصدار ───────────────────────────────────────────────
+            Text(
+              l10n.versionLabel,
+              style: GoogleFonts.tajawal(
+                fontSize: 12,
+                color: Colors.grey.shade400,
+              ),
+            ),
+            const SizedBox(height: 8),
+            // ── حقوق النشر ────────────────────────────────────────────────
+            Text(
+              l10n.copyrightLabel,
+              style: GoogleFonts.tajawal(
+                fontSize: 11,
+                color: Colors.grey.shade400,
+              ),
+            ),
+            const SizedBox(height: 20),
           ],
-        ),
-
-        // ── Body ────────────────────────────────────────────────────────────
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // ── شعار التطبيق ──────────────────────────────────────────────
-              _buildLogo(context),
-              const SizedBox(height: 10),
-
-              // ── اسم التطبيق ───────────────────────────────────────────────
-              Text(
-                'شمس',
-                style: GoogleFonts.tajawal(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 28),
-
-              // ── من نحن؟ ──────────────────────────────────────────────────
-              _buildSectionHeader(context, 'من نحن؟'),
-              const SizedBox(height: 10),
-              _buildBodyText(
-                'نحن في "شمس" نؤمن بأن الطاقة المستقبلية يجب أن '
-                'تكون نظيفة، مستدامة، وصالحة للجميع. نسعى جاهدين '
-                'لتحويل كل منزل ومؤسسة إلى واحة من الطاقة المتجددة '
-                'باستخدام أحدث الحلول التقنية.',
-              ),
-              const SizedBox(height: 28),
-
-              // ── رؤيتنا ───────────────────────────────────────────────────
-              _buildVisionCard(context),
-              const SizedBox(height: 28),
-
-              // ── لماذا تختارنا؟ ────────────────────────────────────────────
-              Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: _buildSectionHeader(context, 'لماذا تختارنا؟'),
-              ),
-              const SizedBox(height: 16),
-              _buildFeaturesGrid(context),
-              const SizedBox(height: 36),
-
-              // ── وسائل التواصل ─────────────────────────────────────────────
-              _buildSocialRow(context),
-              const SizedBox(height: 16),
-
-              // ── رقم الإصدار ───────────────────────────────────────────────
-              Text(
-                'الإصدار v1.0.0 Alpha',
-                style: GoogleFonts.tajawal(
-                  fontSize: 12,
-                  color: Colors.grey.shade400,
-                ),
-              ),
-              const SizedBox(height: 8),
-              // ── حقوق النشر ────────────────────────────────────────────────
-              Text(
-                'جميع الحقوق محفوظة © 2026 شركة شمس',
-                style: GoogleFonts.tajawal(
-                  fontSize: 11,
-                  color: Colors.grey.shade400,
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
         ),
       ),
     );
@@ -182,7 +170,7 @@ class AboutShamsScreen extends StatelessWidget {
   // كارد الرؤية
   // ─────────────────────────────────────────────────────────────────────────────
 
-  Widget _buildVisionCard(BuildContext context) {
+  Widget _buildVisionCard(BuildContext context, AppLocalizations l10n) {
     return Card(
       elevation: 0,
       color: Theme.of(context).colorScheme.secondaryContainer,
@@ -206,7 +194,7 @@ class AboutShamsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'رؤيتنا',
+              l10n.ourVision,
               style: GoogleFonts.tajawal(
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
@@ -215,9 +203,7 @@ class AboutShamsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'أن نكون الرواد في تمكين المجتمعات العربية من خلال '
-              'الابتكار في تقنيات الطاقة الشمسية، لنبني مستقبل '
-              'أنضر ومشرق للأجيال القادمة.',
+              l10n.visionDescription,
               textAlign: TextAlign.center,
               style: GoogleFonts.tajawal(
                 fontSize: 13,
@@ -235,15 +221,15 @@ class AboutShamsScreen extends StatelessWidget {
   // شبكة المميزات — 3 أعمدة
   // ─────────────────────────────────────────────────────────────────────────────
 
-  Widget _buildFeaturesGrid(BuildContext context) {
+  Widget _buildFeaturesGrid(BuildContext context, AppLocalizations l10n) {
     // قائمة المميزات
     final List<Map<String, dynamic>> features = [
-      {'icon': Icons.bolt_rounded, 'label': 'سهولة الوصول'},
-      {'icon': Icons.eco_rounded, 'label': 'الاستدامة'},
-      {'icon': Icons.store_outlined, 'label': 'ورشة مباشرة'},
-      {'icon': Icons.verified_user_outlined, 'label': 'موثوقية عالية'},
-      {'icon': Icons.support_agent_rounded, 'label': 'دعم مستمر'},
-      {'icon': Icons.speed_rounded, 'label': 'أداء سريع'},
+      {'icon': Icons.bolt_rounded, 'label': l10n.featureAccessibility},
+      {'icon': Icons.eco_rounded, 'label': l10n.featureSustainability},
+      {'icon': Icons.store_outlined, 'label': l10n.featureDirectWorkshop},
+      {'icon': Icons.verified_user_outlined, 'label': l10n.featureHighReliability},
+      {'icon': Icons.support_agent_rounded, 'label': l10n.featureContinuousSupport},
+      {'icon': Icons.speed_rounded, 'label': l10n.featureFastPerformance},
     ];
 
     return GridView.builder(

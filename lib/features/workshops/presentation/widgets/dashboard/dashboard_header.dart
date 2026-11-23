@@ -53,9 +53,9 @@ class DashboardHeader extends StatelessWidget {
                             )
                           : _buildCoverPlaceholder(context),
                 ),
-                const Positioned(
+                const PositionedDirectional(
                   top: 16,
-                  right: 16,
+                  start: 16,
                   child: _CameraBadge(),
                 ),
               ],
@@ -66,7 +66,7 @@ class DashboardHeader extends StatelessWidget {
             child: GestureDetector(
               onTap: onLogoTap,
               child: Stack(
-                alignment: Alignment.bottomLeft,
+                alignment: AlignmentDirectional.bottomEnd,
                 children: [
                   Container(
                     padding: const EdgeInsets.all(4),

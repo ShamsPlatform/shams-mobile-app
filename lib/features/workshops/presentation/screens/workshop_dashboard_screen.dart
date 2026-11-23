@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/presentation/view_status.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/features/posts/domain/entities/post.dart';
@@ -58,6 +60,7 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
   // ── Image pickers ─────────────────────────────────────────────────────────
 
   Future<void> _pickCoverImage() async {
+    final l10n = AppLocalizations.of(context)!;
     showDashboardImageSourceSheet(
       context: context,
       picker: _picker,
@@ -65,13 +68,19 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
         final provider = context.read<MyWorkshopProvider>();
         final ok = await provider.uploadAndSetCover(file.path);
         if (!ok && mounted) {
-          _showErrorSnackBar(provider.errorMessage ?? 'تعذر رفع صورة الغلاف');
+          _showErrorSnackBar(
+            l10n.localizeErrorMessage(
+              provider.errorMessage,
+              fallback: l10n.uploadCoverFailed,
+            ),
+          );
         }
       },
     );
   }
 
   Future<void> _pickProfileImage() async {
+    final l10n = AppLocalizations.of(context)!;
     showDashboardImageSourceSheet(
       context: context,
       picker: _picker,
@@ -79,13 +88,19 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
         final provider = context.read<MyWorkshopProvider>();
         final ok = await provider.uploadAndSetLogo(file.path);
         if (!ok && mounted) {
-          _showErrorSnackBar(provider.errorMessage ?? 'تعذر رفع شعار الورشة');
+          _showErrorSnackBar(
+            l10n.localizeErrorMessage(
+              provider.errorMessage,
+              fallback: l10n.uploadLogoFailed,
+            ),
+          );
         }
       },
     );
   }
 
   Future<void> _pickAndAddImage() async {
+    final l10n = AppLocalizations.of(context)!;
     showDashboardImageSourceSheet(
       context: context,
       picker: _picker,
@@ -93,7 +108,12 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
         final provider = context.read<MyWorkshopProvider>();
         final ok = await provider.uploadAndAddGalleryImage(file.path);
         if (!ok && mounted) {
-          _showErrorSnackBar(provider.errorMessage ?? 'تعذر رفع الصورة');
+          _showErrorSnackBar(
+            l10n.localizeErrorMessage(
+              provider.errorMessage,
+              fallback: l10n.uploadImageFailed,
+            ),
+          );
         }
       },
     );
@@ -102,45 +122,43 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
   // ── Delete confirmation ───────────────────────────────────────────────────
 
   void _confirmDelete(Post post) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog<bool>(
       context: context,
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Text(
-            'حذف المنشور',
-            style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
-          ),
-          content: Text(
-            'هل أنت متأكد من حذف هذا المنشور؟ لا يمكن التراجع عن هذا الإجراء.',
-            style: GoogleFonts.tajawal(fontSize: 14),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(
-                'إلغاء',
-                style: GoogleFonts.tajawal(
-                  color: Theme.of(
-                    ctx,
-                  ).extension<ShamsExtendedColors>()!.textHint,
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(
-                'حذف',
-                style: GoogleFonts.tajawal(
-                  color: Theme.of(ctx).colorScheme.error,
-                ),
-              ),
-            ),
-          ],
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
+        title: Text(
+          l10n.deletePostTitle,
+          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          l10n.deletePostConfirm,
+          style: GoogleFonts.tajawal(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              l10n.cancel,
+              style: GoogleFonts.tajawal(
+                color: Theme.of(
+                  ctx,
+                ).extension<ShamsExtendedColors>()!.textHint,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              l10n.delete,
+              style: GoogleFonts.tajawal(
+                color: Theme.of(ctx).colorScheme.error,
+              ),
+            ),
+          ),
+        ],
       ),
     ).then((confirmed) async {
       if (confirmed != true || !mounted) return;
@@ -156,7 +174,7 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
         feedProvider.deletePost(post.id);
         messenger.showSnackBar(
           SnackBar(
-            content: Text('تم حذف المنشور بنجاح', style: GoogleFonts.tajawal()),
+            content: Text(l10n.postDeletedSuccess, style: GoogleFonts.tajawal()),
             backgroundColor: errorColor,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -169,7 +187,10 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
         messenger.showSnackBar(
           SnackBar(
             content: Text(
-              workshopProvider.errorMessage ?? 'تعذر حذف المنشور',
+              l10n.localizeErrorMessage(
+                workshopProvider.errorMessage,
+                fallback: l10n.deletePostFailed,
+              ),
               style: GoogleFonts.tajawal(),
             ),
             backgroundColor: errorColor,
@@ -188,6 +209,7 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final workshopState = context.watch<MyWorkshopProvider>();
     final currentUser =
         context.read<ProfileProvider>().currentUserOrPlaceholder;
@@ -214,117 +236,117 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
       });
     }
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(
-              Icons.arrow_forward_rounded,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-            onPressed: () => Navigator.pop(context),
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_rounded,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
-          title: Text(
-            'لوحة تحكم الورشة',
-            style: GoogleFonts.tajawal(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          centerTitle: true,
+          onPressed: () => Navigator.pop(context),
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              DashboardHeader(
-                coverUrl: d?.coverUrl,
-                logoUrl: d?.logoUrl,
-                pendingCoverPath: workshopState.pendingCoverPath,
-                pendingLogoPath: workshopState.pendingLogoPath,
-                onCoverTap: _pickCoverImage,
-                onLogoTap: _pickProfileImage,
-              ),
-              DashboardInfoSection(
-                name: d?.name ?? 'ورشتي على شمس',
-                username: d?.username ?? '',
-                city: d?.city ?? 'صنعاء',
-                galleryUrls: d?.galleryUrls ?? const [],
-                pendingGalleryPaths: workshopState.pendingGalleryPaths,
-                followersCount: workshopState.followersCount,
-                postCount: workshopState.postCount,
-                onAddGalleryTap: _pickAndAddImage,
-                onRemoveGalleryTap: (i) async {
-                  final provider = context.read<MyWorkshopProvider>();
-                  final ok = await provider.removeGalleryImageAt(i);
-                  if (!ok && mounted) {
-                    _showErrorSnackBar(
-                      provider.errorMessage ?? 'تعذر حذف الصورة',
-                    );
-                  }
-                },
-                onEditTap: () => showEditWorkshopSheet(context),
-              ),
-              const SizedBox(height: 24),
-              DashboardPostsSection(
-                posts: workshopState.posts,
-                onEditPost: (post) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => EditPostScreen(post: post),
+        title: Text(
+          l10n.workshopDashboard,
+          style: GoogleFonts.tajawal(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            DashboardHeader(
+              coverUrl: d?.coverUrl,
+              logoUrl: d?.logoUrl,
+              pendingCoverPath: workshopState.pendingCoverPath,
+              pendingLogoPath: workshopState.pendingLogoPath,
+              onCoverTap: _pickCoverImage,
+              onLogoTap: _pickProfileImage,
+            ),
+            DashboardInfoSection(
+              name: d?.name ?? l10n.myWorkshopOnShams,
+              username: d?.username ?? '',
+              city: l10n.localizeCity(d?.city ?? 'صنعاء'),
+              galleryUrls: d?.galleryUrls ?? const [],
+              pendingGalleryPaths: workshopState.pendingGalleryPaths,
+              followersCount: workshopState.followersCount,
+              postCount: workshopState.postCount,
+              onAddGalleryTap: _pickAndAddImage,
+              onRemoveGalleryTap: (i) async {
+                final provider = context.read<MyWorkshopProvider>();
+                final ok = await provider.removeGalleryImageAt(i);
+                if (!ok && mounted) {
+                  _showErrorSnackBar(
+                    l10n.localizeErrorMessage(
+                      provider.errorMessage,
+                      fallback: l10n.deleteImageFailed,
                     ),
                   );
-                },
-                onDeletePost: _confirmDelete,
+                }
+              },
+              onEditTap: () => showEditWorkshopSheet(context),
+            ),
+            const SizedBox(height: 24),
+            DashboardPostsSection(
+              posts: workshopState.posts,
+              onEditPost: (post) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EditPostScreen(post: post),
+                  ),
+                );
+              },
+              onDeletePost: _confirmDelete,
+            ),
+            const SizedBox(height: 80),
+          ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -4),
               ),
-              const SizedBox(height: 80),
             ],
           ),
-        ),
-        bottomNavigationBar: SafeArea(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -4),
-                ),
-              ],
-            ),
-            child: SizedBox(
-              height: 50,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CreatePostScreen(),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                  foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+          child: SizedBox(
+            height: 50,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CreatePostScreen(),
                   ),
-                  elevation: 0,
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.secondary,
+                foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                icon: const Icon(Icons.add, size: 24),
-                label: Text(
-                  'نشر عمل جديد',
-                  style: GoogleFonts.tajawal(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                elevation: 0,
+              ),
+              icon: const Icon(Icons.add, size: 24),
+              label: Text(
+                l10n.publishNewWork,
+                style: GoogleFonts.tajawal(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),

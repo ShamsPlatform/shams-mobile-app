@@ -1,106 +1,93 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 
 class PrivacySecurityScreen extends StatelessWidget {
   const PrivacySecurityScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          surfaceTintColor: Colors.transparent,
-          centerTitle: true,
-          automaticallyImplyLeading: false,
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(1.0),
-            child: Container(color: Colors.grey.withValues(alpha: 0.1), height: 1.0),
+    final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      backgroundColor: colorScheme.surface,
+      appBar: AppBar(
+        backgroundColor: colorScheme.surface,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        centerTitle: true,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_rounded,
+            color: colorScheme.onSurface,
+            size: 26,
           ),
-          title: Text(
-            'الخصوصية والأمان',
-            style: GoogleFonts.tajawal(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF2D2D2D),
-            ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(color: Colors.grey.withValues(alpha: 0.1), height: 1.0),
+        ),
+        title: Text(
+          l10n.privacySecurity,
+          style: GoogleFonts.tajawal(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onSurface,
           ),
-          actions: [
-            Padding(
-              padding: const EdgeInsetsDirectional.only(end: 8.0),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.arrow_forward,
-                  color: Color(0xFF2D2D2D),
-                  size: 26,
-                ),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
-          ],
         ),
+      ),
 
-        // ── Body ────────────────────────────────────────────────────────────
-        body: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-          children: [
-            // ── مقدمة ───────────────────────────────────────────────────────
-            _buildIntroText(),
-            const SizedBox(height: 28),
+      // ── Body ────────────────────────────────────────────────────────────
+      body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        children: [
+          // ── مقدمة ───────────────────────────────────────────────────────
+          _buildIntroText(l10n.privacyIntro),
+          const SizedBox(height: 28),
 
-            // ── تشفير البيانات ──────────────────────────────────────────────
-            _buildSection(
-              context: context,
-              icon: Icons.lock_outline_rounded,
-              title: 'تشفير البيانات',
-              body:
-                  'نحن نحمي بياناتك واستخدامها الشخصي بأعلى معايير الأمان. '
-                  'يتم تشفير جميع البيانات المرسلة بين الخادم والتطبيق باستخدام بروتوكول SSL/TLS.',
-            ),
-            const SizedBox(height: 24),
+          // ── تشفير البيانات ──────────────────────────────────────────────
+          _buildSection(
+            context: context,
+            icon: Icons.lock_outline_rounded,
+            title: l10n.dataEncryption,
+            body: l10n.dataEncryptionBody,
+          ),
+          const SizedBox(height: 24),
 
-            // ── أمان الحساب ─────────────────────────────────────────────────
-            _buildSection(
-              context: context,
-              icon: Icons.security_rounded,
-              title: 'أمان الحساب',
-              body:
-                  'يمكنك تأمين حسابك عبر تفعيل التحقق بخطوتين، '
-                  'وإدارة الأجهزة المرتبطة بحسابك. نوصي بتغيير كلمة المرور بشكل دوري.',
-            ),
-            const SizedBox(height: 24),
+          // ── أمان الحساب ─────────────────────────────────────────────────
+          _buildSection(
+            context: context,
+            icon: Icons.security_rounded,
+            title: l10n.accountSecurity,
+            body: l10n.accountSecurityBody,
+          ),
+          const SizedBox(height: 24),
 
-            // ── مشاركة المعلومات ────────────────────────────────────────────
-            _buildSection(
-              context: context,
-              icon: Icons.share_outlined,
-              title: 'مشاركة المعلومات',
-              body:
-                  'تحكم في البيانات التي تشاركها مع الآخرين داخل المنصة. '
-                  'يمكنك في أي وقت مراجعة وإلغاء الأذونات الممنوحة للتطبيقات الأخرى.',
-            ),
-            const SizedBox(height: 24),
+          // ── مشاركة المعلومات ────────────────────────────────────────────
+          _buildSection(
+            context: context,
+            icon: Icons.share_outlined,
+            title: l10n.informationSharing,
+            body: l10n.informationSharingBody,
+          ),
+          const SizedBox(height: 24),
 
-            // ── الوصول للموقع ───────────────────────────────────────────────
-            _buildSection(
-              context: context,
-              icon: Icons.location_on_outlined,
-              title: 'الوصول للموقع',
-              body:
-                  'تستخدم المنصة الموقع الجغرافي فقط لتزويدك بخدمات ذات صلة بمنطقتك. '
-                  'يمكنك إلغاء هذا الإذن في أي وقت من إعدادات الجهاز.',
-            ),
-            const SizedBox(height: 40),
+          // ── الوصول للموقع ───────────────────────────────────────────────
+          _buildSection(
+            context: context,
+            icon: Icons.location_on_outlined,
+            title: l10n.locationAccess,
+            body: l10n.locationAccessBody,
+          ),
+          const SizedBox(height: 40),
 
-            // ── سياسة الخصوصية الكاملة ──────────────────────────────────────
-            _buildFullPolicyButton(context),
-            const SizedBox(height: 20),
-          ],
-        ),
+          // ── سياسة الخصوصية الكاملة ──────────────────────────────────────
+          _buildFullPolicyButton(context, l10n.fullPrivacyPolicy),
+          const SizedBox(height: 20),
+        ],
       ),
     );
   }
@@ -109,11 +96,9 @@ class PrivacySecurityScreen extends StatelessWidget {
   // المقدمة النصية
   // ─────────────────────────────────────────────────────────────────────────────
 
-  Widget _buildIntroText() {
+  Widget _buildIntroText(String intro) {
     return Text(
-      'نحن نلتزم بحماية خصوصيتك وأمان بياناتك الشخصية. تتبع '
-      'هذه الإعدادات التي تمنحك التحكم الكامل في كيفية معالجة '
-      'ومشاركتك لمعلوماتك الشخصية لضمان تجربة آمنة ومتوازنة.',
+      intro,
       style: GoogleFonts.tajawal(
         fontSize: 14,
         height: 1.7,
@@ -160,7 +145,7 @@ class PrivacySecurityScreen extends StatelessWidget {
               style: GoogleFonts.tajawal(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFF2D2D2D),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ],
@@ -186,14 +171,14 @@ class PrivacySecurityScreen extends StatelessWidget {
   // زر سياسة الخصوصية الكاملة
   // ─────────────────────────────────────────────────────────────────────────────
 
-  Widget _buildFullPolicyButton(BuildContext context) {
+  Widget _buildFullPolicyButton(BuildContext context, String label) {
     return Center(
       child: GestureDetector(
         onTap: () {
           // TODO: افتح صفحة سياسة الخصوصية الكاملة
         },
         child: Text(
-          'سياسة الخصوصية الكاملة',
+          label,
           style: GoogleFonts.tajawal(
             fontSize: 14,
             fontWeight: FontWeight.bold,

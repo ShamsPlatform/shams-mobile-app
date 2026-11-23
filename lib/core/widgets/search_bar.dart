@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 /// ShamsSearchDelegate — شريط بحث مُحسَّن بتصميم Shams Platform
 class ShamsSearchDelegate extends SearchDelegate<String?> {
   final List<String> searchSuggestions;
+  final String? searchLabel;
 
-  ShamsSearchDelegate({required this.searchSuggestions});
+  ShamsSearchDelegate({
+    required this.searchSuggestions,
+    this.searchLabel,
+  });
 
   @override
-  String get searchFieldLabel => 'ابحث هنا...';
+  String get searchFieldLabel => searchLabel ?? 'ابحث هنا...';
 
   @override
   TextStyle get searchFieldStyle => GoogleFonts.tajawal(fontSize: 15);
@@ -36,10 +41,11 @@ class ShamsSearchDelegate extends SearchDelegate<String?> {
   @override
   List<Widget> buildActions(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     return [
       if (query.isNotEmpty)
         IconButton(
-          tooltip: 'مسح البحث',
+          tooltip: l10n.clearSearch,
           onPressed: () {
             query = '';
             showSuggestions(context);
@@ -52,8 +58,9 @@ class ShamsSearchDelegate extends SearchDelegate<String?> {
   @override
   Widget buildLeading(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     return IconButton(
-      tooltip: 'رجوع',
+      tooltip: l10n.back,
       onPressed: () => close(context, null),
       icon: Icon(Icons.arrow_back_ios_rounded, color: colorScheme.onPrimary),
     );
@@ -105,6 +112,7 @@ class ShamsSearchDelegate extends SearchDelegate<String?> {
 
   Widget _buildEmptyState(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -116,7 +124,7 @@ class ShamsSearchDelegate extends SearchDelegate<String?> {
           ),
           const SizedBox(height: 16),
           Text(
-            'لا توجد نتائج لـ "$query"',
+            l10n.noResultsFor(query),
             style: GoogleFonts.tajawal(
               fontSize: 16,
               fontWeight: FontWeight.w500,
@@ -125,7 +133,7 @@ class ShamsSearchDelegate extends SearchDelegate<String?> {
           ),
           const SizedBox(height: 8),
           Text(
-            'جرّب كلمة مختلفة',
+            l10n.tryDifferentKeyword,
             style: GoogleFonts.tajawal(
               fontSize: 13,
               color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),

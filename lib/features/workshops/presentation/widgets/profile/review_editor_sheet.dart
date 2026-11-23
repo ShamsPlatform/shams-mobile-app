@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/features/workshops/domain/entities/review.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/workshop_reviews_provider.dart';
@@ -69,19 +71,20 @@ class _ReviewEditorSheetState extends State<_ReviewEditorSheet> {
     super.dispose();
   }
 
-  String _ratingLabel(int rating) {
+  String _ratingLabel(int rating, AppLocalizations l10n) {
     return switch (rating) {
-      1 => 'ضعيف',
-      2 => 'مقبول',
-      3 => 'جيد',
-      4 => 'جيد جداً',
-      _ => 'ممتاز',
+      1 => l10n.ratingPoor,
+      2 => l10n.ratingFair,
+      3 => l10n.ratingGood,
+      4 => l10n.ratingVeryGood,
+      _ => l10n.ratingExcellent,
     };
   }
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
+    final l10n = AppLocalizations.of(context)!;
     final provider = context.read<WorkshopReviewsProvider>();
     final messenger = ScaffoldMessenger.of(context);
     final ok = _isEditing
@@ -102,7 +105,9 @@ class _ReviewEditorSheetState extends State<_ReviewEditorSheet> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            _isEditing ? 'تم تحديث تقييمك بنجاح' : 'تم نشر تقييمك بنجاح',
+            _isEditing
+                ? l10n.reviewUpdatedSuccess
+                : l10n.reviewPublishedSuccess,
             style: GoogleFonts.tajawal(),
           ),
           backgroundColor: ShamsColors.verifiedGreen,
@@ -113,214 +118,213 @@ class _ReviewEditorSheetState extends State<_ReviewEditorSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final ext = theme.extension<ShamsExtendedColors>();
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Consumer<WorkshopReviewsProvider>(
-        builder: (context, provider, _) {
-          return Container(
-            padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
-            decoration: BoxDecoration(
-              color: colorScheme.surface,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(24)),
-            ),
-            child: SingleChildScrollView(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: ext?.handleBar ?? ShamsColors.handleBar,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      _isEditing ? 'تعديل تقييمك' : 'أضف تقييمك للورشة',
-                      style: GoogleFonts.tajawal(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.workshopName,
-                      style: GoogleFonts.tajawal(
-                        fontSize: 13,
-                        color: ext?.textHint ?? ShamsColors.textHint,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 14,
-                      ),
+    return Consumer<WorkshopReviewsProvider>(
+      builder: (context, provider, _) {
+        return Container(
+          padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
                       decoration: BoxDecoration(
-                        color: ext?.backgroundLight ?? colorScheme.surface,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: ext?.borderLight ?? colorScheme.outlineVariant,
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(5, (index) {
-                              final starValue = index + 1;
-                              final isSelected = starValue <= _selectedRating;
-                              return IconButton(
-                                tooltip: '$starValue من 5',
-                                onPressed: provider.isSubmitting
-                                    ? null
-                                    : () => setState(() {
-                                          _selectedRating = starValue;
-                                        }),
-                                icon: Icon(
-                                  isSelected
-                                      ? Icons.star_rounded
-                                      : Icons.star_outline_rounded,
-                                  size: 36,
-                                  color: isSelected
-                                      ? ShamsColors.solarYellow
-                                      : ext?.textHint ?? ShamsColors.textHint,
-                                ),
-                              );
-                            }),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '$_selectedRating/5 — ${_ratingLabel(_selectedRating)}',
-                            style: GoogleFonts.tajawal(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: colorScheme.onSurface,
-                            ),
-                          ),
-                        ],
+                        color: ext?.handleBar ?? ShamsColors.handleBar,
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _commentController,
-                      enabled: !provider.isSubmitting,
-                      maxLines: 4,
-                      minLines: 3,
-                      maxLength: 500,
-                      style: GoogleFonts.tajawal(
-                        fontSize: 14,
-                        color: colorScheme.onSurface,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: 'اكتب تعليقك عن الخدمة وجودة التنفيذ',
-                        alignLabelWithHint: true,
-                        filled: true,
-                        fillColor: ext?.inputFill ??
-                            colorScheme.surfaceContainerHighest,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(
-                            color: ext?.borderLight ?? colorScheme.outline,
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(
-                            color: ext?.borderLight ?? colorScheme.outline,
-                          ),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'يرجى كتابة تعليق عن تجربتك مع الورشة';
-                        }
-                        return null;
-                      },
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    _isEditing
+                        ? l10n.editYourReviewTitle
+                        : l10n.addWorkshopReviewTitle,
+                    style: GoogleFonts.tajawal(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
                     ),
-                    if (provider.errorMessage != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        provider.errorMessage!,
-                        style: GoogleFonts.tajawal(
-                          fontSize: 13,
-                          color: colorScheme.error,
-                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.workshopName,
+                    style: GoogleFonts.tajawal(
+                      fontSize: 13,
+                      color: ext?.textHint ?? ShamsColors.textHint,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: ext?.backgroundLight ?? colorScheme.surface,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: ext?.borderLight ?? colorScheme.outlineVariant,
                       ),
-                    ],
-                    const SizedBox(height: 16),
-                    Row(
+                    ),
+                    child: Column(
                       children: [
-                        Expanded(
-                          child: SizedBox(
-                            height: 48,
-                            child: FilledButton(
-                              onPressed:
-                                  provider.isSubmitting ? null : _submit,
-                              style: FilledButton.styleFrom(
-                                backgroundColor: ShamsColors.primaryBlue,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(5, (index) {
+                            final starValue = index + 1;
+                            final isSelected = starValue <= _selectedRating;
+                            return IconButton(
+                              tooltip: l10n.ratingOutOfFive(starValue),
+                              onPressed: provider.isSubmitting
+                                  ? null
+                                  : () => setState(() {
+                                        _selectedRating = starValue;
+                                      }),
+                              icon: Icon(
+                                isSelected
+                                    ? Icons.star_rounded
+                                    : Icons.star_outline_rounded,
+                                size: 36,
+                                color: isSelected
+                                    ? ShamsColors.solarYellow
+                                    : ext?.textHint ?? ShamsColors.textHint,
                               ),
-                              child: provider.isSubmitting
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : Text(
-                                      _isEditing
-                                          ? 'حفظ التعديلات'
-                                          : 'نشر التقييم',
-                                      style: GoogleFonts.tajawal(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                            ),
-                          ),
+                            );
+                          }),
                         ),
-                        const SizedBox(width: 12),
-                        TextButton(
-                          onPressed: provider.isSubmitting
-                              ? null
-                              : () {
-                                  provider.clearError();
-                                  Navigator.of(context).pop(false);
-                                },
-                          child: Text(
-                            'إلغاء',
-                            style: GoogleFonts.tajawal(
-                              fontWeight: FontWeight.w600,
-                            ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '$_selectedRating/5 — ${_ratingLabel(_selectedRating, l10n)}',
+                          style: GoogleFonts.tajawal(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ],
                     ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _commentController,
+                    enabled: !provider.isSubmitting,
+                    maxLines: 4,
+                    minLines: 3,
+                    maxLength: 500,
+                    style: GoogleFonts.tajawal(
+                      fontSize: 14,
+                      color: colorScheme.onSurface,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: l10n.reviewCommentHint,
+                      alignLabelWithHint: true,
+                      filled: true,
+                      fillColor: ext?.inputFill ??
+                          colorScheme.surfaceContainerHighest,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide(
+                          color: ext?.borderLight ?? colorScheme.outline,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide(
+                          color: ext?.borderLight ?? colorScheme.outline,
+                        ),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return l10n.pleaseWriteReviewComment;
+                      }
+                      return null;
+                    },
+                  ),
+                  if (provider.errorMessage != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.localizeErrorMessage(provider.errorMessage!),
+                      style: GoogleFonts.tajawal(
+                        fontSize: 13,
+                        color: colorScheme.error,
+                      ),
+                    ),
                   ],
-                ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: FilledButton(
+                            onPressed: provider.isSubmitting ? null : _submit,
+                            style: FilledButton.styleFrom(
+                              backgroundColor: ShamsColors.primaryBlue,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: provider.isSubmitting
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : Text(
+                                    _isEditing
+                                        ? l10n.saveEdits
+                                        : l10n.publishReview,
+                                    style: GoogleFonts.tajawal(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      TextButton(
+                        onPressed: provider.isSubmitting
+                            ? null
+                            : () {
+                                provider.clearError();
+                                Navigator.of(context).pop(false);
+                              },
+                        child: Text(
+                          l10n.cancel,
+                          style: GoogleFonts.tajawal(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
 import 'package:shams_mobile_app/core/widgets/scrollable_image_picker.dart';
@@ -35,6 +37,7 @@ class DashboardInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final handle = username.isNotEmpty ? '@$username' : '@workshop';
     final totalGallery = galleryUrls.length + pendingGalleryPaths.length;
 
@@ -66,7 +69,7 @@ class DashboardInfoSection extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Text(
-              city,
+              l10n.localizeCity(city),
               style: GoogleFonts.tajawal(
                 fontSize: 12,
                 color: Theme.of(context).colorScheme.onSurface,
@@ -82,7 +85,7 @@ class DashboardInfoSection extends StatelessWidget {
           child: Row(
             children: [
               Text(
-                'صور الورشة',
+                l10n.workshopImages,
                 style: GoogleFonts.tajawal(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -123,7 +126,7 @@ class DashboardInfoSection extends StatelessWidget {
             width: double.infinity,
             height: 45,
             child: CustomSolidButton(
-              title: 'تعديل ملف الورشة',
+              title: l10n.editWorkshopProfile,
               onPressed: onEditTap,
             ),
           ),
@@ -137,7 +140,7 @@ class DashboardInfoSection extends StatelessWidget {
             children: [
               _StatColumn(
                 count: followersCount.toString(),
-                label: 'المتابعون',
+                label: l10n.followers,
                 icon: Icons.people_alt_outlined,
               ),
               VerticalDivider(
@@ -147,7 +150,7 @@ class DashboardInfoSection extends StatelessWidget {
               ),
               _StatColumn(
                 count: '$postCount',
-                label: 'المنشورات',
+                label: l10n.postsCountLabel,
                 icon: Icons.article_outlined,
               ),
             ],

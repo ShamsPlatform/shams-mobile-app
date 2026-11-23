@@ -1,6 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/presentation/view_status.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/features/chat/presentation/screens/chat_conversation_screen.dart';
@@ -21,12 +23,13 @@ class NotificationsScreen extends StatelessWidget {
     final notifications = provider.notifications;
     final colorScheme = Theme.of(context).colorScheme;
     final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
         backgroundColor: ext.backgroundLight,
         appBar: AppBar(
           title: Text(
-            'الإشعارات',
+            l10n.notifications,
             style: GoogleFonts.tajawal(
               color: colorScheme.onSurface,
               fontWeight: FontWeight.bold,
@@ -38,7 +41,7 @@ class NotificationsScreen extends StatelessWidget {
           elevation: 0.5,
           leading: IconButton(
             icon: Icon(
-              Icons.arrow_forward_ios_rounded,
+              Icons.arrow_back_ios_new_rounded,
               color: colorScheme.onSurface,
               size: 20,
             ),
@@ -50,7 +53,7 @@ class NotificationsScreen extends StatelessWidget {
                 onPressed: () =>
                     context.read<NotificationProvider>().markAllAsRead(),
                 child: Text(
-                  'قراءة الكل',
+                  l10n.markAllRead,
                   style: GoogleFonts.tajawal(
                     fontSize: 13,
                     color: colorScheme.primary,
@@ -93,7 +96,7 @@ class NotificationsScreen extends StatelessWidget {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'تم حذف الإشعار',
+                                l10n.notificationDeleted,
                                 style: GoogleFonts.tajawal(
                                   fontSize: 14,
                                   color: colorScheme.onInverseSurface,
@@ -123,6 +126,7 @@ class NotificationsScreen extends StatelessWidget {
     AppNotification notif,
   ) async {
     final notifProvider = context.read<NotificationProvider>();
+    final l10n = AppLocalizations.of(context)!;
     if (!notif.isRead) {
       notifProvider.markAsRead(notif.id);
     }
@@ -176,8 +180,8 @@ class NotificationsScreen extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               _infoSnack(
                 error != null
-                    ? 'حدث خطأ أثناء تحميل المحادثة: $error'
-                    : 'لم يتم العثور على محادثة لطلب الصيانة هذا',
+                    ? l10n.chatLoadError(l10n.localizeErrorMessage(error))
+                    : l10n.maintenanceChatNotFound,
               ),
             );
           }
@@ -208,6 +212,7 @@ class NotificationsScreen extends StatelessWidget {
   Widget _buildEmptyState(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -219,7 +224,7 @@ class NotificationsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'لا توجد إشعارات حالياً',
+            l10n.noNotificationsNow,
             style: GoogleFonts.tajawal(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -228,7 +233,7 @@ class NotificationsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'ستظهر إشعاراتك هنا عند وصولها',
+            l10n.notificationsWillAppearHere,
             style: GoogleFonts.tajawal(
               fontSize: 13,
               color: ext.textHint,

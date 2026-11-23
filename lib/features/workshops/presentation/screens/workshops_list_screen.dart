@@ -1,24 +1,26 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import 'package:shams_mobile_app/core/constants/app_constants.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/appbar.dart';
 import 'package:shams_mobile_app/core/widgets/city_filter.dart';
-import 'package:shams_mobile_app/features/workshops/presentation/widgets/workshop_card.dart';
 import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
-import 'package:shams_mobile_app/features/workshops/presentation/constants/workshop_assets.dart';
-import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
-import 'package:shams_mobile_app/features/notifications/presentation/providers/notification_provider.dart';
+import 'package:shams_mobile_app/core/widgets/shams_drawer.dart';
 import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shams_mobile_app/features/notifications/presentation/providers/notification_provider.dart';
+import 'package:shams_mobile_app/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/screens/about_shams_screen.dart';
 import 'package:shams_mobile_app/features/profile/presentation/screens/edit_profile_screen.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/constants/workshop_assets.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/screens/workshop_dashboard_screen.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/screens/workshop_profile_screen.dart';
-import 'package:shams_mobile_app/features/notifications/presentation/screens/notifications_screen.dart';
-import 'package:shams_mobile_app/core/widgets/shams_drawer.dart';
+import 'package:shams_mobile_app/features/workshops/presentation/widgets/workshop_card.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WorkshopsListScreen — قائمة الورش العامة
@@ -70,6 +72,7 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
     // ── Single source of truth: watch provider for live updates ──────────────
     final workshopsProvider = context.watch<WorkshopsProvider>();
     final workshops = workshopsProvider.workshops;
+    final l10n = AppLocalizations.of(context)!;
 
     // ── Smart filter: apply city + search query ───────────────────────────────
     final filteredWorkshops = workshops.where((workshop) {
@@ -127,7 +130,7 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
           children: [
             // ── شريط البحث ──────────────────────────────────────────────────
             InlineSearchBar(
-              hintText: 'ابحث عن الورشة المفضلة...',
+              hintText: l10n.searchWorkshopHint,
               onChanged: (val) {
                 setState(() {
                   _searchQuery = val;
@@ -167,7 +170,7 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
                       padding: const EdgeInsetsDirectional.only(start: 8.0),
                       child: FilterChip(
                           label: Text(
-                            service,
+                            l10n.localizeServiceType(service),
                             style: GoogleFonts.tajawal(
                               fontSize: 13,
                               color: isSelected
@@ -231,7 +234,7 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
                               const SizedBox(height: 160),
                               Center(
                                 child: Text(
-                                  'لا توجد ورش في المحافظات المحددة.',
+                                  l10n.noWorkshopsInCities,
                                   style: GoogleFonts.tajawal(
                                     fontSize: 16,
                                     color: Theme.of(context)
@@ -264,7 +267,7 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
                           imagePath: workshop.logoUrl ?? kDefaultWorkshopLogoAsset,
                           coverImagePath:
                               workshop.coverUrl ?? kDefaultWorkshopCoverAsset,
-                          cityName: workshop.city,
+                          cityName: l10n.localizeCity(workshop.city),
                           rating: workshop.rating,
                           reviewCount: workshop.reviewCount,
                           // isFollowing reflects live provider state via watch()
@@ -280,8 +283,10 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
                               messenger.showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    provider.errorMessage ??
-                                        'تعذر تحديث المتابعة',
+                                    l10n.localizeErrorMessage(
+                                      provider.errorMessage,
+                                      fallback: l10n.followToggleError,
+                                    ),
                                     style: GoogleFonts.tajawal(),
                                   ),
                                   backgroundColor: errorColor,

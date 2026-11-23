@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/features/workshops/domain/entities/workshop.dart';
 
@@ -18,6 +20,7 @@ class WorkshopProfileInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Text(
@@ -40,7 +43,7 @@ class WorkshopProfileInfo extends StatelessWidget {
             const Icon(Icons.location_on_rounded, size: 14, color: Colors.grey),
             const SizedBox(width: 4),
             Text(
-              workshop.city,
+              l10n.localizeCity(workshop.city),
               style: GoogleFonts.tajawal(
                 fontSize: 13,
                 color: Colors.grey.shade700,
@@ -56,7 +59,7 @@ class WorkshopProfileInfo extends StatelessWidget {
             Text(
               workshop.reviewCount > 0 || workshop.rating > 0
                   ? '${workshop.rating.toStringAsFixed(1)}/5'
-                  : 'جديد',
+                  : l10n.newLabel,
               style: GoogleFonts.tajawal(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -65,7 +68,7 @@ class WorkshopProfileInfo extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Text(
-              '(${workshop.reviewCount} تقييم)',
+              l10n.reviewsCountLabel(workshop.reviewCount),
               style: GoogleFonts.tajawal(
                 fontSize: 12,
                 color: Colors.grey.shade500,
@@ -120,7 +123,7 @@ class WorkshopProfileInfo extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      isFollowing ? 'الغاء المتابعة' : 'متابعة',
+                      isFollowing ? l10n.unfollow : l10n.follow,
                       style: GoogleFonts.tajawal(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -165,7 +168,7 @@ class _CircularSocialIcon extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'ميزة التواصل متوفرة قريباً',
+              AppLocalizations.of(context)!.contactSoon,
               style: GoogleFonts.tajawal(color: Colors.white),
             ),
             backgroundColor: Theme.of(context).colorScheme.onSurface,

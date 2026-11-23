@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import 'package:shams_mobile_app/core/utils/formatters.dart';
 import 'package:shams_mobile_app/features/posts/domain/entities/post.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/widgets/profile/workshop_image_views.dart';
 
@@ -13,6 +14,7 @@ class WorkshopWorkLogSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -22,7 +24,7 @@ class WorkshopWorkLogSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'سجل الأعمال',
+                l10n.workLogTitle,
                 style: GoogleFonts.tajawal(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -34,7 +36,7 @@ class WorkshopWorkLogSection extends StatelessWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'فتح سجل الأعمال بالكامل (قريباً)...',
+                        l10n.fullWorkLogSoon,
                         style: GoogleFonts.tajawal(color: Colors.white),
                       ),
                       backgroundColor: Theme.of(context).colorScheme.primary,
@@ -47,7 +49,7 @@ class WorkshopWorkLogSection extends StatelessWidget {
                   );
                 },
                 child: Text(
-                  'عرض الكل',
+                  l10n.viewAll,
                   style: GoogleFonts.tajawal(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -64,7 +66,7 @@ class WorkshopWorkLogSection extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 20),
               child: Text(
-                'لا توجد أعمال في هذا السجل حالياً.',
+                l10n.noWorkLogYet,
                 style: GoogleFonts.tajawal(
                   fontSize: 14,
                   color: Theme.of(context)
@@ -77,7 +79,7 @@ class WorkshopWorkLogSection extends StatelessWidget {
         else
           ...posts.map(
             (post) => _WorkLogCard(
-              time: formatRelativeTime(post.createdAt),
+              time: l10n.formatRelativeTimeLocalized(post.createdAt),
               content: post.textDetails,
               images: post.images,
             ),
@@ -118,7 +120,7 @@ class _WorkLogCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Align(
-            alignment: Alignment.centerRight,
+            alignment: AlignmentDirectional.centerStart,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
@@ -147,7 +149,7 @@ class _WorkLogCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             content,
-            textAlign: TextAlign.right,
+            textAlign: TextAlign.start,
             style: GoogleFonts.tajawal(
               fontSize: 14,
               height: 1.6,
@@ -172,9 +174,9 @@ class _WorkLogCard extends StatelessWidget {
                           child: WorkshopCoverImage(path: images[index]),
                         ),
                         if (images.length > 1)
-                          Positioned(
+                          PositionedDirectional(
                             bottom: 10,
-                            left: 10,
+                            end: 10,
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,

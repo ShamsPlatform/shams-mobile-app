@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 class ChatInputField extends StatefulWidget {
@@ -75,7 +76,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 12),
-                      hintText: 'اكتب رسالتك...',
+                      hintText: AppLocalizations.of(context)!.writeMessageHint,
                       hintStyle: GoogleFonts.tajawal(
                           color: ext.textHint, fontSize: 14),
                     ),

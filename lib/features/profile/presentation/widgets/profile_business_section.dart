@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 /// Reusable section title with leading accent icon used in the profile screen.
@@ -53,12 +54,13 @@ class ProfileBusinessSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const ProfileSectionHeader(
-          title: 'إدارة أعمالي',
+        ProfileSectionHeader(
+          title: l10n.myBusiness,
           icon: Icons.storefront_rounded,
         ),
         const SizedBox(height: 15),
@@ -105,7 +107,9 @@ class ProfileBusinessSection extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        hasWorkshop ? 'لوحة تحكم الورشة' : 'إضافة ورشة جديدة',
+                        hasWorkshop
+                            ? l10n.workshopDashboard
+                            : l10n.addNewWorkshop,
                         style: GoogleFonts.tajawal(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
@@ -114,8 +118,8 @@ class ProfileBusinessSection extends StatelessWidget {
                       ),
                       Text(
                         hasWorkshop
-                            ? 'إدارة منشوراتك وإحصاءات ورشتك'
-                            : 'انقر هنا لإضافة تفاصيل الورشة',
+                            ? l10n.workshopDashboardSubtitle
+                            : l10n.addNewWorkshopSubtitle,
                         style: GoogleFonts.tajawal(
                           fontSize: 12,
                           color: Colors.grey.shade500,
@@ -124,7 +128,7 @@ class ProfileBusinessSection extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_left, color: Colors.grey, size: 20),
+                const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
               ],
             ),
           ),

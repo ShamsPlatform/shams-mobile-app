@@ -1,8 +1,11 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:shams_mobile_app/core/constants/app_constants.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
 import 'package:shams_mobile_app/core/widgets/text_field.dart';
@@ -36,12 +39,7 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
 
   final ImagePicker _picker = ImagePicker();
 
-  // قائمة الـ 21 محافظة يمنية المطلوبة
-  final List<String> _cities = [
-    'صنعاء', 'عدن', 'تعز', 'الحديدة', 'إب', 'حضرموت', 'ذمار', 'عمران',
-    'الضالع', 'لحج', 'أبين', 'المهرة', 'شبوة', 'البيضاء', 'مأرب', 'الجوف',
-    'صعدة', 'المحويت', 'حجة', 'ريمة', 'سقطرى',
-  ];
+  static const List<String> _cities = ShamsConstants.yemeniCities;
 
   @override
   void initState() {
@@ -63,6 +61,7 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
   }
 
   Future<void> _handleCreateAccount() async {
+    final l10n = AppLocalizations.of(context)!;
     final name = _nameController.text.trim();
     final username = _usernameController.text.trim();
     final phone = _phoneController.text.trim();
@@ -70,7 +69,7 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
     final location = _selectedLocation;
 
     setState(() {
-      _nameError = name.isEmpty ? 'يرجى إدخال اسمك الكامل' : null;
+      _nameError = name.isEmpty ? l10n.pleaseEnterFullName : null;
     });
 
     if (_nameError == null) {
@@ -95,7 +94,10 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                authProvider.errorMessage ?? 'حدث خطأ أثناء إكمال الحساب',
+                l10n.localizeErrorMessage(
+                  authProvider.errorMessage,
+                  fallback: l10n.completeAccountError,
+                ),
                 style: GoogleFonts.tajawal(),
               ),
               backgroundColor: Theme.of(context).colorScheme.error,
@@ -105,7 +107,9 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                authProvider.warnings.join('\n'),
+                authProvider.warnings
+                    .map((w) => l10n.localizeErrorMessage(w))
+                    .join('\n'),
                 style: GoogleFonts.tajawal(),
               ),
               backgroundColor: Theme.of(context).colorScheme.error,
@@ -132,6 +136,7 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
         backgroundColor:
             Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
@@ -147,7 +152,7 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
           child: Column(
             children: [
               Text(
-                'أكمل ملفك الشخصي',
+                l10n.completeYourProfile,
                 style: GoogleFonts.tajawal(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -156,7 +161,7 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'دع مجتمع شمس يتعرف عليك أكثر',
+                l10n.completeProfileSubtitle,
                 style: GoogleFonts.tajawal(
                   fontSize: 14,
                   color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
@@ -185,7 +190,7 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
                       child: GestureDetector(
                         onTap: _pickImage,
                         child: Stack(
-                          alignment: Alignment.bottomRight,
+                          alignment: AlignmentDirectional.bottomEnd,
                           children: [
                             CircleAvatar(
                               radius: 50,
@@ -209,24 +214,24 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
                     ),
                     const SizedBox(height: 32),
                     
-                    _inputLabel('الاسم الكامل *'),
-                    CustomTextField(hintText: 'أدخل اسمك الكامل', prefixIcon: Icons.person_outline, controller: _nameController, errorText: _nameError),
+                    _inputLabel(l10n.fullNameRequired),
+                    CustomTextField(hintText: l10n.enterFullName, prefixIcon: Icons.person_outline, controller: _nameController, errorText: _nameError),
                     const SizedBox(height: 16),
 
-                    _inputLabel('اسم المستخدم *'),
-                    CustomTextField(hintText: 'أدخل اسم المستخدم', prefixIcon: Icons.alternate_email, controller: _usernameController),
+                    _inputLabel(l10n.usernameRequiredLabel),
+                    CustomTextField(hintText: l10n.enterUsername, prefixIcon: Icons.alternate_email, controller: _usernameController),
                     const SizedBox(height: 16),
 
-                    _inputLabel('الموقع *'),
-                    _buildDropdownField(),
+                    _inputLabel(l10n.locationRequiredLabel),
+                    _buildDropdownField(l10n),
                     const SizedBox(height: 16),
 
-                    _inputLabel('رقم الهاتف (اختياري)'),
+                    _inputLabel(l10n.phoneOptional),
                     CustomTextField(hintText: '05xxxxxxxx', prefixIcon: Icons.phone_outlined, controller: _phoneController),
                     const SizedBox(height: 16),
 
-                    _inputLabel('نبذة شخصية (اختياري)'),
-                    CustomTextField(hintText: 'مهتم بالطاقة المتجددة...', prefixIcon: Icons.info_outline, controller: _bioController),
+                    _inputLabel(l10n.bioOptional),
+                    CustomTextField(hintText: l10n.bioHint, prefixIcon: Icons.info_outline, controller: _bioController),
                     const SizedBox(height: 32),
                     
                     SizedBox(
@@ -239,7 +244,7 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
                               ),
                             )
                           : CustomSolidButton(
-                              title: 'إنشاء الحساب',
+                              title: l10n.createAccountBtn,
                               onPressed: _handleCreateAccount,
                             ),
                     ),
@@ -266,7 +271,7 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
     );
   }
 
-  Widget _buildDropdownField() {
+  Widget _buildDropdownField(AppLocalizations l10n) {
     return DropdownButtonFormField<String>(
       initialValue: _selectedLocation,
       icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF9EA3B0)),
@@ -294,7 +299,7 @@ class _SignUpProfileScreenState extends State<SignUpProfileScreen> {
       items: _cities.map((city) {
         return DropdownMenuItem(
           value: city,
-          child: Text(city, style: GoogleFonts.tajawal(fontSize: 15)),
+          child: Text(l10n.localizeCity(city), style: GoogleFonts.tajawal(fontSize: 15)),
         );
       }).toList(),
       onChanged: (value) {

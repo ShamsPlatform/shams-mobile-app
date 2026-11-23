@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -307,7 +307,7 @@ class ShamsDrawer extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  user.name,
+                  user.name == 'جاري التحميل...' ? l10n.loadingLabel : user.name,
                   style: GoogleFonts.tajawal(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,

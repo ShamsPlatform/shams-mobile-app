@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 /// A horizontally scrollable image picker that supports an unlimited number
@@ -175,7 +176,7 @@ class _AddImageButton extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'إضافة',
+              AppLocalizations.of(context)!.add,
               style: GoogleFonts.tajawal(
                 fontSize: 11,
                 color: colorScheme.secondary,

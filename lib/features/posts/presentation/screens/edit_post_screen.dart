@@ -4,12 +4,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/core/di/injection.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/features/posts/domain/entities/post.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/post_editor_provider.dart';
+import 'package:shams_mobile_app/features/posts/presentation/screens/create_post_screen.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/my_workshop_provider.dart';
-import 'package:shams_mobile_app/core/theme/shams_colors.dart';
-import 'package:shams_mobile_app/features/posts/presentation/screens/create_post_screen.dart'; // إعادة استخدام MediaFile و _AttachmentThumbnail
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EditPostScreen — شاشة تعديل المنشور
@@ -61,52 +63,51 @@ class _EditPostScreenState extends State<EditPostScreen> {
   // ── Actions ────────────────────────────────────────────────────────────────
 
   Future<void> _pickMedia() async {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
-      builder: (context) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          title: Text(
-            'إضافة مرفق',
-            style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
-          ),
-          content: Text('اختر طريقة الإرفاق:', style: GoogleFonts.tajawal()),
-          actions: [
-            TextButton(
-              onPressed: () => _handlePick(ImageSource.gallery, false),
-              child: Text(
-                'المعرض (صور)',
-                style: GoogleFonts.tajawal(color: Theme.of(context).colorScheme.primary),
-              ),
-            ),
-            TextButton(
-              onPressed: () => _handlePick(ImageSource.gallery, true),
-              child: Text(
-                'المعرض (فيديو)',
-                style: GoogleFonts.tajawal(color: Colors.purple),
-              ),
-            ),
-            TextButton(
-              onPressed: () => _handlePick(ImageSource.camera, false),
-              child: Text(
-                'الكاميرا',
-                style: GoogleFonts.tajawal(color: Colors.orange),
-              ),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                'إلغاء',
-                style: GoogleFonts.tajawal(color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint),
-              ),
-            ),
-          ],
+      builder: (context) => AlertDialog(
+        title: Text(
+          l10n.addAttachment,
+          style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
         ),
+        content: Text(l10n.chooseAttachMethod, style: GoogleFonts.tajawal()),
+        actions: [
+          TextButton(
+            onPressed: () => _handlePick(ImageSource.gallery, false),
+            child: Text(
+              l10n.galleryPhotos,
+              style: GoogleFonts.tajawal(color: Theme.of(context).colorScheme.primary),
+            ),
+          ),
+          TextButton(
+            onPressed: () => _handlePick(ImageSource.gallery, true),
+            child: Text(
+              l10n.galleryVideo,
+              style: GoogleFonts.tajawal(color: Colors.purple),
+            ),
+          ),
+          TextButton(
+            onPressed: () => _handlePick(ImageSource.camera, false),
+            child: Text(
+              l10n.camera,
+              style: GoogleFonts.tajawal(color: Colors.orange),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              l10n.cancel,
+              style: GoogleFonts.tajawal(color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Future<void> _handlePick(ImageSource source, bool isVideo) async {
+    final l10n = AppLocalizations.of(context)!;
     Navigator.pop(context);
     try {
       final XFile? file = isVideo
@@ -123,7 +124,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'عذراً، هذه الميزة غير مدعومة على هذا الجهاز حالياً.',
+              l10n.cameraNotSupported,
               style: GoogleFonts.tajawal(),
             ),
           ),
@@ -137,11 +138,12 @@ class _EditPostScreenState extends State<EditPostScreen> {
   }
 
   Future<void> _save(BuildContext editorContext) async {
+    final l10n = AppLocalizations.of(context)!;
     if (_contentController.text.trim().isEmpty && _attachments.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'الرجاء إضافة محتوى أو صورة للمنشور',
+            l10n.addPostContentError,
             style: GoogleFonts.tajawal(),
           ),
         ),
@@ -175,7 +177,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'حدث خطأ أثناء تعديل المنشور: ${editor.errorMessage ?? ''}',
+            l10n.editPostError(l10n.localizeErrorMessage(editor.errorMessage, fallback: '')),
             style: GoogleFonts.tajawal(),
           ),
           backgroundColor: Theme.of(context).colorScheme.error,
@@ -189,13 +191,12 @@ class _EditPostScreenState extends State<EditPostScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ChangeNotifierProvider(
       create: (_) => sl<PostEditorProvider>(),
-      builder: (editorContext, _) => Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+      builder: (editorContext, _) => Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        appBar: _buildAppBar(),
+        appBar: _buildAppBar(l10n),
         body: Column(
           children: [
             const Divider(
@@ -212,7 +213,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // 1. قسم رفع الصور والفيديو (نفس الموجود في الإنشاء)
-                    _buildUploadSection(),
+                    _buildUploadSection(l10n),
 
                     const SizedBox(height: 24),
 
@@ -222,35 +223,34 @@ class _EditPostScreenState extends State<EditPostScreen> {
                     const SizedBox(height: 24),
 
                     // 3. حقل النص (مملوء مسبقاً)
-                    _buildContentField(),
+                    _buildContentField(l10n),
 
                     const SizedBox(height: 24),
 
                     // 4. خيار التمييز
-                    _buildHighlightToggle(),
+                    _buildHighlightToggle(l10n),
                   ],
                 ),
               ),
             ),
             // زر الحفظ السفلي الثابت
-            _buildSaveButton(editorContext),
+            _buildSaveButton(editorContext, l10n),
           ],
         ),
       ),
-    ),
     );
   }
 
   // ── Widgets ────────────────────────────────────────────────────────────────
 
-  PreferredSizeWidget _buildAppBar() {
+  PreferredSizeWidget _buildAppBar(AppLocalizations l10n) {
     return AppBar(
       backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       centerTitle: true,
       automaticallyImplyLeading: false,
       title: Text(
-        'تعديل المنشور',
+        l10n.editPost,
         style: GoogleFonts.tajawal(
           fontSize: 18,
           fontWeight: FontWeight.w700,
@@ -263,7 +263,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
           Icons.close_rounded,
           color: Theme.of(context).colorScheme.onSurface,
         ),
-        tooltip: 'إغلاق',
+        tooltip: l10n.close,
       ),
     );
   }
@@ -285,7 +285,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
     );
   }
 
-  Widget _buildUploadSection() {
+  Widget _buildUploadSection(AppLocalizations l10n) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
@@ -317,9 +317,9 @@ class _EditPostScreenState extends State<EditPostScreen> {
                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
-                  Positioned(
+                  PositionedDirectional(
                     bottom: 2,
-                    right: 2,
+                    start: 2,
                     child: Container(
                       padding: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
@@ -337,7 +337,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'إرفاق صور أو فيديوهات',
+                l10n.attachMedia,
                 style: GoogleFonts.tajawal(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
@@ -346,7 +346,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                'وثّق إنجازاتك في الطاقة الشمسية',
+                l10n.documentSolarAchievements,
                 style: GoogleFonts.tajawal(fontSize: 13, color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint),
               ),
             ],
@@ -356,12 +356,12 @@ class _EditPostScreenState extends State<EditPostScreen> {
     );
   }
 
-  Widget _buildContentField() {
+  Widget _buildContentField(AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'تفاصيل المنشور',
+          l10n.postDetailsLabel,
           style: GoogleFonts.tajawal(
             fontSize: 16,
             fontWeight: FontWeight.w700,
@@ -383,7 +383,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
               color: Theme.of(context).colorScheme.onSurface,
             ),
             decoration: InputDecoration(
-              hintText: 'اكتب تفاصيل المنشور هنا',
+              hintText: l10n.writePostDetailsHint,
               hintStyle: GoogleFonts.tajawal(
                 color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
                 fontSize: 14,
@@ -397,7 +397,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
     );
   }
 
-  Widget _buildHighlightToggle() {
+  Widget _buildHighlightToggle(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -408,7 +408,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
         children: [
           Expanded(
             child: Text(
-              'تمييز المنشور',
+              l10n.highlightPost,
               style: GoogleFonts.tajawal(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
@@ -426,7 +426,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
     );
   }
 
-  Widget _buildSaveButton(BuildContext editorContext) {
+  Widget _buildSaveButton(BuildContext editorContext, AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: SizedBox(
@@ -442,7 +442,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
             elevation: 0,
           ),
           child: Text(
-            'حفظ التعديلات',
+            l10n.saveEdits,
             style: GoogleFonts.tajawal(
               fontSize: 16,
               fontWeight: FontWeight.w700,
@@ -467,6 +467,7 @@ class _EditAttachmentThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -476,12 +477,12 @@ class _EditAttachmentThumbnail extends StatelessWidget {
             width: 85,
             height: 85,
             color: Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
-            child: _buildMediaPreview(),
+            child: _buildMediaPreview(l10n),
           ),
         ),
-        Positioned(
+        PositionedDirectional(
           top: -5,
-          right: -5,
+          start: -5,
           child: GestureDetector(
             onTap: onRemove,
             child: Container(
@@ -498,7 +499,7 @@ class _EditAttachmentThumbnail extends StatelessWidget {
     );
   }
 
-  Widget _buildMediaPreview() {
+  Widget _buildMediaPreview(AppLocalizations l10n) {
     if (media.isVideo) {
       // مصغّرة فيديو: خلفية داكنة + أيقونة تشغيل + بطاقة
       return Container(
@@ -513,9 +514,9 @@ class _EditAttachmentThumbnail extends StatelessWidget {
                 size: 36,
               ),
             ),
-            Positioned(
+            PositionedDirectional(
               bottom: 4,
-              left: 4,
+              end: 4,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                 decoration: BoxDecoration(
@@ -532,7 +533,7 @@ class _EditAttachmentThumbnail extends StatelessWidget {
                     ),
                     const SizedBox(width: 2),
                     Text(
-                      'فيديو',
+                      l10n.video,
                       style: GoogleFonts.tajawal(
                         color: Colors.white,
                         fontSize: 8,

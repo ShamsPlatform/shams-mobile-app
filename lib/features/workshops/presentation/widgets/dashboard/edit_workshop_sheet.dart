@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/core/constants/app_constants.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/my_workshop_provider.dart';
 
 /// Opens the modal bottom sheet for editing the owner's workshop info.
 void showEditWorkshopSheet(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
   final myWorkshop = context.read<MyWorkshopProvider>().myWorkshop;
-  final currentName = myWorkshop?.name ?? 'ورشتي على شمس';
+  final currentName = myWorkshop?.name ?? l10n.myWorkshopOnShams;
   final currentUsername = myWorkshop?.username ?? 'workshop';
   final currentCity = myWorkshop?.city ?? 'صنعاء';
   final parentMessenger = ScaffoldMessenger.of(context);
@@ -22,16 +25,13 @@ void showEditWorkshopSheet(BuildContext context) {
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
-    builder: (ctx) => Directionality(
-      textDirection: TextDirection.rtl,
-      child: _EditWorkshopSheetContent(
-        initialName: currentName,
-        initialUsername: currentUsername,
-        initialCity: currentCity,
-        parentMessenger: parentMessenger,
-        successColor: successColor,
-        errorColor: errorColor,
-      ),
+    builder: (ctx) => _EditWorkshopSheetContent(
+      initialName: currentName,
+      initialUsername: currentUsername,
+      initialCity: currentCity,
+      parentMessenger: parentMessenger,
+      successColor: successColor,
+      errorColor: errorColor,
     ),
   );
 }
@@ -83,6 +83,7 @@ class _EditWorkshopSheetContentState extends State<_EditWorkshopSheetContent> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
@@ -108,7 +109,7 @@ class _EditWorkshopSheetContentState extends State<_EditWorkshopSheetContent> {
             ),
           ),
           Text(
-            'تعديل ملف الورشة',
+            l10n.editWorkshopProfile,
             style: GoogleFonts.tajawal(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -119,20 +120,20 @@ class _EditWorkshopSheetContentState extends State<_EditWorkshopSheetContent> {
           _buildEditField(
             context: context,
             controller: _nameCtrl,
-            label: 'اسم الورشة',
+            label: l10n.workshopNameLabel,
             icon: Icons.store_outlined,
           ),
           const SizedBox(height: 14),
           _buildEditField(
             context: context,
             controller: _handleCtrl,
-            label: 'اسم المستخدم',
+            label: l10n.username,
             icon: Icons.alternate_email_rounded,
             prefix: '@',
           ),
           const SizedBox(height: 14),
           Text(
-            'المحافظة',
+            l10n.governorateLabel,
             style: GoogleFonts.tajawal(
               fontSize: 13,
               color: Theme.of(context)
@@ -162,7 +163,7 @@ class _EditWorkshopSheetContentState extends State<_EditWorkshopSheetContent> {
                 value: _selectedCity,
                 isExpanded: true,
                 hint: Text(
-                  'اختر المحافظة',
+                  l10n.selectGovernorate,
                   style: GoogleFonts.tajawal(
                     fontSize: 14,
                     color: Colors.grey.shade400,
@@ -177,7 +178,7 @@ class _EditWorkshopSheetContentState extends State<_EditWorkshopSheetContent> {
                       (city) => DropdownMenuItem<String>(
                         value: city,
                         child: Text(
-                          city,
+                          l10n.localizeCity(city),
                           style: GoogleFonts.tajawal(
                             fontSize: 14,
                             color: Theme.of(context).colorScheme.onSurface,
@@ -208,7 +209,7 @@ class _EditWorkshopSheetContentState extends State<_EditWorkshopSheetContent> {
                   widget.parentMessenger.showSnackBar(
                     SnackBar(
                       content: Text(
-                        'تم حفظ معلومات الورشة بنجاح',
+                        l10n.workshopInfoSaved,
                         style: GoogleFonts.tajawal(),
                       ),
                       backgroundColor: widget.successColor,
@@ -223,7 +224,10 @@ class _EditWorkshopSheetContentState extends State<_EditWorkshopSheetContent> {
                   widget.parentMessenger.showSnackBar(
                     SnackBar(
                       content: Text(
-                        provider.errorMessage ?? 'تعذر حفظ التعديلات',
+                        l10n.localizeErrorMessage(
+                          provider.errorMessage,
+                          fallback: l10n.saveEditsFailed,
+                        ),
                         style: GoogleFonts.tajawal(),
                       ),
                       backgroundColor: widget.errorColor,
@@ -244,7 +248,7 @@ class _EditWorkshopSheetContentState extends State<_EditWorkshopSheetContent> {
                 elevation: 0,
               ),
               child: Text(
-                'حفظ التعديلات',
+                l10n.saveEdits,
                 style: GoogleFonts.tajawal(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -139,11 +141,12 @@ class _UsernameFieldState extends State<UsernameField> {
   }
 
   Widget _buildFeedback(ColorScheme colorScheme, ShamsExtendedColors ext) {
+    final l10n = AppLocalizations.of(context)!;
     if (!_touched) {
       return Padding(
         padding: const EdgeInsets.only(top: 6),
         child: Text(
-          'مثال: ahmed_solar.99  |  3–30 حرفاً، إنجليزية فقط',
+          l10n.usernameHintExample,
           style: GoogleFonts.tajawal(fontSize: 11, color: ext.textHint),
         ),
       );
@@ -158,7 +161,7 @@ class _UsernameFieldState extends State<UsernameField> {
                 size: 13, color: colorScheme.tertiary),
             const SizedBox(width: 4),
             Text(
-              'اسم المستخدم متاح ومقبول',
+              l10n.usernameAvailable,
               style: GoogleFonts.tajawal(
                   fontSize: 11, color: colorScheme.tertiary),
             ),
@@ -175,7 +178,7 @@ class _UsernameFieldState extends State<UsernameField> {
           const SizedBox(width: 4),
           Expanded(
             child: Text(
-              _error ?? '',
+              _error != null ? l10n.localizeErrorMessage(_error) : '',
               style:
                   GoogleFonts.tajawal(fontSize: 11, color: colorScheme.error),
             ),

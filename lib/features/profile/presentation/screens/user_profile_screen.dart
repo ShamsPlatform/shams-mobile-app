@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/language_provider.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/screens/about_shams_screen.dart';
@@ -26,7 +28,6 @@ class UserProfileScreen extends StatefulWidget {
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
   bool _isNotificationsEnabled = true;
-  String _selectedLanguage = 'ar';
 
   @override
   void initState() {
@@ -39,6 +40,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final languageProvider = context.watch<LanguageProvider>();
     final currentUser =
         context.watch<ProfileProvider>().currentUserOrPlaceholder;
 
@@ -51,97 +54,100 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       ),
     );
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: theme.colorScheme.surface,
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              ProfileHeaderCard(
-                currentUser: currentUser,
-                onEditProfileTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const EditProfileScreen(),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 30),
-              ProfileBusinessSection(
-                hasWorkshop: currentUser.hasWorkshop,
-                onTap: currentUser.hasWorkshop
-                    ? _openWorkshopDashboard
-                    : _openAddWorkshop,
-              ),
-              const SizedBox(height: 30),
-              ProfileSettingsSection(
-                notificationsEnabled: _isNotificationsEnabled,
-                onNotificationsChanged: (v) =>
-                    setState(() => _isNotificationsEnabled = v),
-                onPrivacyTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const PrivacySecurityScreen(),
-                    ),
-                  );
-                },
-                onLanguageTap: () => showProfileLanguageSheet(
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            ProfileHeaderCard(
+              currentUser: currentUser,
+              onEditProfileTap: () {
+                Navigator.push(
                   context,
-                  initialLanguage: _selectedLanguage,
-                  onSave: (lang) => setState(() => _selectedLanguage = lang),
-                ),
-                onSupportTap: () => showProfileSupportSheet(
-                  context,
-                  onShowMessage: _showSnackBar,
-                ),
-                onAboutTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const AboutShamsScreen(),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 30),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25),
-                child: CustomSolidButton(
-                  title: 'مشاركة التطبيق',
-                  onPressed: () {
-                    SharePlus.instance.share(
-                      ShareParams(
-                        text:
-                            'حمّل تطبيق شمس وانضم إلينا الآن!\nhttps://shams.app/download',
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextButton.icon(
-                onPressed: () => showProfileLogoutSheet(context),
-                icon: const Icon(
-                  Icons.logout_rounded,
-                  color: Colors.red,
-                  size: 20,
-                ),
-                label: Text(
-                  'تسجيل الخروج',
-                  style: GoogleFonts.tajawal(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                  MaterialPageRoute(
+                    builder: (_) => const EditProfileScreen(),
                   ),
+                );
+              },
+            ),
+            const SizedBox(height: 30),
+            ProfileBusinessSection(
+              hasWorkshop: currentUser.hasWorkshop,
+              onTap: currentUser.hasWorkshop
+                  ? _openWorkshopDashboard
+                  : _openAddWorkshop,
+            ),
+            const SizedBox(height: 30),
+            ProfileSettingsSection(
+              notificationsEnabled: _isNotificationsEnabled,
+              onNotificationsChanged: (v) =>
+                  setState(() => _isNotificationsEnabled = v),
+              onPrivacyTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const PrivacySecurityScreen(),
+                  ),
+                );
+              },
+              onLanguageTap: () => showProfileLanguageSheet(
+                context,
+                initialLanguage: languageProvider.currentLocale.languageCode,
+                onSave: (lang) {
+                  final targetLocale = lang == 'en'
+                      ? const Locale('en', 'US')
+                      : const Locale('ar', 'SA');
+                  context
+                      .read<LanguageProvider>()
+                      .changeLanguage(targetLocale);
+                },
+              ),
+              onSupportTap: () => showProfileSupportSheet(
+                context,
+                onShowMessage: _showSnackBar,
+              ),
+              onAboutTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AboutShamsScreen(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 30),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25),
+              child: CustomSolidButton(
+                title: l10n.shareApp,
+                onPressed: () {
+                  SharePlus.instance.share(
+                    ShareParams(
+                      text: l10n.shareAppText,
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextButton.icon(
+              onPressed: () => showProfileLogoutSheet(context),
+              icon: const Icon(
+                Icons.logout_rounded,
+                color: Colors.red,
+                size: 20,
+              ),
+              label: Text(
+                l10n.logout,
+                style: GoogleFonts.tajawal(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
                 ),
               ),
-              const SizedBox(height: 40),
-            ],
-          ),
+            ),
+            const SizedBox(height: 40),
+          ],
         ),
       ),
     );
@@ -156,7 +162,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       final hasWorkshop =
           context.read<ProfileProvider>().currentUserOrPlaceholder.hasWorkshop;
       if (hasWorkshop) {
-        _showSnackBar('تم إنشاء الورشة بنجاح! 🎉');
+        final l10n = AppLocalizations.of(context)!;
+        _showSnackBar(l10n.workshopCreatedSuccess);
       }
     });
   }

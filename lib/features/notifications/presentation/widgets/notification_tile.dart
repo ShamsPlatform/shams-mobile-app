@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/features/notifications/domain/entities/app_notification.dart';
 
@@ -45,6 +47,7 @@ class NotificationTile extends StatelessWidget {
     final visual = _typeVisuals[notif.type]!;
     final colorScheme = Theme.of(context).colorScheme;
     final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
+    final l10n = AppLocalizations.of(context)!;
 
     return InkWell(
       onTap: onTap,
@@ -58,7 +61,7 @@ class NotificationTile extends StatelessWidget {
           children: [
             if (isUnread)
               Padding(
-                padding: const EdgeInsets.only(top: 6, left: 8),
+                padding: const EdgeInsetsDirectional.only(top: 6, end: 8),
                 child: Container(
                   width: 7,
                   height: 7,
@@ -105,7 +108,7 @@ class NotificationTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _formatTime(notif.createdAt),
+                    l10n.formatRelativeTimeLocalized(notif.createdAt),
                     style: GoogleFonts.tajawal(
                       fontSize: 11,
                       color: ext.textHint,
@@ -118,14 +121,5 @@ class NotificationTile extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _formatTime(DateTime dt) {
-    final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 60) return 'منذ ${diff.inMinutes} دقيقة';
-    if (diff.inHours < 24) return 'منذ ${diff.inHours} ساعة';
-    if (diff.inDays == 1) return 'أمس';
-    if (diff.inDays < 7) return 'منذ ${diff.inDays} أيام';
-    return '${dt.day}/${dt.month}/${dt.year}';
   }
 }

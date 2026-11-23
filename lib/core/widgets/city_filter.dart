@@ -1,6 +1,7 @@
-﻿import 'package:flutter/material.dart';
-import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 class CityMultiSelectFilter extends StatefulWidget {
@@ -52,7 +53,7 @@ class _CityMultiSelectFilterState extends State<CityMultiSelectFilter> {
                     final isChecked = _selectedCities.contains(city);
 
                     return CheckboxListTile(
-                      title: Text(city,
+                      title: Text(l10n.localizeCity(city),
                           style: GoogleFonts.tajawal(fontSize: 15)),
                       value: isChecked,
                       activeColor: colorScheme.secondary,
@@ -166,7 +167,7 @@ class _CityMultiSelectFilterState extends State<CityMultiSelectFilter> {
                   padding: const EdgeInsetsDirectional.only(start: 8.0),
                   child: InputChip(
                     label: Text(
-                      city,
+                      l10n.localizeCity(city),
                       style: GoogleFonts.tajawal(
                           fontSize: 13,
                           color: colorScheme.onSurface,

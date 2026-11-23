@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/core/di/injection.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/presentation/view_status.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
@@ -78,6 +80,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
   }
 
   Future<void> _toggleFollow() async {
+    final l10n = AppLocalizations.of(context)!;
     final provider = context.read<WorkshopsProvider>();
     final messenger = ScaffoldMessenger.of(context);
     final errorColor = Theme.of(context).colorScheme.error;
@@ -86,7 +89,10 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            provider.errorMessage ?? 'تعذر تحديث المتابعة',
+            l10n.localizeErrorMessage(
+              provider.errorMessage,
+              fallback: l10n.followToggleError,
+            ),
             style: GoogleFonts.tajawal(),
           ),
           backgroundColor: errorColor,
@@ -99,28 +105,26 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
   Widget build(BuildContext context) {
     final workshopsProvider = context.watch<WorkshopsProvider>();
     final workshop = workshopsProvider.getWorkshopById(widget.workshopId);
+    final l10n = AppLocalizations.of(context)!;
 
     if (workshop == null) {
-      return Directionality(
-        textDirection: TextDirection.rtl,
-        child: Scaffold(
-          backgroundColor: Theme.of(context)
-              .extension<ShamsExtendedColors>()!
-              .backgroundLight,
-          appBar: AppBar(
-            backgroundColor: Theme.of(context).colorScheme.surface,
-            elevation: 0.5,
-            iconTheme: IconThemeData(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+      return Scaffold(
+        backgroundColor: Theme.of(context)
+            .extension<ShamsExtendedColors>()!
+            .backgroundLight,
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          elevation: 0.5,
+          iconTheme: IconThemeData(
+            color: Theme.of(context).colorScheme.onSurface,
           ),
-          body: Center(
-            child: Text(
-              'الورشة المطلوبة غير متوفرة حالياً.',
-              style: GoogleFonts.tajawal(
-                fontSize: 16,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+        ),
+        body: Center(
+          child: Text(
+            l10n.workshopUnavailable,
+            style: GoogleFonts.tajawal(
+              fontSize: 16,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ),
@@ -146,9 +150,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
         ),
       ],
       child: Builder(
-        builder: (context) => Directionality(
-          textDirection: TextDirection.rtl,
-          child: Scaffold(
+        builder: (context) => Scaffold(
         backgroundColor: Theme.of(context)
             .extension<ShamsExtendedColors>()!
             .backgroundLight,
@@ -169,7 +171,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
             color: Theme.of(context).colorScheme.onSurface,
           ),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_forward_ios_rounded, size: 20),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
             onPressed: () => Navigator.pop(context),
           ),
           actions: [
@@ -194,7 +196,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'بحث',
+                        l10n.search,
                         style: GoogleFonts.tajawal(
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
@@ -210,7 +212,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
         floatingActionButton: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 50),
           child: CustomSolidButton(
-            title: 'طلب خدمة صيانة الآن',
+            title: l10n.requestMaintenanceNow,
             onPressed: () => showMaintenanceRequestSheet(context, workshop),
           ),
         ),
@@ -222,7 +224,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
                 SafeArea(
                   bottom: false,
                   child: InlineSearchBar(
-                    hintText: 'ابحث في الورشة...',
+                    hintText: l10n.searchInWorkshopHint,
                     onChanged: (val) {},
                     onClose: () {
                       setState(() {
@@ -264,7 +266,6 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
           ),
         ),
       ),
-        ),
       ),
     );
   }

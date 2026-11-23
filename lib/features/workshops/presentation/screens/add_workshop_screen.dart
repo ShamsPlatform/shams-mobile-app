@@ -1,17 +1,19 @@
-﻿import 'dart:io';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 import 'package:shams_mobile_app/core/constants/app_constants.dart';
+import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/image_source_sheet.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
 import 'package:shams_mobile_app/core/widgets/scrollable_image_picker.dart';
 import 'package:shams_mobile_app/features/auth/presentation/widgets/username_field.dart';
-import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/features/workshops/domain/repositories/workshop_repository.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/my_workshop_provider.dart';
@@ -81,6 +83,7 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
   // ── Submit ───────────────────────────────────────────────────────────────────
 
   Future<void> _onCreateTapped() async {
+    final l10n = AppLocalizations.of(context)!;
     final name = _nameController.text.trim();
     final username = _usernameController.text.trim();
     final description = _descriptionController.text.trim();
@@ -88,14 +91,14 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
 
     // Validate required text fields
     if (name.isEmpty || description.isEmpty || _selectedCity == null) {
-      _showError('يرجى تعبئة جميع الحقول المطلوبة');
+      _showError(l10n.fillRequiredFields);
       return;
     }
 
     // Validate username
     final usernameError = UsernameValidator.validate(username);
     if (usernameError != null) {
-      _showError(usernameError);
+      _showError(l10n.localizeErrorMessage(usernameError));
       return;
     }
 
@@ -123,13 +126,18 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
         profileProvider.updateWorkshopStatus(true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('تم إضافة الورشة بنجاح!', style: GoogleFonts.tajawal()),
+            content: Text(l10n.workshopAddedSuccess, style: GoogleFonts.tajawal()),
             backgroundColor: Colors.green,
           ),
         );
         Navigator.pop(context);
       } else {
-        _showError(myWorkshopProvider.errorMessage ?? 'فشل إنشاء الورشة');
+        _showError(
+          l10n.localizeErrorMessage(
+            myWorkshopProvider.errorMessage,
+            fallback: l10n.workshopCreateFailed,
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -153,13 +161,17 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           centerTitle: true,
-          automaticallyImplyLeading: false,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_rounded, color: Theme.of(context).colorScheme.onSurface),
+            onPressed: () => Navigator.pop(context),
+          ),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(1),
             child: Container(
@@ -168,19 +180,13 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
             ),
           ),
           title: Text(
-            'إضافة ورشة',
+            l10n.addWorkshop,
             style: GoogleFonts.tajawal(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.arrow_forward, color: Theme.of(context).colorScheme.onSurface),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -188,21 +194,21 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1. Cover + Profile image header
-              _buildMediaHeader(),
+              _buildMediaHeader(l10n),
               const SizedBox(height: 24),
 
               // 2. Workshop Name
-              _buildFieldLabel('اسم الورشة *'),
+              _buildFieldLabel(l10n.workshopNameRequired),
               const SizedBox(height: 8),
               _buildTextField(
                 controller: _nameController,
-                hintText: 'أدخل اسم الورشة الكامل',
+                hintText: l10n.enterFullWorkshopName,
                 prefixIcon: Icons.store_mall_directory_outlined,
               ),
               const SizedBox(height: 20),
 
               // 3. Username
-              _buildFieldLabel('اسم المستخدم *'),
+              _buildFieldLabel(l10n.usernameRequiredLabel),
               const SizedBox(height: 8),
               UsernameField(controller: _usernameController),
               const SizedBox(height: 20),
@@ -215,7 +221,7 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildFieldLabel('سنوات الخبرة'),
+                        _buildFieldLabel(l10n.yearsOfExperience),
                         const SizedBox(height: 8),
                         _buildTextField(
                           controller: _yearsController,
@@ -233,9 +239,9 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildFieldLabel('المحافظة *'),
+                        _buildFieldLabel(l10n.governorateRequired),
                         const SizedBox(height: 8),
-                        _buildCityDropdown(),
+                        _buildCityDropdown(l10n),
                       ],
                     ),
                   ),
@@ -244,11 +250,11 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
               const SizedBox(height: 20),
 
               // 5. Description
-              _buildFieldLabel('وصف مختصر للخدمات *'),
+              _buildFieldLabel(l10n.servicesDescriptionRequired),
               const SizedBox(height: 8),
               _buildTextField(
                 controller: _descriptionController,
-                hintText: 'اكتب وصفاً موجزاً للخدمات التي تقدمها الورشة...',
+                hintText: l10n.servicesDescriptionHint,
                 maxLines: 4,
               ),
               const SizedBox(height: 24),
@@ -256,7 +262,7 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
               // 6. Unlimited extra images
               Row(
                 children: [
-                  _buildFieldLabel('صور الورشة'),
+                  _buildFieldLabel(l10n.workshopImages),
                   const SizedBox(width: 8),
                   Text(
                     '(${_images.length})',
@@ -287,7 +293,7 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
                         ),
                       )
                     : CustomSolidButton(
-                        title: 'إنشاء الورشة',
+                        title: l10n.createWorkshopBtn,
                         onPressed: _onCreateTapped,
                       ),
               ),
@@ -300,7 +306,7 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
 
   // ─── Media Header: cover image + centred profile avatar ─────────────────────
 
-  Widget _buildMediaHeader() {
+  Widget _buildMediaHeader(AppLocalizations l10n) {
     return SizedBox(
       height: 210,
       child: Stack(
@@ -331,10 +337,10 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
                         fit: StackFit.expand,
                         children: [
                           Image.file(_coverImage!, fit: BoxFit.cover),
-                          Positioned(
+                          PositionedDirectional(
                             bottom: 8,
-                            left: 8,
-                            child: _editBadge('تغيير الغلاف'),
+                            end: 8,
+                            child: _editBadge(l10n.changeCover),
                           ),
                         ],
                       )
@@ -351,7 +357,7 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'اضغط لإضافة صورة الغلاف',
+                            l10n.tapToAddCover,
                             style: GoogleFonts.tajawal(
                               fontSize: 13,
                               color: Colors.grey.shade500,
@@ -400,7 +406,7 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  'صورة',
+                                  l10n.photo,
                                   style: GoogleFonts.tajawal(
                                     fontSize: 10,
                                     color: Theme.of(context).colorScheme.secondary,
@@ -505,7 +511,7 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
     );
   }
 
-  Widget _buildCityDropdown() {
+  Widget _buildCityDropdown(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
@@ -518,7 +524,7 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
           value: _selectedCity,
           isExpanded: true,
           hint: Text(
-            'اختر المحافظة',
+            l10n.selectGovernorate,
             style: GoogleFonts.tajawal(
               fontSize: 13,
               color: Colors.grey.shade400,
@@ -530,7 +536,7 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
                 (city) => DropdownMenuItem<String>(
                   value: city,
                   child: Text(
-                    city,
+                    l10n.localizeCity(city),
                     style: GoogleFonts.tajawal(
                       fontSize: 14,
                       color: Theme.of(context).colorScheme.onSurface,

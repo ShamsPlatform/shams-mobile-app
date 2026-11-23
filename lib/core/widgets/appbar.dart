@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/core/theme/theme_provider.dart';
 
@@ -110,9 +110,9 @@ class ShamsPlatformAppBar extends StatelessWidget
                           onTap: onNotificationTap,
                         ),
                         if (unreadCount > 0)
-                          Positioned(
+                          PositionedDirectional(
                             top: -4,
-                            left: -6,
+                            end: -6,
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 4,
