@@ -2,8 +2,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
+import 'package:shams_mobile_app/core/widgets/shams_shimmer.dart';
 
 class PostCard extends StatefulWidget {
   final String username;
@@ -82,7 +84,7 @@ class _PostCardState extends State<PostCard>
       ),
       TweenSequenceItem(
         tween: Tween<double>(begin: 0.95, end: 1.0)
-            .chain(CurveTween(curve: Curves.easeOut)),
+            .chain(CurveTween(curve: Curves.elasticOut)),
         weight: 30,
       ),
     ]).animate(_likeAnimController);
@@ -155,6 +157,10 @@ class _PostCardState extends State<PostCard>
 
   Widget _buildHeader(ColorScheme colorScheme, ShamsExtendedColors ext) {
     final bool isNetwork = widget.avatarPath.startsWith('http');
+    final trimmedHandle = widget.userHandle.trim();
+    final formattedHandle = trimmedHandle.isEmpty
+        ? ''
+        : (trimmedHandle.startsWith('@') ? trimmedHandle : '@$trimmedHandle');
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
@@ -190,27 +196,29 @@ class _PostCardState extends State<PostCard>
                   ),
                   Row(
                     children: [
-                      Flexible(
-                        child: Text(
-                          widget.userHandle,
-                          style: GoogleFonts.tajawal(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400,
-                            color: colorScheme.primary,
+                      if (formattedHandle.isNotEmpty)
+                        Flexible(
+                          child: Text(
+                            formattedHandle,
+                            style: GoogleFonts.tajawal(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              color: colorScheme.primary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
                       if (widget.timeAgoText != null &&
                           widget.timeAgoText!.isNotEmpty) ...[
-                        Text(
-                          ' • ',
-                          style: GoogleFonts.tajawal(
-                            fontSize: 12,
-                            color: ext.textHint,
+                        if (formattedHandle.isNotEmpty)
+                          Text(
+                            ' • ',
+                            style: GoogleFonts.tajawal(
+                              fontSize: 12,
+                              color: ext.textHint,
+                            ),
                           ),
-                        ),
                         Flexible(
                           child: Text(
                             widget.timeAgoText!,
@@ -329,11 +337,10 @@ class _PostCardState extends State<PostCard>
                 final path = images[index];
                 final isNetwork = path.startsWith('http');
                 if (isNetwork) {
-                  return Image.network(
-                    path,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    errorBuilder: (_, _, _) => _imagePlaceholder(ext),
+                  return _NetworkPostImage(
+                    imageUrl: path,
+                    ext: ext,
+                    fallback: _imagePlaceholder(ext),
                   );
                 } else if (path.startsWith('assets/')) {
                   return Image.asset(
@@ -492,6 +499,10 @@ class _Avatar extends StatelessWidget {
             ? Image.network(
                 imagePath,
                 fit: BoxFit.cover,
+                loadingBuilder: (_, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return _fallback();
+                },
                 errorBuilder: (_, _, _) => _fallback(),
               )
             : (imagePath.startsWith('assets/')
@@ -668,5 +679,85 @@ class _ActionChipState extends State<_ActionChip> {
     if (n >= 1000000) return '${(n / 1000000).toStringAsFixed(1)}M';
     if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}K';
     return n.toString();
+  }
+}
+
+
+// ── _NetworkPostImage ─────────────────────────────────────────────────────────
+
+class _NetworkPostImage extends StatelessWidget {
+  final String imageUrl;
+  final ShamsExtendedColors ext;
+  final Widget fallback;
+
+  const _NetworkPostImage({
+    required this.imageUrl,
+    required this.ext,
+    required this.fallback,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+        if (wasSynchronouslyLoaded) return child;
+        return AnimatedOpacity(
+          opacity: frame == null ? 0.0 : 1.0,
+          duration: const Duration(milliseconds: 260),
+          curve: Curves.easeOutCubic,
+          child: child,
+        );
+      },
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        final totalBytes = loadingProgress.expectedTotalBytes;
+        final progress = totalBytes != null && totalBytes > 0
+            ? loadingProgress.cumulativeBytesLoaded / totalBytes
+            : null;
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            ShamsShimmer(
+              child: Container(color: ext.chipBackground),
+            ),
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: ext.cardSurface.withValues(alpha: 0.85),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+                child: LoadingAnimationWidget.threeArchedCircle(
+                  color: colorScheme.primary,
+                  size: 30,
+                ),
+              ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 3,
+                backgroundColor: Colors.transparent,
+                valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
+              ),
+            ),
+          ],
+        );
+      },
+      errorBuilder: (_, _, _) => fallback,
+    );
   }
 }

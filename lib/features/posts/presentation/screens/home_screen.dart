@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/app/main_screen.dart';
 import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
@@ -14,6 +15,7 @@ import 'package:shams_mobile_app/features/posts/presentation/providers/feed_prov
 import 'package:shams_mobile_app/features/posts/presentation/screens/post_detail_screen.dart';
 import 'package:shams_mobile_app/features/posts/presentation/widgets/comments_component.dart';
 import 'package:shams_mobile_app/features/posts/presentation/widgets/post_card.dart';
+import 'package:shams_mobile_app/features/posts/presentation/widgets/post_card_skeleton.dart';
 import 'package:shams_mobile_app/features/workshops/domain/entities/workshop.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/constants/workshop_assets.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
@@ -154,9 +156,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // ── قائمة المنشورات ───────────────────────────────
           if (feedProvider.isLoading && allPosts.isEmpty)
-            const SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(child: CircularProgressIndicator()),
+            const SliverToBoxAdapter(
+              child: PostFeedSkeletonList(),
             )
           else if (filteredPosts.isEmpty)
             SliverFillRemaining(
@@ -285,10 +286,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
         if (feedProvider.isLoadingMore)
-          const SliverToBoxAdapter(
+          SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Center(child: CircularProgressIndicator()),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Center(
+                child: LoadingAnimationWidget.staggeredDotsWave(
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 34,
+                ),
+              ),
             ),
           ),
 
