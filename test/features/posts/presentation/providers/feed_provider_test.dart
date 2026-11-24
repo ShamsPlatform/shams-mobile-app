@@ -267,4 +267,58 @@ void main() {
     await pagedProvider.loadMore();
     verify(() => getFeed(any())).called(4);
   });
+
+  test('addPost replaces duplicate IDs in place without inflating offset and load deduplicates',
+      () async {
+    final pagedProvider = FeedProvider(
+      getFeed: getFeed,
+      toggleLike: toggleLike,
+      addComment: addComment,
+      deleteComment: deleteComment,
+      toggleCommentLike: toggleCommentLike,
+      hidePost: hidePost,
+      pageSize: 2,
+    );
+
+    when(
+      () => getFeed(
+        any(
+          that: predicate<GetFeedParams>(
+            (p) => p.limit == 2 && p.offset == 0,
+          ),
+        ),
+      ),
+    ).thenAnswer((_) async => Ok([post1, post2, post1]));
+
+    await pagedProvider.load();
+    expect(pagedProvider.posts.map((p) => p.id), ['p1', 'p2']);
+
+    final updatedPost1 = post1.copyWith(textDetails: 'Updated Post 1');
+    pagedProvider.addPost(updatedPost1);
+
+    expect(pagedProvider.posts, hasLength(2));
+    expect(pagedProvider.posts.where((p) => p.id == 'p1'), hasLength(1));
+    expect(pagedProvider.getPostById('p1')!.textDetails, 'Updated Post 1');
+
+    when(
+      () => getFeed(
+        any(
+          that: predicate<GetFeedParams>(
+            (p) => p.limit == 2 && p.offset == 3,
+          ),
+        ),
+      ),
+    ).thenAnswer((_) async => const Ok([]));
+
+    await pagedProvider.loadMore();
+    verify(
+      () => getFeed(
+        any(
+          that: predicate<GetFeedParams>(
+            (p) => p.limit == 2 && p.offset == 3,
+          ),
+        ),
+      ),
+    ).called(1);
+  });
 }
