@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
+import 'package:shams_mobile_app/core/widgets/shams_modals.dart';
 import 'package:shams_mobile_app/app/main_screen.dart';
 
 class ShamsDrawer extends StatelessWidget {
@@ -13,6 +14,8 @@ class ShamsDrawer extends StatelessWidget {
   final VoidCallback onAboutTap;
   final VoidCallback onSignOut;
   final VoidCallback? onWorkshopDashboardTap;
+  final ValueChanged<int>? onTabSelected;
+  final VoidCallback? onMaintenanceRequestsTap;
 
   const ShamsDrawer({
     super.key,
@@ -22,108 +25,106 @@ class ShamsDrawer extends StatelessWidget {
     required this.onAboutTap,
     required this.onSignOut,
     this.onWorkshopDashboardTap,
+    this.onTabSelected,
+    this.onMaintenanceRequestsTap,
   });
 
   void _navigateTo(BuildContext context, int index) {
     Navigator.pop(context);
     if (activeIndex == index) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (context) => MainScreen(initialIndex: index),
-      ),
-      (route) => false,
-    );
+    if (onTabSelected != null) {
+      onTabSelected!(index);
+    } else {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (context) => MainScreen(initialIndex: index),
+        ),
+        (route) => false,
+      );
+    }
   }
 
   void _showSupportMenu(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet(
+    showShamsModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) {
         final colorScheme = Theme.of(context).colorScheme;
-        final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
 
-        return Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(25)),
-          ),
-          padding: const EdgeInsets.fromLTRB(25, 15, 25, 30),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: ext.handleBar,
-                  borderRadius: BorderRadius.circular(10),
-                ),
+        return Material(
+          color: colorScheme.surface,
+          borderRadius:
+              const BorderRadius.vertical(top: Radius.circular(25)),
+          clipBehavior: Clip.antiAlias,
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(25, 15, 25, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const ShamsSheetHandle(),
+                  const SizedBox(height: 20),
+                  Text(
+                    l10n.technicalSupportTitle,
+                    style: GoogleFonts.tajawal(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ShamsSupportOptionTile(
+                    icon: Icons.chat_bubble_outline_rounded,
+                    iconColor: const Color(0xFF25D366),
+                    title: l10n.whatsapp,
+                    subtitle: '+967 776 434 968',
+                    subtitleTextDirection: TextDirection.ltr,
+                    onTap: () async {
+                      Navigator.pop(context);
+                      final Uri url =
+                          Uri.parse('https://wa.me/967776434968');
+                      try {
+                        await launchUrl(url,
+                            mode: LaunchMode.externalApplication);
+                      } catch (_) {}
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  ShamsSupportOptionTile(
+                    icon: Icons.phone_in_talk_outlined,
+                    iconColor: colorScheme.primary,
+                    title: l10n.phoneCall,
+                    subtitle: '+967 776 434 968',
+                    subtitleTextDirection: TextDirection.ltr,
+                    onTap: () async {
+                      Navigator.pop(context);
+                      final Uri url = Uri.parse('tel:+967776434968');
+                      try {
+                        await launchUrl(url);
+                      } catch (_) {}
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  ShamsSupportOptionTile(
+                    icon: Icons.email_outlined,
+                    iconColor: colorScheme.primary,
+                    title: l10n.emailFull,
+                    subtitle: 'codyvex1@gmail.com',
+                    subtitleTextDirection: TextDirection.ltr,
+                    onTap: () async {
+                      Navigator.pop(context);
+                      final Uri url =
+                          Uri.parse('mailto:codyvex1@gmail.com');
+                      try {
+                        await launchUrl(url);
+                      } catch (_) {}
+                    },
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-              Text(
-                l10n.technicalSupportTitle,
-                style: GoogleFonts.tajawal(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 20),
-              ListTile(
-                leading: const Icon(
-                  Icons.chat_bubble_outline_rounded,
-                  color: Color(0xFF25D366),
-                ),
-                title: Text(l10n.whatsapp,
-                    style: GoogleFonts.tajawal(fontSize: 16)),
-                onTap: () async {
-                  Navigator.pop(context);
-                  final Uri url =
-                      Uri.parse('https://wa.me/967776434968');
-                  try {
-                    await launchUrl(url,
-                        mode: LaunchMode.externalApplication);
-                  } catch (_) {}
-                },
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.phone_in_talk_outlined,
-                  color: colorScheme.primary,
-                ),
-                title: Text(
-                  l10n.phoneCall,
-                  style: GoogleFonts.tajawal(fontSize: 16),
-                ),
-                onTap: () async {
-                  Navigator.pop(context);
-                  final Uri url = Uri.parse('tel:+967776434968');
-                  try {
-                    await launchUrl(url);
-                  } catch (_) {}
-                },
-              ),
-              ListTile(
-                leading: const Icon(
-                  Icons.email_outlined,
-                  color: Colors.orange,
-                ),
-                title: Text(
-                  l10n.emailFull,
-                  style: GoogleFonts.tajawal(fontSize: 16),
-                ),
-                onTap: () async {
-                  Navigator.pop(context);
-                  final Uri url =
-                      Uri.parse('mailto:codyvex1@gmail.com');
-                  try {
-                    await launchUrl(url);
-                  } catch (_) {}
-                },
-              ),
-            ],
+            ),
           ),
         );
       },
@@ -135,12 +136,12 @@ class ShamsDrawer extends StatelessWidget {
     final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
     final l10n = AppLocalizations.of(context)!;
 
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showShamsDialog<bool>(
       context: context,
       builder: (ctx) => Dialog(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20)),
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -175,6 +176,7 @@ class ShamsDrawer extends StatelessWidget {
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(ctx, false),
                       style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(0, 44),
                         padding:
                             const EdgeInsets.symmetric(vertical: 12),
                         side: BorderSide(color: ext.borderLight),
@@ -184,6 +186,8 @@ class ShamsDrawer extends StatelessWidget {
                       ),
                       child: Text(
                         l10n.cancel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.tajawal(
                           color: colorScheme.onSurface,
                           fontWeight: FontWeight.bold,
@@ -196,6 +200,7 @@ class ShamsDrawer extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(ctx, true),
                       style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(0, 44),
                         backgroundColor: colorScheme.error,
                         foregroundColor: colorScheme.onError,
                         elevation: 0,
@@ -207,6 +212,8 @@ class ShamsDrawer extends StatelessWidget {
                       ),
                       child: Text(
                         l10n.logout,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.tajawal(
                             fontWeight: FontWeight.bold),
                       ),
@@ -243,13 +250,13 @@ class ShamsDrawer extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(16, 60, 16, 24),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
-                begin: AlignmentDirectional.topEnd,
-                end: AlignmentDirectional.bottomStart,
+                begin: AlignmentDirectional.topStart,
+                end: AlignmentDirectional.bottomEnd,
                 colors: [
-                  colorScheme.primary,
-                  colorScheme.primaryContainer,
+                  Color(0xFF003D99), // Deep Royal Blue (>7:1 contrast)
+                  Color(0xFF0052CC), // Shams Brand Blue
                 ],
               ),
             ),
@@ -269,37 +276,46 @@ class ShamsDrawer extends StatelessWidget {
                               user.name.isNotEmpty
                                   ? user.name[0].toUpperCase()
                                   : 'U',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                color: colorScheme.onPrimaryContainer,
+                                color: Color(0xFF003D99),
                               ),
                             )
                           : null,
                     ),
                     const SizedBox(width: 16),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: user.hasWorkshop
-                            ? colorScheme.secondary
-                            : colorScheme.onPrimary
-                                .withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        user.hasWorkshop
-                            ? l10n.workshopOwner
-                            : l10n.shamsClient,
-                        style: GoogleFonts.tajawal(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
                           color: user.hasWorkshop
-                              ? colorScheme.onSecondary
-                              : colorScheme.onPrimary,
+                              ? colorScheme.secondary
+                              : Colors.white.withValues(alpha: 0.20),
+                          borderRadius: BorderRadius.circular(20),
+                          border: user.hasWorkshop
+                              ? null
+                              : Border.all(
+                                  color: Colors.white.withValues(alpha: 0.35),
+                                  width: 1.0,
+                                ),
+                        ),
+                        child: Text(
+                          user.hasWorkshop
+                              ? l10n.workshopOwner
+                              : l10n.shamsClient,
+                          style: GoogleFonts.tajawal(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: user.hasWorkshop
+                                ? colorScheme.onSecondary
+                                : Colors.white,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
@@ -311,7 +327,7 @@ class ShamsDrawer extends StatelessWidget {
                   style: GoogleFonts.tajawal(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: colorScheme.onPrimary,
+                    color: Colors.white,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -321,7 +337,7 @@ class ShamsDrawer extends StatelessWidget {
                   user.email,
                   style: GoogleFonts.tajawal(
                     fontSize: 13,
-                    color: colorScheme.onPrimary.withValues(alpha: 0.7),
+                    color: Colors.white.withValues(alpha: 0.88),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -335,6 +351,7 @@ class ShamsDrawer extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 8),
               children: [
+                // ── Group 1: Navigation Tabs ─────────────────────────────
                 _buildMenuItem(
                   context: context,
                   icon: Icons.home_rounded,
@@ -356,6 +373,14 @@ class ShamsDrawer extends StatelessWidget {
                   isSelected: activeIndex == 2,
                   onTap: () => _navigateTo(context, 2),
                 ),
+
+                // ── Subtle Divider between Navigation and Account Utilities ──
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  child: Divider(color: ext.dividerLight, height: 1),
+                ),
+
+                // ── Group 2: Account & Maintenance Utilities ─────────────
                 _buildMenuItem(
                   context: context,
                   icon: Icons.edit_note_rounded,
@@ -371,8 +396,21 @@ class ShamsDrawer extends StatelessWidget {
                   icon: Icons.build_circle_outlined,
                   title: l10n.myMaintenanceRequests,
                   isSelected: false,
-                  onTap: () => _navigateTo(context, 2),
+                  onTap: () {
+                    Navigator.pop(context);
+                    if (onMaintenanceRequestsTap != null) {
+                      onMaintenanceRequestsTap!();
+                    }
+                  },
                 ),
+
+                // ── Subtle Divider between Account and Support/Platform ────
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  child: Divider(color: ext.dividerLight, height: 1),
+                ),
+
+                // ── Group 3: Platform Information & Support ───────────────
                 _buildMenuItem(
                   context: context,
                   icon: Icons.info_outline_rounded,
@@ -393,11 +431,13 @@ class ShamsDrawer extends StatelessWidget {
                     _showSupportMenu(context);
                   },
                 ),
+
+                // ── Group 4: Workshop Management (Conditional) ───────────
                 if (user.hasWorkshop) ...[
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 8),
-                    child: Divider(color: ext.borderLight, height: 1),
+                        horizontal: 16, vertical: 6),
+                    child: Divider(color: ext.dividerLight, height: 1),
                   ),
                   _buildMenuItem(
                     context: context,
@@ -415,7 +455,7 @@ class ShamsDrawer extends StatelessWidget {
           ),
 
           // ── Footer (Logout) ────────────────────────────────────────────
-          Divider(color: ext.borderLight, height: 1),
+          Divider(color: ext.dividerLight, height: 1),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: _buildMenuItem(
@@ -450,29 +490,30 @@ class ShamsDrawer extends StatelessWidget {
     final finalIconColor = iconColor ??
         (isSelected ? colorScheme.primary : ext.textHint);
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      child: Material(
         color: isSelected
-            ? colorScheme.primary.withValues(alpha: 0.06)
+            ? colorScheme.primary.withValues(alpha: 0.08)
             : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
-      ),
-      child: ListTile(
-        leading: Icon(icon, color: finalIconColor, size: 22),
-        title: Text(
-          title,
-          style: GoogleFonts.tajawal(
-            fontSize: 14,
-            fontWeight:
-                isSelected ? FontWeight.bold : FontWeight.w500,
-            color: finalTextColor,
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
+          leading: Icon(icon, color: finalIconColor, size: 22),
+          title: Text(
+            title,
+            style: GoogleFonts.tajawal(
+              fontSize: 14,
+              fontWeight:
+                  isSelected ? FontWeight.bold : FontWeight.w500,
+              color: finalTextColor,
+            ),
           ),
-        ),
-        onTap: onTap,
-        dense: true,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          onTap: onTap,
+          dense: true,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
         ),
       ),
     );

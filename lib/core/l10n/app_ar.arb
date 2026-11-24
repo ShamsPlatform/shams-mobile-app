@@ -357,6 +357,7 @@
   "failedToLoadChats": "تعذر تحميل المحادثات",
   "noChatsYet": "لا توجد محادثات بعد",
   "startChatFromWorkshop": "ابدأ محادثة من صفحة ورشة لطلب الصيانة",
+  "exploreWorkshops": "تصفح الورش",
   "noChatsMatching": "لا توجد محادثات تطابق \"{query}\"",
   "@noChatsMatching": {
     "placeholders": {"query": {"type": "String"}}
@@ -432,8 +433,9 @@
   "noWorkshopsInCities": "لا توجد ورش في المحافظات المحددة.",
   "followToggleError": "تعذر تحديث المتابعة",
   "follow": "متابعة",
+  "following": "متابَع",
   "unfollow": "إلغاء المتابعة",
-  "enterWorkshop": "دخول الورشة",
+  "enterWorkshop": "عرض الورشة",
   "addWorkshop": "إضافة ورشة",
   "fillRequiredFields": "يرجى تعبئة جميع الحقول المطلوبة",
   "workshopAddedSuccess": "تم إضافة الورشة بنجاح!",

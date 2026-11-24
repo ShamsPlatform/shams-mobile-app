@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/theme/theme_provider.dart';
 
 /// ShamsPlatformAppBar — شريط التطبيق الرئيسي لمنصة شمس
@@ -56,8 +57,19 @@ class ShamsPlatformAppBar extends StatelessWidget
     final darkModeIcon =
         isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined;
 
+    final ext = Theme.of(context).extension<ShamsExtendedColors>();
+    final dividerColor = ext?.dividerLight ?? colorScheme.outlineVariant;
+
     return Container(
-      color: colorScheme.surface,
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        border: Border(
+          bottom: BorderSide(
+            color: dividerColor,
+            width: 1.0,
+          ),
+        ),
+      ),
       child: SafeArea(
         bottom: false,
         child: SizedBox(
@@ -69,14 +81,20 @@ class ShamsPlatformAppBar extends StatelessWidget
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // ── أيقونة القائمة الجانبية (يمين — بداية RTL) ────────────
-                _AppBarIcon(
-                  icon: Icons.menu_rounded,
-                  color: colorScheme.onSurface,
-                  onTap: onMenuTap,
+                SizedBox(
+                  width: 76,
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: _AppBarIcon(
+                      icon: Icons.menu_rounded,
+                      color: colorScheme.onSurface,
+                      onTap: onMenuTap,
+                    ),
+                  ),
                 ),
 
                 // ── الشعار (الوسط) ─────────────────────────────────────────
-                Flexible(
+                Expanded(
                   child: Center(
                     child: Image.asset(
                       logoAsset,
@@ -87,64 +105,70 @@ class ShamsPlatformAppBar extends StatelessWidget
                 ),
 
                 // ── أيقونات الوضع الليلي والإشعارات (يسار — نهاية RTL) ─────
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // أيقونة تبديل الوضع الليلي
-                    _AppBarIcon(
-                      icon: darkModeIcon,
-                      color: colorScheme.onSurface,
-                      onTap: onDarkModeTap ??
-                          () => themeProvider.toggleTheme(),
-                    ),
-
-                    const SizedBox(width: 14),
-
-                    // أيقونة الإشعارات مع شارة
-                    Stack(
-                      clipBehavior: Clip.none,
+                SizedBox(
+                  width: 76,
+                  child: Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
+                        // أيقونة تبديل الوضع الليلي
                         _AppBarIcon(
-                          icon: Icons.notifications_outlined,
+                          icon: darkModeIcon,
                           color: colorScheme.onSurface,
-                          onTap: onNotificationTap,
+                          onTap: onDarkModeTap ??
+                              () => themeProvider.toggleTheme(),
                         ),
-                        if (unreadCount > 0)
-                          PositionedDirectional(
-                            top: -4,
-                            end: -6,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 4,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE53935),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: colorScheme.surface,
-                                  width: 1.5,
-                                ),
-                              ),
-                              constraints: const BoxConstraints(
-                                minWidth: 16,
-                                minHeight: 16,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '$unreadCount',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
+
+                        const SizedBox(width: 14),
+
+                        // أيقونة الإشعارات مع شارة
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            _AppBarIcon(
+                              icon: Icons.notifications_outlined,
+                              color: colorScheme.onSurface,
+                              onTap: onNotificationTap,
+                            ),
+                            if (unreadCount > 0)
+                              PositionedDirectional(
+                                top: -4,
+                                end: -6,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: ShamsColors.dangerRed,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: colorScheme.surface,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 16,
+                                    minHeight: 16,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '$unreadCount',
+                                      style: const TextStyle(
+                                        color: ShamsColors.bgWhite,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
+                          ],
+                        ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ],
             ),

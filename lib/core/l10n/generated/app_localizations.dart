@@ -1274,6 +1274,12 @@ abstract class AppLocalizations {
   /// **'ابدأ محادثة من صفحة ورشة لطلب الصيانة'**
   String get startChatFromWorkshop;
 
+  /// No description provided for @exploreWorkshops.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصفح الورش'**
+  String get exploreWorkshops;
+
   /// No description provided for @noChatsMatching.
   ///
   /// In ar, this message translates to:
@@ -1640,6 +1646,12 @@ abstract class AppLocalizations {
   /// **'متابعة'**
   String get follow;
 
+  /// No description provided for @following.
+  ///
+  /// In ar, this message translates to:
+  /// **'متابَع'**
+  String get following;
+
   /// No description provided for @unfollow.
   ///
   /// In ar, this message translates to:
@@ -1649,7 +1661,7 @@ abstract class AppLocalizations {
   /// No description provided for @enterWorkshop.
   ///
   /// In ar, this message translates to:
-  /// **'دخول الورشة'**
+  /// **'عرض الورشة'**
   String get enterWorkshop;
 
   /// No description provided for @addWorkshop.

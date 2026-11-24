@@ -45,9 +45,9 @@ class ShamsBottomNavBar extends StatelessWidget {
       label: 'workshopsNav',
     ),
     ShamsNavItem(
-      activeIcon: Icons.people_alt_rounded,
-      inactiveIcon: Icons.people_alt_outlined,
-      label: 'followNav',
+      activeIcon: Icons.chat_bubble_rounded,
+      inactiveIcon: Icons.chat_bubble_outline_rounded,
+      label: 'chatsTitle',
     ),
     ShamsNavItem(
       activeIcon: Icons.person_rounded,
@@ -60,6 +60,10 @@ class ShamsBottomNavBar extends StatelessWidget {
     switch (key) {
       case 'homeNav': return l10n.homeNav;
       case 'workshopsNav': return l10n.workshopsNav;
+      case 'chatsTitle':
+      case 'myChats':
+      case 'chatsNav':
+        return l10n.chatsTitle;
       case 'followNav': return l10n.followNav;
       case 'profileNav': return l10n.profileNav;
       default: return key;
@@ -139,44 +143,8 @@ class _NavBarItem extends StatefulWidget {
   State<_NavBarItem> createState() => _NavBarItemState();
 }
 
-class _NavBarItemState extends State<_NavBarItem>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnim;
-  late Animation<double> _iconSizeAnim;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 220),
-    );
-    _scaleAnim = Tween<double>(begin: 0.85, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
-    );
-    _iconSizeAnim = Tween<double>(begin: 24.0, end: 28.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
-
-    if (widget.isActive) _controller.value = 1.0;
-  }
-
-  @override
-  void didUpdateWidget(_NavBarItem oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.isActive && !oldWidget.isActive) {
-      _controller.forward(from: 0.0);
-    } else if (!widget.isActive && oldWidget.isActive) {
-      _controller.reverse();
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+class _NavBarItemState extends State<_NavBarItem> {
+  bool _isPressed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -184,57 +152,84 @@ class _NavBarItemState extends State<_NavBarItem>
 
     return GestureDetector(
       onTap: widget.onTap,
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
       behavior: HitTestBehavior.opaque,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // ── نقطة المؤشر ───────────────────────────────────────
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeInOut,
-                width: widget.isActive ? 20 : 0,
-                height: 3,
-                margin: const EdgeInsets.only(bottom: 5),
-                decoration: BoxDecoration(
-                  color: colorScheme.secondary,
-                  borderRadius: BorderRadius.circular(99),
-                ),
-              ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // ── نقطة / شريط المؤشر ───────────────────────────────────────
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutCubic,
+            width: widget.isActive ? 22 : 0,
+            height: 3,
+            margin: const EdgeInsets.only(bottom: 5),
+            decoration: BoxDecoration(
+              color: colorScheme.secondary,
+              borderRadius: BorderRadius.circular(99),
+            ),
+          ),
 
-              // ── الأيقونة ──────────────────────────────────────────
-              ScaleTransition(
-                scale: _scaleAnim,
-                child: Icon(
-                  widget.isActive ? widget.activeIcon : widget.inactiveIcon,
-                  size: widget.isActive ? _iconSizeAnim.value : 24,
-                  color: widget.isActive
-                      ? colorScheme.secondary
-                      : colorScheme.onSurfaceVariant,
+          // ── الأيقونة مع أنيميشن التكبير والانتقال السلس ─────────────
+          AnimatedScale(
+            scale: _isPressed ? 0.92 : (widget.isActive ? 1.15 : 1.0),
+            duration: const Duration(milliseconds: 240),
+            curve: Curves.easeOutBack,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: ScaleTransition(
+                    scale: Tween<double>(begin: 0.88, end: 1.0).animate(
+                      CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeOutCubic,
+                      ),
+                    ),
+                    child: child,
+                  ),
+                );
+              },
+              child: Icon(
+                widget.isActive ? widget.activeIcon : widget.inactiveIcon,
+                key: ValueKey<int>(
+                  widget.isActive
+                      ? widget.activeIcon.codePoint
+                      : widget.inactiveIcon.codePoint,
                 ),
+                size: 24,
+                color: widget.isActive
+                    ? colorScheme.secondary
+                    : colorScheme.onSurfaceVariant,
               ),
+            ),
+          ),
 
-              const SizedBox(height: 4),
+          const SizedBox(height: 4),
 
-              // ── التسمية ───────────────────────────────────────────
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 200),
-                style: GoogleFonts.tajawal(
-                  fontSize: widget.isActive ? 12.5 : 11.5,
-                  fontWeight: widget.isActive
-                      ? FontWeight.w700
-                      : FontWeight.w400,
-                  color: widget.isActive
-                      ? colorScheme.secondary
-                      : colorScheme.onSurfaceVariant,
-                ),
-                child: Text(widget.label),
-              ),
-            ],
-          );
-        },
+          // ── التسمية ───────────────────────────────────────────
+          AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            style: GoogleFonts.tajawal(
+              fontSize: widget.isActive ? 12.5 : 11.5,
+              fontWeight: widget.isActive
+                  ? FontWeight.w700
+                  : FontWeight.w500,
+              color: widget.isActive
+                  ? colorScheme.secondary
+                  : colorScheme.onSurfaceVariant,
+            ),
+            child: Text(
+              widget.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }

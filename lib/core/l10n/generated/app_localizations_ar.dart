@@ -625,6 +625,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get startChatFromWorkshop => 'ابدأ محادثة من صفحة ورشة لطلب الصيانة';
 
   @override
+  String get exploreWorkshops => 'تصفح الورش';
+
+  @override
   String noChatsMatching(String query) {
     return 'لا توجد محادثات تطابق \"$query\"';
   }
@@ -820,10 +823,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get follow => 'متابعة';
 
   @override
+  String get following => 'متابَع';
+
+  @override
   String get unfollow => 'إلغاء المتابعة';
 
   @override
-  String get enterWorkshop => 'دخول الورشة';
+  String get enterWorkshop => 'عرض الورشة';
 
   @override
   String get addWorkshop => 'إضافة ورشة';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
@@ -151,6 +152,7 @@ class ShamsTheme {
 
       // AppBar
       appBarTheme: AppBarTheme(
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         backgroundColor: ShamsColors.bgWhite,
         foregroundColor: ShamsColors.textGray,
         centerTitle: true,
@@ -371,6 +373,7 @@ class ShamsTheme {
 
       // AppBar
       appBarTheme: AppBarTheme(
+        systemOverlayStyle: SystemUiOverlayStyle.light,
         backgroundColor: darkSurface,
         foregroundColor: darkOnSurface,
         centerTitle: true,

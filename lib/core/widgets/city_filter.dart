@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
+import 'package:shams_mobile_app/core/widgets/shams_modals.dart';
 
 class CityMultiSelectFilter extends StatefulWidget {
   final ValueChanged<List<String>> onSelectionChanged;
@@ -27,13 +28,14 @@ class _CityMultiSelectFilterState extends State<CityMultiSelectFilter> {
 
   void _showMultiSelectDialog() {
     final l10n = AppLocalizations.of(context)!;
-    showDialog(
+    showShamsDialog(
       context: context,
       builder: (BuildContext context) {
         final colorScheme = Theme.of(context).colorScheme;
         return StatefulBuilder(
           builder: (context, setStateDialog) {
             return AlertDialog(
+              scrollable: true,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16)),
               title: Text(
@@ -45,13 +47,10 @@ class _CityMultiSelectFilterState extends State<CityMultiSelectFilter> {
               ),
               content: SizedBox(
                 width: double.maxFinite,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: _availableCities.length,
-                  itemBuilder: (context, index) {
-                    final city = _availableCities[index];
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: _availableCities.map((city) {
                     final isChecked = _selectedCities.contains(city);
-
                     return CheckboxListTile(
                       title: Text(l10n.localizeCity(city),
                           style: GoogleFonts.tajawal(fontSize: 15)),
@@ -70,7 +69,7 @@ class _CityMultiSelectFilterState extends State<CityMultiSelectFilter> {
                         widget.onSelectionChanged(_selectedCities);
                       },
                     );
-                  },
+                  }).toList(),
                 ),
               ),
               actions: [
@@ -124,12 +123,16 @@ class _CityMultiSelectFilterState extends State<CityMultiSelectFilter> {
                 Icon(Icons.filter_alt_outlined,
                     size: 20, color: colorScheme.onSurface),
                 const SizedBox(width: 8),
-                Text(
-                  l10n.governorates,
-                  style: GoogleFonts.tajawal(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: colorScheme.onSurface),
+                Flexible(
+                  child: Text(
+                    l10n.governorates,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.tajawal(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Icon(Icons.keyboard_arrow_down_rounded,

@@ -3,6 +3,7 @@ import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
+import 'package:shams_mobile_app/core/widgets/shams_modals.dart';
 
 /// Shows a modal bottom sheet with Gallery / Camera options.
 /// Returns the chosen [ImageSource], or `null` if dismissed.
@@ -10,7 +11,7 @@ Future<ImageSource?> showImageSourceSheet(BuildContext context) async {
   ImageSource? source;
   final l10n = AppLocalizations.of(context)!;
 
-  await showModalBottomSheet<void>(
+  await showShamsModalBottomSheet<void>(
     context: context,
     backgroundColor: Colors.transparent,
     builder: (_) {

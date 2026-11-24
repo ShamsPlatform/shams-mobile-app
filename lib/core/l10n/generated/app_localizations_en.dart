@@ -631,6 +631,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Start a chat from a workshop page to request maintenance';
 
   @override
+  String get exploreWorkshops => 'Explore Workshops';
+
+  @override
   String noChatsMatching(String query) {
     return 'No chats matching \"$query\"';
   }
@@ -827,6 +830,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get follow => 'Follow';
+
+  @override
+  String get following => 'Following';
 
   @override
   String get unfollow => 'Unfollow';
