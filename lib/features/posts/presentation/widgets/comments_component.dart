@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
+import 'package:shams_mobile_app/core/widgets/shams_modals.dart';
 import 'package:shams_mobile_app/features/posts/domain/entities/comment.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
@@ -18,7 +20,7 @@ Future<void> showCommentsSheet(
   BuildContext context, {
   required String postId,
 }) {
-  return showModalBottomSheet(
+  return showShamsModalBottomSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
@@ -73,64 +75,187 @@ class _CommentsComponentState extends State<CommentsComponent> {
     final l10n = AppLocalizations.of(context)!;
 
     final feed = context.watch<FeedProvider>();
-    final post = feed.posts.firstWhere(
-      (p) => p.id == widget.postId,
-      orElse: () => feed.posts.first,
-    );
-    final currentComments = post.comments;
+    final post = feed.getPostById(widget.postId);
 
-    return Container(
-      height: screenH * 0.85 + bottomInset,
-      decoration: BoxDecoration(
-        color: ext.backgroundLight,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        children: [
-          _buildHandle(ext),
-          Expanded(
-            child: Column(
-              children: [
-                _buildTitle(currentComments.length, l10n),
-                Divider(height: 1, thickness: 1, color: ext.borderLight),
-                Expanded(
-                  child: currentComments.isEmpty
-                      ? _buildEmpty(l10n)
-                      : ListView.separated(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          itemCount: currentComments.length,
-                          separatorBuilder: (_, _) => Divider(
-                            height: 1,
-                            thickness: 1,
-                            color: ext.dividerLight,
-                            indent: 70,
-                          ),
-                          itemBuilder: (context, index) {
-                            final comment = currentComments[index];
-                            return InkWell(
-                              onTap: () => _showCommentMenu(
-                                context,
-                                index,
-                                currentComments,
-                                post.author?.id,
-                              ),
-                              child: _CommentTile(
-                                comment: comment,
-                                onLikeTap: () => context
-                                    .read<FeedProvider>()
-                                    .toggleCommentLike(
-                                        widget.postId, comment.id),
-                              ),
-                            );
-                          },
+    final maxSheetHeight = math.max(0.0, screenH - bottomInset);
+    final sheetHeight = math.min(screenH * 0.85, maxSheetHeight);
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: Container(
+        height: sheetHeight,
+        decoration: BoxDecoration(
+          color: ext.backgroundLight,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            if (post == null) {
+              if (constraints.maxHeight < 72) {
+                return SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildHandle(ext),
+                      _buildPostNotFound(l10n, ext),
+                    ],
+                  ),
+                );
+              }
+              return Column(
+                children: [
+                  _buildHandle(ext),
+                  Expanded(
+                    child: Center(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(24),
+                        child: _buildPostNotFound(l10n, ext),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }
+
+            final currentComments = post.comments;
+            if (constraints.maxHeight < 72) {
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildHandle(ext),
+                    _buildTitle(currentComments.length, l10n),
+                    Divider(height: 1, thickness: 1, color: ext.borderLight),
+                    if (currentComments.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
                         ),
+                        child: _buildEmpty(l10n),
+                      )
+                    else
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        itemCount: currentComments.length,
+                        separatorBuilder: (_, _) => Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: ext.dividerLight,
+                          indent: 70,
+                        ),
+                        itemBuilder: (context, index) {
+                          final comment = currentComments[index];
+                          return InkWell(
+                            onTap: () => _showCommentMenu(
+                              context,
+                              index,
+                              currentComments,
+                              post.author?.id,
+                            ),
+                            child: _CommentTile(
+                              comment: comment,
+                              onLikeTap: () => context
+                                  .read<FeedProvider>()
+                                  .toggleCommentLike(widget.postId, comment.id),
+                            ),
+                          );
+                        },
+                      ),
+                    Divider(height: 1, thickness: 1, color: ext.borderLight),
+                    _buildInputBar(l10n),
+                  ],
                 ),
+              );
+            }
+
+            return Column(
+              children: [
+                Expanded(
+                  child: CustomScrollView(
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: Center(child: _buildHandle(ext)),
+                      ),
+                      SliverToBoxAdapter(
+                        child: _buildTitle(currentComments.length, l10n),
+                      ),
+                      SliverToBoxAdapter(
+                        child: Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: ext.borderLight,
+                        ),
+                      ),
+                      if (currentComments.isEmpty)
+                        SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 16,
+                            ),
+                            child: _buildEmpty(l10n),
+                          ),
+                        )
+                      else
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          sliver: SliverList.separated(
+                            itemCount: currentComments.length,
+                            separatorBuilder: (_, _) => Divider(
+                              height: 1,
+                              thickness: 1,
+                              color: ext.dividerLight,
+                              indent: 70,
+                            ),
+                            itemBuilder: (context, index) {
+                              final comment = currentComments[index];
+                              return InkWell(
+                                onTap: () => _showCommentMenu(
+                                  context,
+                                  index,
+                                  currentComments,
+                                  post.author?.id,
+                                ),
+                                child: _CommentTile(
+                                  comment: comment,
+                                  onLikeTap: () => context
+                                      .read<FeedProvider>()
+                                      .toggleCommentLike(
+                                        widget.postId,
+                                        comment.id,
+                                      ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                Divider(height: 1, thickness: 1, color: ext.borderLight),
+                _buildInputBar(l10n),
               ],
-            ),
-          ),
-          Divider(height: 1, thickness: 1, color: ext.borderLight),
-          _buildInputBar(bottomInset, l10n),
-        ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPostNotFound(AppLocalizations l10n, ShamsExtendedColors ext) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      child: Text(
+        l10n.postNotFound,
+        textAlign: TextAlign.center,
+        style: GoogleFonts.tajawal(
+          fontSize: 15,
+          color: ext.textHint,
+        ),
       ),
     );
   }
@@ -153,12 +278,16 @@ class _CommentsComponentState extends State<CommentsComponent> {
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Row(
         children: [
-          Text(
-            l10n.comments,
-            style: GoogleFonts.tajawal(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              color: colorScheme.onSurface,
+          Flexible(
+            child: Text(
+              l10n.comments,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.tajawal(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: colorScheme.onSurface,
+              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -208,22 +337,22 @@ class _CommentsComponentState extends State<CommentsComponent> {
     );
   }
 
-  Widget _buildInputBar(double bottomInset, AppLocalizations l10n) {
+  Widget _buildInputBar(AppLocalizations l10n) {
     final colorScheme = Theme.of(context).colorScheme;
     final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
 
     return Container(
       color: colorScheme.surface,
-      padding: EdgeInsets.fromLTRB(12, 10, 12, 10 + bottomInset),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
       child: Row(
         children: [
           const SizedBox(width: 8),
           Expanded(
             child: Container(
-              height: 42,
+              constraints: const BoxConstraints(minHeight: 48),
               decoration: BoxDecoration(
                 color: ext.inputFill,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: ext.borderLight),
               ),
               child: Row(
@@ -231,7 +360,7 @@ class _CommentsComponentState extends State<CommentsComponent> {
                   GestureDetector(
                     onTap: () {},
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Icon(
                         Icons.emoji_emotions_outlined,
                         size: 22,
@@ -255,7 +384,7 @@ class _CommentsComponentState extends State<CommentsComponent> {
                         ),
                         border: InputBorder.none,
                         isDense: true,
-                        contentPadding: EdgeInsets.zero,
+                        contentPadding: const EdgeInsetsDirectional.only(end: 14),
                       ),
                       onSubmitted: (_) => _sendComment(),
                     ),
@@ -265,19 +394,20 @@ class _CommentsComponentState extends State<CommentsComponent> {
             ),
           ),
           const SizedBox(width: 8),
-          GestureDetector(
-            onTap: _sendComment,
-            child: Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: colorScheme.primary,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                Icons.send_rounded,
-                color: colorScheme.onPrimary,
-                size: 20,
+          Material(
+            color: colorScheme.primary,
+            borderRadius: BorderRadius.circular(24),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: _sendComment,
+              child: SizedBox(
+                width: 48,
+                height: 48,
+                child: Icon(
+                  Icons.send_rounded,
+                  color: colorScheme.onPrimary,
+                  size: 20,
+                ),
               ),
             ),
           ),
@@ -300,7 +430,7 @@ class _CommentsComponentState extends State<CommentsComponent> {
     final bool canDelete = currentUser.id == commentAuthorId ||
         (postAuthorId != null && currentUser.id == postAuthorId);
 
-    showModalBottomSheet(
+    showShamsModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
@@ -445,25 +575,40 @@ class _CommentTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // اسم المستخدم + الوقت
-                Row(
-                  children: [
-                    Text(
-                      comment.user.name,
-                      style: GoogleFonts.tajawal(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w700,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      l10n.formatRelativeTimeLocalized(comment.createdAt),
-                      style: GoogleFonts.tajawal(
-                        fontSize: 11.5,
-                        color: ext.textHint,
-                      ),
-                    ),
-                  ],
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            comment.user.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.tajawal(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w700,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: constraints.maxWidth * 0.4,
+                          ),
+                          child: Text(
+                            l10n.formatRelativeTimeLocalized(comment.createdAt),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.tajawal(
+                              fontSize: 11.5,
+                              color: ext.textHint,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
 
                 const SizedBox(height: 4),
@@ -482,6 +627,7 @@ class _CommentTile extends StatelessWidget {
 
                 // زر الإعجاب
                 GestureDetector(
+                  behavior: HitTestBehavior.opaque,
                   onTap: onLikeTap,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -494,16 +640,20 @@ class _CommentTile extends StatelessWidget {
                         color: comment.isLiked ? colorScheme.error : ext.textHint,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        comment.likesCount > 0
-                            ? '${comment.likesCount}'
-                            : l10n.like,
-                        style: GoogleFonts.tajawal(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: comment.isLiked
-                              ? colorScheme.error
-                              : ext.textHint,
+                      Flexible(
+                        child: Text(
+                          comment.likesCount > 0
+                              ? '${comment.likesCount}'
+                              : l10n.like,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.tajawal(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: comment.isLiked
+                                ? colorScheme.error
+                                : ext.textHint,
+                          ),
                         ),
                       ),
                     ],

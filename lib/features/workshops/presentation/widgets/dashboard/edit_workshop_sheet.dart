@@ -5,6 +5,7 @@ import 'package:shams_mobile_app/core/constants/app_constants.dart';
 import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
+import 'package:shams_mobile_app/core/widgets/shams_modals.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/my_workshop_provider.dart';
 
 /// Opens the modal bottom sheet for editing the owner's workshop info.
@@ -18,13 +19,10 @@ void showEditWorkshopSheet(BuildContext context) {
   final successColor = Theme.of(context).colorScheme.tertiary;
   final errorColor = Theme.of(context).colorScheme.error;
 
-  showModalBottomSheet(
+  showShamsModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Theme.of(context).colorScheme.surface,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-    ),
+    backgroundColor: Colors.transparent,
     builder: (ctx) => _EditWorkshopSheetContent(
       initialName: currentName,
       initialUsername: currentUsername,
@@ -84,180 +82,186 @@ class _EditWorkshopSheetContentState extends State<_EditWorkshopSheetContent> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-        left: 24,
-        right: 24,
-        top: 16,
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 20),
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+          left: 24,
+          right: 24,
+          top: 16,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .extension<ShamsExtendedColors>()!
+                      .handleBar,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Text(
+              l10n.editWorkshopProfile,
+              style: GoogleFonts.tajawal(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 20),
+            _buildEditField(
+              context: context,
+              controller: _nameCtrl,
+              label: l10n.workshopNameLabel,
+              icon: Icons.store_outlined,
+            ),
+            const SizedBox(height: 14),
+            _buildEditField(
+              context: context,
+              controller: _handleCtrl,
+              label: l10n.username,
+              icon: Icons.alternate_email_rounded,
+              prefix: '@',
+            ),
+            const SizedBox(height: 14),
+            Text(
+              l10n.governorateLabel,
+              style: GoogleFonts.tajawal(
+                fontSize: 13,
+                color: Theme.of(context)
+                    .extension<ShamsExtendedColors>()!
+                    .textHint,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
                 color: Theme.of(context)
                     .extension<ShamsExtendedColors>()!
-                    .handleBar,
-                borderRadius: BorderRadius.circular(2),
+                    .backgroundLight,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: _selectedCity != null
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context)
+                          .extension<ShamsExtendedColors>()!
+                          .borderLight,
+                  width: _selectedCity != null ? 1.5 : 1,
+                ),
               ),
-            ),
-          ),
-          Text(
-            l10n.editWorkshopProfile,
-            style: GoogleFonts.tajawal(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 20),
-          _buildEditField(
-            context: context,
-            controller: _nameCtrl,
-            label: l10n.workshopNameLabel,
-            icon: Icons.store_outlined,
-          ),
-          const SizedBox(height: 14),
-          _buildEditField(
-            context: context,
-            controller: _handleCtrl,
-            label: l10n.username,
-            icon: Icons.alternate_email_rounded,
-            prefix: '@',
-          ),
-          const SizedBox(height: 14),
-          Text(
-            l10n.governorateLabel,
-            style: GoogleFonts.tajawal(
-              fontSize: 13,
-              color: Theme.of(context)
-                  .extension<ShamsExtendedColors>()!
-                  .textHint,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .extension<ShamsExtendedColors>()!
-                  .backgroundLight,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: _selectedCity != null
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context)
-                        .extension<ShamsExtendedColors>()!
-                        .borderLight,
-                width: _selectedCity != null ? 1.5 : 1,
-              ),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _selectedCity,
-                isExpanded: true,
-                hint: Text(
-                  l10n.selectGovernorate,
-                  style: GoogleFonts.tajawal(
-                    fontSize: 14,
-                    color: Colors.grey.shade400,
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _selectedCity,
+                  isExpanded: true,
+                  hint: Text(
+                    l10n.selectGovernorate,
+                    style: GoogleFonts.tajawal(
+                      fontSize: 14,
+                      color: Colors.grey.shade400,
+                    ),
                   ),
-                ),
-                icon: Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                items: _cities
-                    .map(
-                      (city) => DropdownMenuItem<String>(
-                        value: city,
-                        child: Text(
-                          l10n.localizeCity(city),
-                          style: GoogleFonts.tajawal(
-                            fontSize: 14,
-                            color: Theme.of(context).colorScheme.onSurface,
+                  icon: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  items: _cities
+                      .map(
+                        (city) => DropdownMenuItem<String>(
+                          value: city,
+                          child: Text(
+                            l10n.localizeCity(city),
+                            style: GoogleFonts.tajawal(
+                              fontSize: 14,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                           ),
                         ),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (v) => setState(() => _selectedCity = v),
+                      )
+                      .toList(),
+                  onChanged: (v) => setState(() => _selectedCity = v),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: () async {
-                final provider = context.read<MyWorkshopProvider>();
-                final ok = await provider.updateInfo(
-                  name: _nameCtrl.text,
-                  username: _handleCtrl.text,
-                  city: _selectedCity,
-                );
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () async {
+                  final provider = context.read<MyWorkshopProvider>();
+                  final ok = await provider.updateInfo(
+                    name: _nameCtrl.text,
+                    username: _handleCtrl.text,
+                    city: _selectedCity,
+                  );
 
-                if (mounted && context.mounted) Navigator.pop(context);
-                if (ok) {
-                  widget.parentMessenger.showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        l10n.workshopInfoSaved,
-                        style: GoogleFonts.tajawal(),
-                      ),
-                      backgroundColor: widget.successColor,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                } else {
-                  widget.parentMessenger.showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        l10n.localizeErrorMessage(
-                          provider.errorMessage,
-                          fallback: l10n.saveEditsFailed,
+                  if (mounted && context.mounted) Navigator.pop(context);
+                  if (ok) {
+                    widget.parentMessenger.showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          l10n.workshopInfoSaved,
+                          style: GoogleFonts.tajawal(),
                         ),
-                        style: GoogleFonts.tajawal(),
+                        backgroundColor: widget.successColor,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        duration: const Duration(seconds: 2),
                       ),
-                      backgroundColor: widget.errorColor,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                    );
+                  } else {
+                    widget.parentMessenger.showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          l10n.localizeErrorMessage(
+                            provider.errorMessage,
+                            fallback: l10n.saveEditsFailed,
+                          ),
+                          style: GoogleFonts.tajawal(),
+                        ),
+                        backgroundColor: widget.errorColor,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        duration: const Duration(seconds: 3),
                       ),
-                      duration: const Duration(seconds: 3),
-                    ),
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.secondary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.secondary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: 0,
                 ),
-                elevation: 0,
-              ),
-              child: Text(
-                l10n.saveEdits,
-                style: GoogleFonts.tajawal(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSecondary,
+                child: Text(
+                  l10n.saveEdits,
+                  style: GoogleFonts.tajawal(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSecondary,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

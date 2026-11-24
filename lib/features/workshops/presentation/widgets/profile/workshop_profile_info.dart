@@ -21,77 +21,117 @@ class WorkshopProfileInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
+    final trimmedHandle = workshop.handle.trim();
+    final formattedHandle = trimmedHandle.isEmpty
+        ? ''
+        : (trimmedHandle.startsWith('@') ? trimmedHandle : '@$trimmedHandle');
+
     return Column(
       children: [
-        Text(
-          workshop.name,
-          style: GoogleFonts.tajawal(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface,
+        Padding(
+          padding: const EdgeInsetsDirectional.symmetric(horizontal: 20),
+          child: Text(
+            workshop.name,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.tajawal(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
+            ),
           ),
         ),
-        const SizedBox(height: 2),
-        Text(
-          workshop.handle,
-          style: GoogleFonts.tajawal(fontSize: 13, color: Colors.grey.shade500),
-        ),
+        if (formattedHandle.isNotEmpty) ...[
+          const SizedBox(height: 2),
+          Text(
+            formattedHandle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.tajawal(
+              fontSize: 13,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
         const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.location_on_rounded, size: 14, color: Colors.grey),
-            const SizedBox(width: 4),
-            Text(
-              l10n.localizeCity(workshop.city),
-              style: GoogleFonts.tajawal(
-                fontSize: 13,
-                color: Colors.grey.shade700,
+        Padding(
+          padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 12,
+            runSpacing: 4,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.location_on_rounded,
+                    size: 14,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      l10n.localizeCity(workshop.city),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.tajawal(
+                        fontSize: 13,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(width: 12),
-            Icon(
-              Icons.star_rounded,
-              size: 16,
-              color: Theme.of(context).colorScheme.secondary,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              workshop.reviewCount > 0 || workshop.rating > 0
-                  ? '${workshop.rating.toStringAsFixed(1)}/5'
-                  : l10n.newLabel,
-              style: GoogleFonts.tajawal(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.star_rounded,
+                    size: 16,
+                    color: colorScheme.secondary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    workshop.reviewCount > 0 || workshop.rating > 0
+                        ? '${workshop.rating.toStringAsFixed(1)}/5'
+                        : l10n.newLabel,
+                    style: GoogleFonts.tajawal(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              l10n.reviewsCountLabel(workshop.reviewCount),
-              style: GoogleFonts.tajawal(
-                fontSize: 12,
-                color: Colors.grey.shade500,
+              Text(
+                l10n.reviewsCountLabel(workshop.reviewCount),
+                style: GoogleFonts.tajawal(
+                  fontSize: 12,
+                  color: ext.textHint,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: 10),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsetsDirectional.symmetric(horizontal: 24),
           child: Text(
             workshop.description,
             textAlign: TextAlign.center,
             style: GoogleFonts.tajawal(
               fontSize: 13.5,
               height: 1.5,
-              color: Colors.grey.shade600,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ),
         const SizedBox(height: 20),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsetsDirectional.symmetric(horizontal: 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -102,19 +142,15 @@ class WorkshopProfileInfo extends StatelessWidget {
                     onPressed: onToggleFollow,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isFollowing
-                          ? Theme.of(context).colorScheme.surface
-                          : Theme.of(context).colorScheme.secondary,
+                          ? colorScheme.surface
+                          : colorScheme.secondary,
                       foregroundColor: isFollowing
-                          ? Theme.of(context)
-                              .extension<ShamsExtendedColors>()!
-                              .textHint
-                          : Theme.of(context).colorScheme.onSecondary,
+                          ? ext.textHint
+                          : colorScheme.onSecondary,
                       elevation: 0,
                       side: isFollowing
                           ? BorderSide(
-                              color: Theme.of(context)
-                                  .extension<ShamsExtendedColors>()!
-                                  .borderLight,
+                              color: ext.borderLight,
                               width: 1.5,
                             )
                           : BorderSide.none,
@@ -139,7 +175,7 @@ class WorkshopProfileInfo extends StatelessWidget {
               ),
               _CircularSocialIcon(
                 icon: Icons.phone_in_talk_rounded,
-                color: Theme.of(context).colorScheme.onSurface,
+                color: colorScheme.onSurface,
               ),
               const _CircularSocialIcon(
                 icon: Icons.camera_alt_rounded,
@@ -149,7 +185,7 @@ class WorkshopProfileInfo extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        Divider(color: Colors.grey.shade300, thickness: 1),
+        Divider(color: ext.dividerLight, thickness: 1),
       ],
     );
   }
@@ -163,15 +199,17 @@ class _CircularSocialIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
     return InkWell(
       onTap: () {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               AppLocalizations.of(context)!.contactSoon,
-              style: GoogleFonts.tajawal(color: Colors.white),
+              style: GoogleFonts.tajawal(color: colorScheme.onInverseSurface),
             ),
-            backgroundColor: Theme.of(context).colorScheme.onSurface,
+            backgroundColor: colorScheme.inverseSurface,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
@@ -182,12 +220,12 @@ class _CircularSocialIcon extends StatelessWidget {
       },
       borderRadius: BorderRadius.circular(50),
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
+        margin: const EdgeInsetsDirectional.symmetric(horizontal: 4),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          color: colorScheme.surface,
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: ext.borderLight),
         ),
         child: Icon(icon, color: color, size: 20),
       ),

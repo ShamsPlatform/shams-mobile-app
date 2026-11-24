@@ -1,25 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shams_mobile_app/app/main_screen.dart';
 import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/appbar.dart';
 import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
-import 'package:shams_mobile_app/core/widgets/shams_drawer.dart';
-import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shams_mobile_app/core/widgets/shams_modals.dart';
 import 'package:shams_mobile_app/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:shams_mobile_app/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/features/posts/presentation/screens/post_detail_screen.dart';
 import 'package:shams_mobile_app/features/posts/presentation/widgets/comments_component.dart';
 import 'package:shams_mobile_app/features/posts/presentation/widgets/post_card.dart';
-import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
-import 'package:shams_mobile_app/features/profile/presentation/screens/about_shams_screen.dart';
-import 'package:shams_mobile_app/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:shams_mobile_app/features/workshops/domain/entities/workshop.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/constants/workshop_assets.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
-import 'package:shams_mobile_app/features/workshops/presentation/screens/workshop_dashboard_screen.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/screens/workshop_profile_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -68,32 +65,20 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      drawer: ShamsDrawer(
-        activeIndex: 0,
-        currentUser: context.watch<ProfileProvider>().currentUserOrPlaceholder,
-        onEditProfileTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const EditProfileScreen()),
-        ),
-        onAboutTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const AboutShamsScreen()),
-        ),
-        onWorkshopDashboardTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const WorkshopDashboardScreen(),
-          ),
-        ),
-        onSignOut: () => context.read<AuthProvider>().signOut(),
-      ),
       backgroundColor: Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
       // ── AppBar المُعاد استخدامه من widgets/appbar.dart ──────────
       appBar: ShamsPlatformAppBar(
         unreadNotifications:
             context.select<NotificationProvider, int>((p) => p.unreadCount),
         onMenuTap: () {
-          _scaffoldKey.currentState?.openDrawer();
+          final rootScaffold = Scaffold.maybeOf(context);
+          if (rootScaffold != null && rootScaffold.hasDrawer) {
+            rootScaffold.openDrawer();
+          } else if (MainScreen.scaffoldKey.currentState?.hasDrawer ?? false) {
+            MainScreen.scaffoldKey.currentState?.openDrawer();
+          } else {
+            _scaffoldKey.currentState?.openDrawer();
+          }
         },
         onNotificationTap: () {
           Navigator.push(
@@ -247,6 +232,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   avatarPath: displayAvatar,
                   content: post.textDetails,
                   imagePaths: post.images.isNotEmpty ? post.images : null,
+                  timeAgoText: l10n.formatRelativeTimeLocalized(post.createdAt),
+                  heroTag: 'post-media-${post.id}',
                   likesCount: post.likesCount,
                   commentsCount: post.comments.length,
                   sharesCount: 0,
@@ -334,7 +321,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _showPostMenu(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet(
+    showShamsModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (_) => Container(
@@ -442,12 +429,14 @@ class _MenuOption extends StatelessWidget {
           children: [
             Icon(icon, size: 22, color: effectiveColor),
             const SizedBox(width: 14),
-            Text(
-              label,
-              style: GoogleFonts.tajawal(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: effectiveColor,
+            Expanded(
+              child: Text(
+                label,
+                style: GoogleFonts.tajawal(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: effectiveColor,
+                ),
               ),
             ),
           ],

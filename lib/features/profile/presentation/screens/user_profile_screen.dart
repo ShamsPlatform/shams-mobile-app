@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/l10n/language_provider.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/screens/about_shams_screen.dart';
@@ -40,113 +41,134 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final ext = theme.extension<ShamsExtendedColors>()!;
     final l10n = AppLocalizations.of(context)!;
     final languageProvider = context.watch<LanguageProvider>();
     final currentUser =
         context.watch<ProfileProvider>().currentUserOrPlaceholder;
+    final topPadding = MediaQuery.paddingOf(context).top;
 
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: theme.brightness == Brightness.dark
-            ? Brightness.light
-            : Brightness.dark,
-      ),
-    );
+    final overlayStyle = (theme.brightness == Brightness.dark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark)
+        .copyWith(statusBarColor: Colors.transparent);
 
-    return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      body: SingleChildScrollView(
-        child: Column(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: Scaffold(
+        backgroundColor: colorScheme.surface,
+        body: Stack(
           children: [
-            ProfileHeaderCard(
-              currentUser: currentUser,
-              onEditProfileTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const EditProfileScreen(),
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  ProfileHeaderCard(
+                    currentUser: currentUser,
+                    onEditProfileTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const EditProfileScreen(),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
-            const SizedBox(height: 30),
-            ProfileBusinessSection(
-              hasWorkshop: currentUser.hasWorkshop,
-              onTap: currentUser.hasWorkshop
-                  ? _openWorkshopDashboard
-                  : _openAddWorkshop,
-            ),
-            const SizedBox(height: 30),
-            ProfileSettingsSection(
-              notificationsEnabled: _isNotificationsEnabled,
-              onNotificationsChanged: (v) =>
-                  setState(() => _isNotificationsEnabled = v),
-              onPrivacyTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const PrivacySecurityScreen(),
+                  const SizedBox(height: 30),
+                  ProfileBusinessSection(
+                    hasWorkshop: currentUser.hasWorkshop,
+                    onTap: currentUser.hasWorkshop
+                        ? _openWorkshopDashboard
+                        : _openAddWorkshop,
                   ),
-                );
-              },
-              onLanguageTap: () => showProfileLanguageSheet(
-                context,
-                initialLanguage: languageProvider.currentLocale.languageCode,
-                onSave: (lang) {
-                  final targetLocale = lang == 'en'
-                      ? const Locale('en', 'US')
-                      : const Locale('ar', 'SA');
-                  context
-                      .read<LanguageProvider>()
-                      .changeLanguage(targetLocale);
-                },
-              ),
-              onSupportTap: () => showProfileSupportSheet(
-                context,
-                onShowMessage: _showSnackBar,
-              ),
-              onAboutTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const AboutShamsScreen(),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 30),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
-              child: CustomSolidButton(
-                title: l10n.shareApp,
-                onPressed: () {
-                  SharePlus.instance.share(
-                    ShareParams(
-                      text: l10n.shareAppText,
+                  const SizedBox(height: 30),
+                  ProfileSettingsSection(
+                    notificationsEnabled: _isNotificationsEnabled,
+                    onNotificationsChanged: (v) =>
+                        setState(() => _isNotificationsEnabled = v),
+                    onPrivacyTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const PrivacySecurityScreen(),
+                        ),
+                      );
+                    },
+                    onLanguageTap: () => showProfileLanguageSheet(
+                      context,
+                      initialLanguage:
+                          languageProvider.currentLocale.languageCode,
+                      onSave: (lang) {
+                        final targetLocale = lang == 'en'
+                            ? const Locale('en', 'US')
+                            : const Locale('ar', 'SA');
+                        context
+                            .read<LanguageProvider>()
+                            .changeLanguage(targetLocale);
+                      },
                     ),
-                  );
-                },
+                    onSupportTap: () => showProfileSupportSheet(
+                      context,
+                      onShowMessage: _showSnackBar,
+                    ),
+                    onAboutTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AboutShamsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 30),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25),
+                    child: CustomSolidButton(
+                      title: l10n.shareApp,
+                      onPressed: () {
+                        SharePlus.instance.share(
+                          ShareParams(
+                            text: l10n.shareAppText,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextButton.icon(
+                    onPressed: () => showProfileLogoutSheet(context),
+                    icon: Icon(
+                      Icons.logout_rounded,
+                      color: colorScheme.error,
+                      size: 20,
+                    ),
+                    label: Text(
+                      l10n.logout,
+                      style: GoogleFonts.tajawal(
+                        color: colorScheme.error,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                ],
               ),
             ),
-            const SizedBox(height: 20),
-            TextButton.icon(
-              onPressed: () => showProfileLogoutSheet(context),
-              icon: const Icon(
-                Icons.logout_rounded,
-                color: Colors.red,
-                size: 20,
-              ),
-              label: Text(
-                l10n.logout,
-                style: GoogleFonts.tajawal(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
+            if (topPadding > 0)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: topPadding,
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: ext.backgroundLight.withValues(alpha: 0.92),
+                    ),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 40),
           ],
         ),
       ),
@@ -185,7 +207,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           style: GoogleFonts.tajawal(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: isError ? colorScheme.onError : colorScheme.onTertiary,
           ),
         ),
         backgroundColor: isError ? colorScheme.error : colorScheme.tertiary,

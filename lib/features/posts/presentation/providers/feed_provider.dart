@@ -64,9 +64,13 @@ class FeedProvider extends ChangeNotifier implements Resettable {
     final result = await _getFeed(GetFeedParams(limit: _pageSize, offset: 0));
     switch (result) {
       case Ok(:final data):
-        _posts
-          ..clear()
-          ..addAll(data);
+        _posts.clear();
+        final seenIds = <String>{};
+        for (final post in data) {
+          if (seenIds.add(post.id)) {
+            _posts.add(post);
+          }
+        }
         _nextOffset = data.length;
         _hasMore = data.length >= _pageSize;
         _status = ViewStatus.success;
@@ -217,10 +221,16 @@ class FeedProvider extends ChangeNotifier implements Resettable {
     }
   }
 
-  /// Inserts [post] at the top of the feed (newest-first).
+  /// Inserts [post] at the top of the feed (newest-first), or replaces the
+  /// existing entry in place if a post with the same [Post.id] is already present.
   void addPost(Post post) {
-    _posts.insert(0, post);
-    _nextOffset++;
+    final existingIndex = _posts.indexWhere((p) => p.id == post.id);
+    if (existingIndex != -1) {
+      _posts[existingIndex] = post;
+    } else {
+      _posts.insert(0, post);
+      _nextOffset++;
+    }
     notifyListeners();
   }
 

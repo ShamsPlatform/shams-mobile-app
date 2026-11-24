@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:shams_mobile_app/core/constants/app_constants.dart';
 import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
+import 'package:shams_mobile_app/core/widgets/primary_button.dart';
 import 'package:shams_mobile_app/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
-import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -37,7 +39,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _nameController.text = currentUser.name;
     _usernameController.text =
         currentUser.username ?? currentUser.email.split('@').first;
-    _selectedLocation = currentUser.location ?? 'صنعاء';
+    final rawLocation = currentUser.location?.trim();
+    _selectedLocation =
+        (rawLocation != null && ShamsConstants.yemeniCities.contains(rawLocation))
+            ? rawLocation
+            : null;
     _phoneController.text = currentUser.phone ?? '';
     _bioController.text = currentUser.bio ?? '';
   }
@@ -105,7 +111,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         SnackBar(
           content: Text(
             l10n.profileUpdatedSuccess,
-            style: GoogleFonts.tajawal(),
+            style: GoogleFonts.tajawal(
+              color: Theme.of(context).colorScheme.onTertiary,
+            ),
           ),
           backgroundColor: Theme.of(context).colorScheme.tertiary, // لون أخضر للنجاح
           duration: const Duration(seconds: 2),
@@ -122,7 +130,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         SnackBar(
           content: Text(
             errorText,
-            style: GoogleFonts.tajawal(),
+            style: GoogleFonts.tajawal(
+              color: Theme.of(context).colorScheme.onError,
+            ),
           ),
           backgroundColor: Theme.of(context).colorScheme.error, // لون أحمر للفشل
           duration: const Duration(seconds: 4),
@@ -135,16 +145,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     final currentUser = context.watch<ProfileProvider>().currentUserOrPlaceholder;
     final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
 
     return Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surface, // الخلفية البيضاء السادة كما في التصميم
+        backgroundColor: colorScheme.surface,
         appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.surface,
+          backgroundColor: colorScheme.surface,
           elevation: 0,
+          scrolledUnderElevation: 0,
+          surfaceTintColor: Colors.transparent,
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back_rounded,
-              color: Theme.of(context).colorScheme.onSurface,
+              color: colorScheme.onSurface,
             ),
             onPressed: () => Navigator.pop(context),
           ),
@@ -153,10 +167,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             style: GoogleFonts.tajawal(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
+              color: colorScheme.onSurface,
             ),
           ),
           centerTitle: true,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(1.0),
+            child: Container(color: ext.dividerLight, height: 1.0),
+          ),
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
@@ -167,23 +185,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    // الحدود المتدرجة (البرتقالي والأصفر)
+                    // الحدود المتدرجة
                     Container(
                       padding: const EdgeInsets.all(4), // سمك الحدود
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: LinearGradient(
                           colors: [
-                            Color(0xFFFFA726),
-                            Color(0xFFFFD600),
-                          ], // البرتقالي والاصفر الشمسي
+                            colorScheme.secondary,
+                            colorScheme.primary,
+                          ],
                           begin: AlignmentDirectional.topStart,
                           end: AlignmentDirectional.bottomEnd,
                         ),
                       ),
                       child: CircleAvatar(
                         radius: 55, // الحجم مطابق للتصميم
-                        backgroundColor: Theme.of(context).colorScheme.surface,
+                        backgroundColor: colorScheme.surface,
                         backgroundImage: _selectedImage != null
                             ? FileImage(_selectedImage!) as ImageProvider
                             : _getProfileImageProvider(
@@ -191,7 +209,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               ),
                       ),
                     ),
-                    // أيقونة الكاميرا الصفراء في موضعها الصحيح
+                    // أيقونة الكاميرا في موضعها الصحيح
                     PositionedDirectional(
                       bottom: 0,
                       end: 0,
@@ -200,17 +218,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.secondary, // اللون الأصفر الشمسي
+                            color: colorScheme.secondary,
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: Theme.of(context).colorScheme.surface,
+                              color: colorScheme.surface,
                               width: 3,
-                            ), // حد أبيض سميك
+                            ),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.camera_alt_rounded,
                             size: 20,
-                            color: Colors.white,
+                            color: colorScheme.onSecondary,
                           ),
                         ),
                       ),
@@ -252,6 +270,70 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               const SizedBox(height: 24),
 
+              // حقل المحافظة
+              _buildInputLabel(l10n.governorateLabel),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedLocation,
+                isExpanded: true,
+                hint: Text(
+                  l10n.selectGovernorate,
+                  style: GoogleFonts.tajawal(
+                    color: ext.textHint,
+                    fontSize: 14,
+                  ),
+                ),
+                icon: Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: ext.textHint,
+                ),
+                dropdownColor: colorScheme.surface,
+                decoration: InputDecoration(
+                  prefixIcon: Icon(
+                    Icons.location_on_outlined,
+                    color: ext.textHint,
+                    size: 22,
+                  ),
+                  filled: false,
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 16,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: ext.borderLight, width: 1),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: ext.borderLight, width: 1),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: colorScheme.primary,
+                      width: 1.5,
+                    ),
+                  ),
+                ),
+                items: ShamsConstants.yemeniCities
+                    .map(
+                      (city) => DropdownMenuItem<String>(
+                        value: city,
+                        child: Text(
+                          l10n.localizeCity(city),
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.tajawal(
+                            fontSize: 15,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) => setState(() => _selectedLocation = value),
+              ),
+              const SizedBox(height: 24),
+
               // حقل نبذة شخصية
               _buildInputLabel(l10n.bio),
               const SizedBox(height: 8),
@@ -263,38 +345,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 48),
 
               // ── زر الحفظ (Save Button) ──
-              SizedBox(
-                width: double.infinity,
-                height: 52, // الارتفاع مطابق للتصميم
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _saveChanges,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.secondary, // الأصفر الشمسي
-                    foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        12,
-                      ), // حواف دائرية خفيفة
-                    ),
-                  ),
-                  child: _isLoading
-                      ? SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            color: Theme.of(context).colorScheme.onSecondary,
-                            strokeWidth: 2.5,
-                          ),
-                        )
-                      : Text(
-                          l10n.saveChanges,
-                          style: GoogleFonts.tajawal(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                ),
+              CustomSolidButton(
+                title: l10n.saveChanges,
+                isLoading: _isLoading,
+                onPressed: _saveChanges,
               ),
             ],
           ),
@@ -323,30 +377,36 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     required String hintText,
     required IconData icon,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
     return TextFormField(
       controller: controller,
-      style: GoogleFonts.tajawal(fontSize: 15, color: Theme.of(context).colorScheme.onSurface),
+      style: GoogleFonts.tajawal(fontSize: 15, color: colorScheme.onSurface),
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: GoogleFonts.tajawal(
-          color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
+          color: ext.textHint,
           fontSize: 14,
         ),
-        prefixIcon: Icon(icon, color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint, size: 22),
+        prefixIcon: Icon(icon, color: ext.textHint, size: 22),
         filled: false, // لا توجد خلفية ممتلئة
         contentPadding: const EdgeInsets.symmetric(
           vertical: 16,
           horizontal: 16,
         ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: ext.borderLight, width: 1),
+        ),
         // الحدود الرمادية الفاتحة والنحيفة كما في التصميم
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Theme.of(context).extension<ShamsExtendedColors>()!.borderLight, width: 1),
+          borderSide: BorderSide(color: ext.borderLight, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.secondary,
+            color: colorScheme.primary,
             width: 1.5,
           ), // تحديد بلون التطبيق عند الوقوف عليه
         ),

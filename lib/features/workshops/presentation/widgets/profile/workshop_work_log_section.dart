@@ -23,14 +23,19 @@ class WorkshopWorkLogSection extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                l10n.workLogTitle,
-                style: GoogleFonts.tajawal(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
+              Flexible(
+                child: Text(
+                  l10n.workLogTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.tajawal(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               GestureDetector(
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -50,6 +55,8 @@ class WorkshopWorkLogSection extends StatelessWidget {
                 },
                 child: Text(
                   l10n.viewAll,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.tajawal(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -138,9 +145,13 @@ class _WorkLogCard extends StatelessWidget {
                     color: Colors.grey,
                   ),
                   const SizedBox(width: 4),
-                  Text(
-                    time,
-                    style: GoogleFonts.tajawal(fontSize: 11, color: Colors.grey),
+                  Flexible(
+                    child: Text(
+                      time,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.tajawal(fontSize: 11, color: Colors.grey),
+                    ),
                   ),
                 ],
               ),

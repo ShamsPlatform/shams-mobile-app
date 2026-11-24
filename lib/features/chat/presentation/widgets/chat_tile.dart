@@ -132,26 +132,41 @@ class ChatTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          name,
-                          style: GoogleFonts.tajawal(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.onSurface),
-                        ),
-                        Text(
-                          time,
-                          style: GoogleFonts.tajawal(
-                            fontSize: 12,
-                            color: unreadCount > 0
-                                ? colorScheme.primary
-                                : colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.tajawal(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.onSurface),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: constraints.maxWidth * 0.4,
+                              ),
+                              child: Text(
+                                time,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.tajawal(
+                                  fontSize: 12,
+                                  color: unreadCount > 0
+                                      ? colorScheme.primary
+                                      : colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     const SizedBox(height: 4),
                     Row(
@@ -173,6 +188,7 @@ class ChatTile extends StatelessWidget {
                             ),
                           ),
                         ),
+                        if (unreadCount > 0) const SizedBox(width: 8),
                         if (unreadCount > 0)
                           Container(
                             padding: const EdgeInsets.all(6),

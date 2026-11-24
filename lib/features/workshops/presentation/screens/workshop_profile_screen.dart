@@ -158,6 +158,8 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
         appBar: AppBar(
           title: Text(
             workshop.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.tajawal(
               color: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.bold,
@@ -209,14 +211,35 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
             const SizedBox(width: 4),
           ],
         ),
-        floatingActionButton: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 50),
-          child: CustomSolidButton(
-            title: l10n.requestMaintenanceNow,
-            onPressed: () => showMaintenanceRequestSheet(context, workshop),
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            border: Border(
+              top: BorderSide(
+                color: Theme.of(context)
+                    .extension<ShamsExtendedColors>()!
+                    .dividerLight,
+              ),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 12),
+              child: CustomSolidButton(
+                title: l10n.requestMaintenanceNow,
+                onPressed: () => showMaintenanceRequestSheet(context, workshop),
+              ),
+            ),
           ),
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         body: SingleChildScrollView(
           child: Column(
             children: [
@@ -261,7 +284,7 @@ class _WorkshopProfileState extends State<WorkshopProfile> {
               ),
               const SizedBox(height: 25),
               WorkshopWorkLogSection(posts: workshopPosts),
-              const SizedBox(height: 120),
+              const SizedBox(height: 28),
             ],
           ),
         ),

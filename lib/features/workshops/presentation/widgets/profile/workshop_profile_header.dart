@@ -43,25 +43,31 @@ class WorkshopProfileHeader extends StatelessWidget {
           left: 0,
           right: 0,
           child: Center(
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                shape: BoxShape.circle,
-              ),
-              child: Container(
-                width: 90,
-                height: 90,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Theme.of(context)
-                      .extension<ShamsExtendedColors>()!
-                      .borderLight,
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: WorkshopAvatarImage(
-                  path: workshop.logoUrl ?? kDefaultWorkshopLogoAsset,
-                  name: workshop.name,
+            child: Hero(
+              tag: 'workshop-avatar-${workshop.id}',
+              child: Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Container(
+                    width: 90,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Theme.of(context)
+                          .extension<ShamsExtendedColors>()!
+                          .borderLight,
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: WorkshopAvatarImage(
+                      path: workshop.logoUrl ?? kDefaultWorkshopLogoAsset,
+                      name: workshop.name,
+                    ),
+                  ),
                 ),
               ),
             ),

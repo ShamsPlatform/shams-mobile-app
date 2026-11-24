@@ -6,6 +6,7 @@ import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/primary_button.dart';
+import 'package:shams_mobile_app/core/widgets/shams_modals.dart';
 import 'package:shams_mobile_app/features/chat/presentation/providers/chat_list_provider.dart';
 import 'package:shams_mobile_app/features/maintenance/domain/usecases/submit_maintenance_request_usecase.dart';
 import 'package:shams_mobile_app/features/maintenance/presentation/providers/maintenance_request_provider.dart';
@@ -15,7 +16,7 @@ import 'package:shams_mobile_app/features/chat/presentation/screens/chat_convers
 /// Opens the modal bottom sheet for submitting a maintenance request to [workshop].
 void showMaintenanceRequestSheet(BuildContext context, Workshop workshop) {
   final parentContext = context;
-  showModalBottomSheet(
+  showShamsModalBottomSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
@@ -55,37 +56,63 @@ class _MaintenanceRequestSheetContentState
     super.dispose();
   }
 
-  InputDecoration _inputDecoration(BuildContext context) {
+  InputDecoration _inputDecoration(
+    BuildContext context, {
+    IconData? prefixIcon,
+    String? labelText,
+    String? hintText,
+    bool alignIconTop = false,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
     return InputDecoration(
       filled: true,
-      fillColor: Theme.of(context)
-          .extension<ShamsExtendedColors>()!
-          .backgroundLight,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      fillColor: ext.backgroundLight,
+      labelText: labelText,
+      hintText: hintText,
+      alignLabelWithHint: alignIconTop,
+      labelStyle: GoogleFonts.tajawal(
+        fontSize: 13,
+        color: ext.textHint,
+      ),
+      hintStyle: GoogleFonts.tajawal(
+        fontSize: 13,
+        color: ext.textHint,
+      ),
+      prefixIcon: prefixIcon == null
+          ? null
+          : (alignIconTop
+              ? Padding(
+                  padding: const EdgeInsetsDirectional.only(bottom: 40),
+                  child: Icon(
+                    prefixIcon,
+                    size: 20,
+                    color: colorScheme.primary,
+                  ),
+                )
+              : Icon(
+                  prefixIcon,
+                  size: 20,
+                  color: colorScheme.primary,
+                )),
+      contentPadding: const EdgeInsetsDirectional.symmetric(
+        horizontal: 16,
+        vertical: 14,
+      ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color:
-              Theme.of(context).extension<ShamsExtendedColors>()!.borderLight,
-        ),
+        borderSide: BorderSide(color: ext.borderLight),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: Theme.of(context).colorScheme.primary,
+          color: colorScheme.primary,
           width: 1.5,
         ),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color:
-              Theme.of(context).extension<ShamsExtendedColors>()!.borderLight,
-        ),
-      ),
-      hintStyle: GoogleFonts.tajawal(
-        fontSize: 13,
-        color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
+        borderSide: BorderSide(color: ext.borderLight),
       ),
     );
   }
@@ -101,7 +128,9 @@ class _MaintenanceRequestSheetContentState
         SnackBar(
           content: Text(
             sheetL10n.selectServiceAndDetails,
-            style: GoogleFonts.tajawal(color: Colors.white),
+            style: GoogleFonts.tajawal(
+              color: Theme.of(context).colorScheme.onError,
+            ),
           ),
           backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
@@ -117,7 +146,9 @@ class _MaintenanceRequestSheetContentState
       SnackBar(
         content: Text(
           parentL10n.sendingMaintenanceRequest,
-          style: GoogleFonts.tajawal(color: Colors.white),
+          style: GoogleFonts.tajawal(
+            color: Theme.of(parentContext).colorScheme.onPrimary,
+          ),
         ),
         backgroundColor: Theme.of(parentContext).colorScheme.primary,
         behavior: SnackBarBehavior.floating,
@@ -163,7 +194,9 @@ class _MaintenanceRequestSheetContentState
               maintenanceProvider.errorMessage,
               fallback: parentL10n.maintenanceRequestFailed,
             ),
-            style: GoogleFonts.tajawal(color: Colors.white),
+            style: GoogleFonts.tajawal(
+              color: Theme.of(parentContext).colorScheme.onError,
+            ),
           ),
           backgroundColor: Theme.of(parentContext).colorScheme.error,
           behavior: SnackBarBehavior.floating,
@@ -175,134 +208,152 @@ class _MaintenanceRequestSheetContentState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final decoration = _inputDecoration(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsetsDirectional.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          color: colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .extension<ShamsExtendedColors>()!
-                        .handleBar,
-                    borderRadius: BorderRadius.circular(2),
+        child: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            padding: const EdgeInsetsDirectional.fromSTEB(24, 16, 24, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: ext.handleBar,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                l10n.requestMaintenanceFrom(widget.workshop.name),
-                style: GoogleFonts.tajawal(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
+                const SizedBox(height: 20),
+                Text(
+                  l10n.requestMaintenanceFrom(widget.workshop.name),
+                  style: GoogleFonts.tajawal(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedService,
-                hint: Text(
-                  l10n.requiredServiceType,
-                  style: GoogleFonts.tajawal(fontSize: 14),
-                ),
-                items: ShamsConstants.solarServiceTypes
-                    .map(
-                      (s) => DropdownMenuItem(
-                        value: s,
-                        child: Text(
-                          l10n.localizeServiceType(s),
-                          style: GoogleFonts.tajawal(fontSize: 14),
+                const SizedBox(height: 20),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedService,
+                  isExpanded: true,
+                  items: ShamsConstants.solarServiceTypes
+                      .map(
+                        (s) => DropdownMenuItem(
+                          value: s,
+                          child: Text(
+                            l10n.localizeServiceType(s),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.tajawal(fontSize: 14),
+                          ),
                         ),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (val) => setState(() => _selectedService = val),
-                decoration: decoration,
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedInverter,
-                hint: Text(
-                  l10n.inverterType,
-                  style: GoogleFonts.tajawal(fontSize: 14),
+                      )
+                      .toList(),
+                  onChanged: (val) => setState(() => _selectedService = val),
+                  decoration: _inputDecoration(
+                    context,
+                    prefixIcon: Icons.build_circle_outlined,
+                    labelText: l10n.requiredServiceType,
+                  ),
                 ),
-                items: ShamsConstants.inverterBrands
-                    .map(
-                      (s) => DropdownMenuItem(
-                        value: s,
-                        child: Text(
-                          l10n.localizeInverterBrand(s),
-                          style: GoogleFonts.tajawal(fontSize: 14),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedInverter,
+                  isExpanded: true,
+                  items: ShamsConstants.inverterBrands
+                      .map(
+                        (s) => DropdownMenuItem(
+                          value: s,
+                          child: Text(
+                            l10n.localizeInverterBrand(s),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.tajawal(fontSize: 14),
+                          ),
                         ),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (val) => setState(() => _selectedInverter = val),
-                decoration: decoration,
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedBattery,
-                hint: Text(
-                  l10n.batteryType,
-                  style: GoogleFonts.tajawal(fontSize: 14),
+                      )
+                      .toList(),
+                  onChanged: (val) => setState(() => _selectedInverter = val),
+                  decoration: _inputDecoration(
+                    context,
+                    prefixIcon: Icons.electrical_services_rounded,
+                    labelText: l10n.inverterType,
+                  ),
                 ),
-                items: ShamsConstants.batteryTypes
-                    .map(
-                      (s) => DropdownMenuItem(
-                        value: s,
-                        child: Text(
-                          l10n.localizeBatteryType(s),
-                          style: GoogleFonts.tajawal(fontSize: 14),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedBattery,
+                  isExpanded: true,
+                  items: ShamsConstants.batteryTypes
+                      .map(
+                        (s) => DropdownMenuItem(
+                          value: s,
+                          child: Text(
+                            l10n.localizeBatteryType(s),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.tajawal(fontSize: 14),
+                          ),
                         ),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (val) => setState(() => _selectedBattery = val),
-                decoration: decoration,
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _capacityController,
-                keyboardType: TextInputType.number,
-                decoration: decoration.copyWith(
-                  hintText: l10n.systemSizeHint,
+                      )
+                      .toList(),
+                  onChanged: (val) => setState(() => _selectedBattery = val),
+                  decoration: _inputDecoration(
+                    context,
+                    prefixIcon: Icons.battery_charging_full_rounded,
+                    labelText: l10n.batteryType,
+                  ),
                 ),
-                style: GoogleFonts.tajawal(
-                  fontSize: 14,
-                  color: Theme.of(context).colorScheme.onSurface,
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _capacityController,
+                  keyboardType: TextInputType.number,
+                  decoration: _inputDecoration(
+                    context,
+                    prefixIcon: Icons.bolt_rounded,
+                    labelText: l10n.systemSizeHint,
+                  ),
+                  style: GoogleFonts.tajawal(
+                    fontSize: 14,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _descController,
-                maxLines: 3,
-                decoration: decoration.copyWith(
-                  hintText: l10n.problemDetailsHint,
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _descController,
+                  maxLines: 3,
+                  decoration: _inputDecoration(
+                    context,
+                    prefixIcon: Icons.description_outlined,
+                    hintText: l10n.problemDetailsHint,
+                    alignIconTop: true,
+                  ),
+                  style: GoogleFonts.tajawal(
+                    fontSize: 14,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
-                style: GoogleFonts.tajawal(
-                  fontSize: 14,
-                  color: Theme.of(context).colorScheme.onSurface,
+                const SizedBox(height: 20),
+                CustomSolidButton(
+                  title: l10n.sendRequest,
+                  onPressed: _submit,
                 ),
-              ),
-              const SizedBox(height: 20),
-              CustomSolidButton(
-                title: l10n.sendRequest,
-                onPressed: _submit,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

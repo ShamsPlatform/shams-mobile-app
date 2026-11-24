@@ -13,81 +13,107 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final ext = theme.extension<ShamsExtendedColors>()!;
+
     return Scaffold(
-        backgroundColor:
-            Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              children: [
-                const Spacer(flex: 2),
-                // ── الشعار والاسم ──
-                Image.asset('assets/images/logo/shams logo.png', height: 100),
-                const SizedBox(height: 16),
-                Text(
-                  l10n.appTitle,
-                  style: GoogleFonts.tajawal(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.secondary,
+      backgroundColor: ext.backgroundLight,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Column(
+                    children: [
+                      const Spacer(flex: 2),
+                      // ── الشعار والاسم ──
+                      Image.asset('assets/images/logo/shams logo.png', height: 100),
+                      const SizedBox(height: 16),
+                      Text(
+                        l10n.appTitle,
+                        style: GoogleFonts.tajawal(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                      Text(
+                        l10n.welcomeTagline,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.tajawal(
+                          fontSize: 14,
+                          color: ext.textHint,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Spacer(),
+                      // ── بطاقات المميزات (Feature Highlights) ──
+                      IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildFeatureCard(context, Icons.bolt_rounded, l10n.highEfficiency),
+                            const SizedBox(width: 16),
+                            _buildFeatureCard(context, Icons.settings_suggest_rounded, l10n.smartControl),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Spacer(),
+                      // ── الأزرار الأساسية ──
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 52),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: CustomSolidButton(
+                            title: l10n.signup,
+                            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SignUpScreen())),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 52),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: CustomOutlinedButton(
+                            title: l10n.signin,
+                            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SignInScreen())),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        l10n.termsOfServiceNotice,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.tajawal(
+                          fontSize: 11,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                   ),
                 ),
-                Text(
-                  l10n.welcomeTagline,
-                  style: GoogleFonts.tajawal(
-                    fontSize: 14,
-                    color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
-                  ),
-                ),
-                const Spacer(),
-                // ── بطاقات المميزات (Feature Highlights) ──
-                Row(
-                  children: [
-                    _buildFeatureCard(context, Icons.bolt_rounded, l10n.highEfficiency),
-                    const SizedBox(width: 16),
-                    _buildFeatureCard(context, Icons.settings_suggest_rounded, l10n.smartControl),
-                  ],
-                ),
-                const Spacer(),
-                // ── الأزرار الأساسية ──
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: CustomSolidButton(
-                    title: l10n.signup,
-                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SignUpScreen())),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: CustomOutlinedButton(
-                    title: l10n.signin,
-                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SignInScreen())),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  l10n.termsOfServiceNotice,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.tajawal(fontSize: 11, color: const Color(0xFFBFC3CE)),
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
-      );
+      ),
+    );
   }
 
   Widget _buildFeatureCard(BuildContext context, IconData icon, String label) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -97,15 +123,17 @@ class WelcomeScreen extends StatelessWidget {
           ],
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: Theme.of(context).colorScheme.primary, size: 28),
+            Icon(icon, color: colorScheme.primary, size: 28),
             const SizedBox(height: 8),
             Text(
               label,
+              textAlign: TextAlign.center,
               style: GoogleFonts.tajawal(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface,
+                color: colorScheme.onSurface,
               ),
             ),
           ],

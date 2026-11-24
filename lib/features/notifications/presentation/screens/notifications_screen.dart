@@ -5,6 +5,7 @@ import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/presentation/view_status.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
+import 'package:shams_mobile_app/core/widgets/shams_modals.dart';
 import 'package:shams_mobile_app/features/chat/presentation/screens/chat_conversation_screen.dart';
 import 'package:shams_mobile_app/features/notifications/domain/entities/app_notification.dart';
 import 'package:shams_mobile_app/features/notifications/presentation/providers/notification_provider.dart';
@@ -30,6 +31,8 @@ class NotificationsScreen extends StatelessWidget {
         appBar: AppBar(
           title: Text(
             l10n.notifications,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.tajawal(
               color: colorScheme.onSurface,
               fontWeight: FontWeight.bold,
@@ -49,15 +52,20 @@ class NotificationsScreen extends StatelessWidget {
           ),
           actions: [
             if (provider.unreadCount > 0)
-              TextButton(
-                onPressed: () =>
-                    context.read<NotificationProvider>().markAllAsRead(),
-                child: Text(
-                  l10n.markAllRead,
-                  style: GoogleFonts.tajawal(
-                    fontSize: 13,
-                    color: colorScheme.primary,
-                    fontWeight: FontWeight.w600,
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 132),
+                child: TextButton(
+                  onPressed: () =>
+                      context.read<NotificationProvider>().markAllAsRead(),
+                  child: Text(
+                    l10n.markAllRead,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.tajawal(
+                      fontSize: 13,
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
@@ -156,7 +164,7 @@ class NotificationsScreen extends StatelessWidget {
         break;
       case NotificationType.maintenanceStatus:
         if (notif.targetId != null) {
-          showDialog(
+          showShamsDialog(
             context: context,
             barrierDismissible: false,
             builder: (_) => const Center(child: CircularProgressIndicator()),
@@ -211,35 +219,55 @@ class NotificationsScreen extends StatelessWidget {
 
   Widget _buildEmptyState(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
     final l10n = AppLocalizations.of(context)!;
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.notifications_off_outlined,
-            size: 60,
-            color: ext.textHint.withValues(alpha: 0.4),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.noNotificationsNow,
-            style: GoogleFonts.tajawal(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: colorScheme.onSurface,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 88,
+              height: 88,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colorScheme.primaryContainer.withValues(alpha: 0.35),
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.notifications_off_outlined,
+                  size: 46,
+                  color: colorScheme.primary,
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            l10n.notificationsWillAppearHere,
-            style: GoogleFonts.tajawal(
-              fontSize: 13,
-              color: ext.textHint,
+            const SizedBox(height: 18),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                l10n.noNotificationsNow,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.tajawal(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
+                ),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 6),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                l10n.notificationsWillAppearHere,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.tajawal(
+                  fontSize: 13,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

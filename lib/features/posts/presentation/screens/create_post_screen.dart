@@ -7,6 +7,7 @@ import 'package:shams_mobile_app/core/di/injection.dart';
 import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
+import 'package:shams_mobile_app/core/widgets/shams_modals.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/post_editor_provider.dart';
 import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
@@ -59,9 +60,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   /// دالة لاختيار الصور أو الفيديوهات
   Future<void> _pickMedia() async {
     final l10n = AppLocalizations.of(context)!;
-    showDialog(
+    showShamsDialog(
       context: context,
       builder: (context) => AlertDialog(
+        scrollable: true,
         title: Text(
           l10n.addAttachment,
           style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
@@ -156,7 +158,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     final workshopId = myWorkshop?.id ?? currentUser.id;
     final editor = editorContext.read<PostEditorProvider>();
 
-    showDialog(
+    showShamsDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => const Center(

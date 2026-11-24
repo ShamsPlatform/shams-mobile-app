@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
@@ -10,6 +11,8 @@ class PostCard extends StatefulWidget {
   final String avatarPath;
   final String content;
   final List<String>? imagePaths;
+  final String? timeAgoText;
+  final String? heroTag;
   final int likesCount;
   final int commentsCount;
   final int sharesCount;
@@ -32,6 +35,8 @@ class PostCard extends StatefulWidget {
     required this.sharesCount,
     required this.isLiked,
     this.imagePaths,
+    this.timeAgoText,
+    this.heroTag,
     this.onLikeToggle,
     this.onCommentTap,
     this.onShareTap,
@@ -62,22 +67,32 @@ class _PostCardState extends State<PostCard>
 
     _likeAnimController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 180),
-      lowerBound: 0.75,
-      upperBound: 1.0,
-      value: 1.0,
+      duration: const Duration(milliseconds: 360),
     );
-    _likeScaleAnim = _likeAnimController;
+    _likeScaleAnim = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 1.30)
+            .chain(CurveTween(curve: Curves.easeOutBack)),
+        weight: 40,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.30, end: 0.95)
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 30,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.95, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 30,
+      ),
+    ]).animate(_likeAnimController);
   }
 
   @override
   void didUpdateWidget(PostCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.isLiked != widget.isLiked ||
-        oldWidget.likesCount != widget.likesCount) {
-      _isLiked = widget.isLiked;
-      _likesCount = widget.likesCount;
-    }
+    _isLiked = widget.isLiked;
+    _likesCount = widget.likesCount;
   }
 
   @override
@@ -86,26 +101,31 @@ class _PostCardState extends State<PostCard>
     super.dispose();
   }
 
-  Future<void> _handleLikeTap() async {
-    await _likeAnimController.reverse();
-    await _likeAnimController.forward();
+  void _handleLikeTap() {
+    if (widget.onLikeToggle == null) return;
+    HapticFeedback.lightImpact();
+    _likeAnimController
+      ..reset()
+      ..forward();
     setState(() {
       _isLiked = !_isLiked;
       _likesCount += _isLiked ? 1 : -1;
     });
-    widget.onLikeToggle?.call(_isLiked);
+    widget.onLikeToggle!.call(_isLiked);
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: ext.cardSurface,
         borderRadius: BorderRadius.circular(20),
+        border: isDark ? Border.all(color: ext.borderLight, width: 0.8) : null,
         boxShadow: [
           BoxShadow(
             color: colorScheme.primary.withValues(alpha: 0.07),
@@ -168,15 +188,43 @@ class _PostCardState extends State<PostCard>
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  Text(
-                    widget.userHandle,
-                    style: GoogleFonts.tajawal(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: colorScheme.primary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          widget.userHandle,
+                          style: GoogleFonts.tajawal(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: colorScheme.primary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (widget.timeAgoText != null &&
+                          widget.timeAgoText!.isNotEmpty) ...[
+                        Text(
+                          ' • ',
+                          style: GoogleFonts.tajawal(
+                            fontSize: 12,
+                            color: ext.textHint,
+                          ),
+                        ),
+                        Flexible(
+                          child: Text(
+                            widget.timeAgoText!,
+                            style: GoogleFonts.tajawal(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              color: ext.textHint,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),
@@ -193,57 +241,63 @@ class _PostCardState extends State<PostCard>
     final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AnimatedCrossFade(
-            firstChild: Text(
-              widget.content,
-              textAlign: TextAlign.start,
-              maxLines: widget.maxLines,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.tajawal(
-                fontSize: 14.5,
-                height: 1.65,
-                color: colorScheme.onSurface,
-              ),
-            ),
-            secondChild: Text(
-              widget.content,
-              textAlign: TextAlign.start,
-              style: GoogleFonts.tajawal(
-                fontSize: 14.5,
-                height: 1.65,
-                color: colorScheme.onSurface,
-              ),
-            ),
-            crossFadeState: _isExpanded
-                ? CrossFadeState.showSecond
-                : CrossFadeState.showFirst,
-            duration: const Duration(milliseconds: 250),
-          ),
-          if (_shouldShowToggle())
-            GestureDetector(
-              onTap: () => setState(() => _isExpanded = !_isExpanded),
-              child: Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  _isExpanded ? l10n.showLess : l10n.readMore,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final showToggle = _shouldShowToggle(constraints.maxWidth);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AnimatedCrossFade(
+                firstChild: Text(
+                  widget.content,
+                  textAlign: TextAlign.start,
+                  maxLines: widget.maxLines,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.tajawal(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.primary,
+                    fontSize: 14.5,
+                    height: 1.65,
+                    color: colorScheme.onSurface,
                   ),
                 ),
+                secondChild: Text(
+                  widget.content,
+                  textAlign: TextAlign.start,
+                  style: GoogleFonts.tajawal(
+                    fontSize: 14.5,
+                    height: 1.65,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                crossFadeState: _isExpanded
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
+                duration: const Duration(milliseconds: 250),
               ),
-            ),
-          const SizedBox(height: 12),
-        ],
+              if (showToggle)
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => setState(() => _isExpanded = !_isExpanded),
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      _isExpanded ? l10n.showLess : l10n.readMore,
+                      style: GoogleFonts.tajawal(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 12),
+            ],
+          );
+        },
       ),
     );
   }
 
-  bool _shouldShowToggle() {
+  bool _shouldShowToggle(double maxWidth) {
     final tp = TextPainter(
       text: TextSpan(
         text: widget.content,
@@ -251,69 +305,88 @@ class _PostCardState extends State<PostCard>
       ),
       maxLines: widget.maxLines,
       textDirection: Directionality.of(context),
-    )..layout(maxWidth: double.infinity);
-    return tp.didExceedMaxLines;
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout(maxWidth: maxWidth);
+    final exceeded = tp.didExceedMaxLines;
+    tp.dispose();
+    return exceeded;
   }
 
   Widget _buildImageCarousel(ShamsExtendedColors ext) {
     final images = widget.imagePaths!;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
-        child: Stack(
-          alignment: AlignmentDirectional.bottomEnd,
-          children: [
-            SizedBox(
-              height: 210,
-              child: PageView.builder(
-                itemCount: images.length,
-                onPageChanged: (i) => setState(() => _currentImageIndex = i),
-                itemBuilder: (context, index) {
-                  final path = images[index];
-                  final isNetwork = path.startsWith('http');
-                  if (isNetwork) {
-                    return Image.network(
-                      path,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      errorBuilder: (_, _, _) => _imagePlaceholder(ext),
-                    );
-                  } else if (path.startsWith('assets/')) {
-                    return Image.asset(
-                      path,
+    Widget carousel = ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: Stack(
+        alignment: AlignmentDirectional.bottomEnd,
+        children: [
+          SizedBox(
+            height: 210,
+            child: PageView.builder(
+              itemCount: images.length,
+              onPageChanged: (i) => setState(() => _currentImageIndex = i),
+              itemBuilder: (context, index) {
+                final path = images[index];
+                final isNetwork = path.startsWith('http');
+                if (isNetwork) {
+                  return Image.network(
+                    path,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    errorBuilder: (_, _, _) => _imagePlaceholder(ext),
+                  );
+                } else if (path.startsWith('assets/')) {
+                  return Image.asset(
+                    path,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    errorBuilder: (_, _, _) => _imagePlaceholder(ext),
+                  );
+                } else {
+                  final file = File(path);
+                  if (file.existsSync()) {
+                    return Image.file(
+                      file,
                       fit: BoxFit.cover,
                       width: double.infinity,
                       errorBuilder: (_, _, _) => _imagePlaceholder(ext),
                     );
                   } else {
-                    final file = File(path);
-                    if (file.existsSync()) {
-                      return Image.file(
-                        file,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        errorBuilder: (_, _, _) => _imagePlaceholder(ext),
-                      );
-                    } else {
-                      return _imagePlaceholder(ext);
-                    }
+                    return _imagePlaceholder(ext);
                   }
-                },
+                }
+              },
+            ),
+          ),
+          if (images.length > 1)
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: _PageIndicatorBadge(
+                current: _currentImageIndex + 1,
+                total: images.length,
               ),
             ),
-            if (images.length > 1)
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: _PageIndicatorBadge(
-                  current: _currentImageIndex + 1,
-                  total: images.length,
-                ),
-              ),
-          ],
-        ),
+        ],
       ),
+    );
+
+    if (widget.heroTag != null && widget.heroTag!.isNotEmpty) {
+      carousel = Hero(
+        tag: widget.heroTag!,
+        child: Material(
+          type: MaterialType.transparency,
+          child: carousel,
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(
+        start: 14,
+        end: 14,
+        bottom: 10,
+      ),
+      child: carousel,
     );
   }
 
@@ -355,11 +428,22 @@ class _PostCardState extends State<PostCard>
                   color: _isLiked
                       ? colorScheme.error
                       : colorScheme.onSurfaceVariant,
-                  onTap: _handleLikeTap,
+                  onTap: widget.onLikeToggle != null ? _handleLikeTap : null,
                   isAnimated: true,
                 ),
               ),
             ],
+          ),
+          IconButton(
+            onPressed: widget.onShareTap,
+            icon: Icon(
+              Icons.share_outlined,
+              size: 20,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
           ),
         ],
       ),
@@ -505,7 +589,7 @@ class _PageIndicatorBadge extends StatelessWidget {
 
 // ── _ActionChip ───────────────────────────────────────────────────────────────
 
-class _ActionChip extends StatelessWidget {
+class _ActionChip extends StatefulWidget {
   final IconData icon;
   final int count;
   final Color color;
@@ -521,32 +605,61 @@ class _ActionChip extends StatelessWidget {
   });
 
   @override
+  State<_ActionChip> createState() => _ActionChipState();
+}
+
+class _ActionChipState extends State<_ActionChip> {
+  int _iconVersion = 0;
+  int _countVersion = 0;
+
+  @override
+  void didUpdateWidget(_ActionChip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.icon != widget.icon) {
+      _iconVersion++;
+    }
+    if (_formatCount(oldWidget.count) != _formatCount(widget.count)) {
+      _countVersion++;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            transitionBuilder: (child, animation) =>
-                ScaleTransition(scale: animation, child: child),
-            child: Icon(icon, key: ValueKey(icon), size: 22, color: color),
-          ),
-          const SizedBox(width: 5),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            child: Text(
-              _formatCount(count),
-              key: ValueKey(count),
-              style: GoogleFonts.tajawal(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: color,
+      behavior: HitTestBehavior.opaque,
+      onTap: widget.onTap,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              transitionBuilder: (child, animation) =>
+                  ScaleTransition(scale: animation, child: child),
+              child: Icon(
+                widget.icon,
+                key: ValueKey('icon-$_iconVersion'),
+                size: 22,
+                color: widget.color,
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 5),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: Text(
+                _formatCount(widget.count),
+                key: ValueKey('count-$_countVersion'),
+                style: GoogleFonts.tajawal(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: widget.color,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

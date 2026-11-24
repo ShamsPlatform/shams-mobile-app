@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import 'package:shams_mobile_app/app/main_screen.dart';
 import 'package:shams_mobile_app/core/constants/app_constants.dart';
 import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
@@ -9,16 +10,10 @@ import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/appbar.dart';
 import 'package:shams_mobile_app/core/widgets/city_filter.dart';
 import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
-import 'package:shams_mobile_app/core/widgets/shams_drawer.dart';
-import 'package:shams_mobile_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shams_mobile_app/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:shams_mobile_app/features/notifications/presentation/screens/notifications_screen.dart';
-import 'package:shams_mobile_app/features/profile/presentation/providers/profile_provider.dart';
-import 'package:shams_mobile_app/features/profile/presentation/screens/about_shams_screen.dart';
-import 'package:shams_mobile_app/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/constants/workshop_assets.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/workshops_provider.dart';
-import 'package:shams_mobile_app/features/workshops/presentation/screens/workshop_dashboard_screen.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/screens/workshop_profile_screen.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/widgets/workshop_card.dart';
 
@@ -87,25 +82,6 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
 
     return Scaffold(
         key: _scaffoldKey,
-        drawer: ShamsDrawer(
-          activeIndex: 1,
-          currentUser: context.watch<ProfileProvider>().currentUserOrPlaceholder,
-          onEditProfileTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const EditProfileScreen()),
-          ),
-          onAboutTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AboutShamsScreen()),
-          ),
-          onWorkshopDashboardTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const WorkshopDashboardScreen(),
-            ),
-          ),
-          onSignOut: () => context.read<AuthProvider>().signOut(),
-        ),
         backgroundColor: Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
 
         // ── الشريط العلوي ──────────────────────────────────────────────────
@@ -113,7 +89,14 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
           unreadNotifications:
               context.select<NotificationProvider, int>((p) => p.unreadCount),
           onMenuTap: () {
-            _scaffoldKey.currentState?.openDrawer();
+            final rootScaffold = Scaffold.maybeOf(context);
+            if (rootScaffold != null && rootScaffold.hasDrawer) {
+              rootScaffold.openDrawer();
+            } else if (MainScreen.scaffoldKey.currentState?.hasDrawer ?? false) {
+              MainScreen.scaffoldKey.currentState?.openDrawer();
+            } else {
+              _scaffoldKey.currentState?.openDrawer();
+            }
           },
           onNotificationTap: () {
             context.read<NotificationProvider>().markAllAsRead();
@@ -142,7 +125,7 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
             Container(
               width: double.infinity,
               color: Theme.of(context).colorScheme.surface,
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 12),
               child: CityMultiSelectFilter(
                 onSelectionChanged: (selectedCities) {
                   setState(() {
@@ -156,59 +139,39 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
             Container(
               width: double.infinity,
               color: Theme.of(context).colorScheme.surface,
-              padding: const EdgeInsets.only(bottom: 12),
-              child: SizedBox(
-                height: 40,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: ShamsConstants.solarServiceTypes.length,
-                  itemBuilder: (context, index) {
-                    final service = ShamsConstants.solarServiceTypes[index];
-                    final isSelected = _selectedServices.contains(service);
-                    return Padding(
-                      padding: const EdgeInsetsDirectional.only(start: 8.0),
-                      child: FilterChip(
-                          label: Text(
-                            l10n.localizeServiceType(service),
-                            style: GoogleFonts.tajawal(
-                              fontSize: 13,
-                              color: isSelected
-                                  ? Theme.of(context).colorScheme.onSecondary
-                                  : Theme.of(context)
-                                      .extension<ShamsExtendedColors>()!
-                                      .textHint,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                            ),
-                          ),
-                          selected: isSelected,
-                          onSelected: (bool selected) {
-                            setState(() {
-                              if (selected) {
-                                _selectedServices.add(service);
-                              } else {
-                                _selectedServices.remove(service);
-                              }
-                            });
-                          },
-                          selectedColor: Theme.of(context).colorScheme.secondary,
-                          backgroundColor: Theme.of(context).colorScheme.surface,
-                          checkmarkColor: Theme.of(context).colorScheme.onSecondary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            side: BorderSide(
-                              color: isSelected
-                                  ? Theme.of(context).colorScheme.secondary
-                                  : Theme.of(context)
-                                      .extension<ShamsExtendedColors>()!
-                                      .borderLight,
-                            ),
-                          ),
+              padding: const EdgeInsetsDirectional.only(bottom: 12),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    for (int index = 0;
+                        index < ShamsConstants.solarServiceTypes.length;
+                        index++) ...[
+                      if (index > 0) const SizedBox(width: 8),
+                      Builder(
+                        builder: (context) {
+                          final service =
+                              ShamsConstants.solarServiceTypes[index];
+                          final isSelected =
+                              _selectedServices.contains(service);
+                          return _ServiceFilterChip(
+                            label: l10n.localizeServiceType(service),
+                            isSelected: isSelected,
+                            onTap: () {
+                              setState(() {
+                                if (isSelected) {
+                                  _selectedServices.remove(service);
+                                } else {
+                                  _selectedServices.add(service);
+                                }
+                              });
+                            },
+                          );
+                        },
                       ),
-                    );
-                  },
+                    ],
+                  ],
                 ),
               ),
             ),
@@ -262,6 +225,7 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
                               }
                               final workshop = filteredWorkshops[index];
                               return WorkshopCard(
+                          heroTag: 'workshop-avatar-${workshop.id}',
                           username: workshop.name,
                           userHandle: workshop.handle,
                           imagePath: workshop.logoUrl ?? kDefaultWorkshopLogoAsset,
@@ -309,6 +273,108 @@ class _WorkshopsListScreenState extends State<WorkshopsListScreen> {
           ],
         ),
       );
+  }
+}
+
+class _ServiceFilterChip extends StatefulWidget {
+  const _ServiceFilterChip({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  State<_ServiceFilterChip> createState() => _ServiceFilterChipState();
+}
+
+class _ServiceFilterChipState extends State<_ServiceFilterChip> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
+    final isSelected = widget.isSelected;
+
+    return Listener(
+      onPointerDown: (_) {
+        if (mounted) setState(() => _isPressed = true);
+      },
+      onPointerUp: (_) {
+        if (mounted && _isPressed) setState(() => _isPressed = false);
+      },
+      onPointerCancel: (_) {
+        if (mounted && _isPressed) setState(() => _isPressed = false);
+      },
+      child: AnimatedScale(
+        scale: _isPressed ? 0.96 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeOutCubic,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          decoration: BoxDecoration(
+            color: isSelected ? colorScheme.secondary : ext.chipBackground,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected ? colorScheme.secondary : ext.borderLight,
+              width: 1.2,
+            ),
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            borderRadius: BorderRadius.circular(20),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: widget.onTap,
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 40),
+                alignment: AlignmentDirectional.center,
+                padding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
+                child: AnimatedSize(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOutCubic,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isSelected) ...[
+                        Icon(
+                          Icons.check_rounded,
+                          size: 16,
+                          color: colorScheme.onSecondary,
+                        ),
+                        const SizedBox(width: 6),
+                      ],
+                      AnimatedDefaultTextStyle(
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeOutCubic,
+                        style: GoogleFonts.tajawal(
+                          fontSize: 13,
+                          color: isSelected
+                              ? colorScheme.onSecondary
+                              : colorScheme.onSurfaceVariant,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.w500,
+                        ),
+                        child: Text(widget.label),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

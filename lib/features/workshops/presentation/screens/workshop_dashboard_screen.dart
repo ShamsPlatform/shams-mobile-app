@@ -7,6 +7,7 @@ import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/presentation/view_status.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
+import 'package:shams_mobile_app/core/widgets/shams_modals.dart';
 import 'package:shams_mobile_app/features/posts/domain/entities/post.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/features/posts/presentation/screens/create_post_screen.dart';
@@ -123,9 +124,10 @@ class _WorkshopDashboardScreenState extends State<WorkshopDashboardScreen> {
 
   void _confirmDelete(Post post) {
     final l10n = AppLocalizations.of(context)!;
-    showDialog<bool>(
+    showShamsDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
+        scrollable: true,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),

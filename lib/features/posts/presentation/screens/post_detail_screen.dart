@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
+import 'package:shams_mobile_app/core/widgets/shams_modals.dart';
 import 'package:shams_mobile_app/features/posts/presentation/providers/feed_provider.dart';
 import 'package:shams_mobile_app/features/posts/presentation/widgets/comments_component.dart';
 import 'package:shams_mobile_app/features/posts/presentation/widgets/post_card.dart';
@@ -44,11 +45,16 @@ class PostDetailScreen extends StatelessWidget {
             Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
         appBar: _buildAppBar(context),
         body: Center(
-          child: Text(
-            l10n.postNotFound,
-            style: GoogleFonts.tajawal(
-              fontSize: 16,
-              color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              l10n.postNotFound,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.tajawal(
+                fontSize: 16,
+                color:
+                    Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
+              ),
             ),
           ),
         ),
@@ -100,6 +106,8 @@ class PostDetailScreen extends StatelessWidget {
               avatarPath: avatarPath,
               content: post.textDetails,
               imagePaths: post.images.isNotEmpty ? post.images : null,
+              timeAgoText: l10n.formatRelativeTimeLocalized(post.createdAt),
+              heroTag: 'post-media-${post.id}',
               likesCount: post.likesCount,
               commentsCount: post.comments.length,
               sharesCount: 0,
@@ -185,7 +193,7 @@ class PostDetailScreen extends StatelessWidget {
 
   void _showMenu(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet(
+    showShamsModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (_) => Container(
@@ -231,57 +239,48 @@ class PostDetailScreen extends StatelessWidget {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(kToolbarHeight),
-      child: Container(
-        color: Theme.of(context).colorScheme.secondary,
-        child: SafeArea(
-          bottom: false,
-          child: SizedBox(
-            height: kToolbarHeight,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        size: 18,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    l10n.postDetails,
-                    style: GoogleFonts.tajawal(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () => _onShare(context),
-                    child: Icon(
-                      Icons.share_outlined,
-                      size: 22,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                ],
-              ),
-            ),
+    final colorScheme = Theme.of(context).colorScheme;
+    final ext = Theme.of(context).extension<ShamsExtendedColors>();
+    final dividerColor = ext?.dividerLight ?? colorScheme.outlineVariant;
+
+    return AppBar(
+      backgroundColor: colorScheme.surface,
+      foregroundColor: colorScheme.onSurface,
+      elevation: 0.5,
+      centerTitle: true,
+      leading: IconButton(
+        icon: Icon(
+          Icons.arrow_back_ios_new_rounded,
+          color: colorScheme.onSurface,
+          size: 20,
+        ),
+        onPressed: () => Navigator.pop(context),
+      ),
+      title: Text(
+        l10n.postDetails,
+        style: GoogleFonts.tajawal(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: colorScheme.onSurface,
+        ),
+      ),
+      actions: [
+        IconButton(
+          icon: Icon(
+            Icons.share_outlined,
+            size: 22,
+            color: colorScheme.onSurface,
           ),
+          onPressed: () => _onShare(context),
+        ),
+        const SizedBox(width: 4),
+      ],
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1.0),
+        child: Divider(
+          height: 1.0,
+          thickness: 1.0,
+          color: dividerColor,
         ),
       ),
     );
@@ -329,50 +328,77 @@ class _CommentsSection extends StatelessWidget {
           // ── رأس القسم ──────────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-            child: Row(
-              children: [
-                Text(
-                  l10n.comments,
-                  style: GoogleFonts.tajawal(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                // Live count badge — updates automatically via context.watch
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(99),
-                  ),
-                  child: Text(
-                    '${comments.length}',
-                    style: GoogleFonts.tajawal(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).colorScheme.primary,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Row(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              l10n.comments,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.tajawal(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          // Live count badge — updates automatically via context.watch
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 7,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(99),
+                            ),
+                            child: Text(
+                              '${comments.length}',
+                              style: GoogleFonts.tajawal(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ),
-                const Spacer(),
-                // context.read() inside onTap callback — correct usage.
-                GestureDetector(
-                  onTap: () => _openSheet(context),
-                  child: Text(
-                    l10n.viewAll,
-                    style: GoogleFonts.tajawal(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.primary,
+                    const SizedBox(width: 8),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: constraints.maxWidth * 0.4,
+                      ),
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => _openSheet(context),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Text(
+                            l10n.viewAll,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.tajawal(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ],
+                  ],
+                );
+              },
             ),
           ),
 
@@ -408,28 +434,37 @@ class _CommentsSection extends StatelessWidget {
             onTap: () => _openSheet(context),
             child: Container(
               margin: const EdgeInsets.all(14),
-              height: 42,
+              constraints: const BoxConstraints(minHeight: 48),
+              padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: 16,
+                vertical: 10,
+              ),
               decoration: BoxDecoration(
-                color: Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
-                borderRadius: BorderRadius.circular(12),
+                color: Theme.of(context).extension<ShamsExtendedColors>()!.inputFill,
+                borderRadius: BorderRadius.circular(24),
                 border: Border.all(
                   color: Theme.of(context).extension<ShamsExtendedColors>()!.borderLight,
                 ),
               ),
               child: Row(
                 children: [
-                  const SizedBox(width: 14),
                   Icon(
                     Icons.chat_bubble_outline_rounded,
                     size: 18,
                     color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    l10n.writeCommentHint,
-                    style: GoogleFonts.tajawal(
-                      fontSize: 13.5,
-                      color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
+                  Expanded(
+                    child: Text(
+                      l10n.writeCommentHint,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.tajawal(
+                        fontSize: 13.5,
+                        color: Theme.of(context)
+                            .extension<ShamsExtendedColors>()!
+                            .textHint,
+                      ),
                     ),
                   ),
                 ],
@@ -554,25 +589,42 @@ class _PreviewComment extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      userName,
-                      style: GoogleFonts.tajawal(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      timeAgo,
-                      style: GoogleFonts.tajawal(
-                        fontSize: 11,
-                        color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
-                      ),
-                    ),
-                  ],
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            userName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.tajawal(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: constraints.maxWidth * 0.4,
+                          ),
+                          child: Text(
+                            timeAgo,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.tajawal(
+                              fontSize: 11,
+                              color: Theme.of(context)
+                                  .extension<ShamsExtendedColors>()!
+                                  .textHint,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
                 const SizedBox(height: 3),
                 Text(
@@ -621,12 +673,14 @@ class _MenuOption extends StatelessWidget {
           children: [
             Icon(icon, size: 22, color: effectiveColor),
             const SizedBox(width: 14),
-            Text(
-              label,
-              style: GoogleFonts.tajawal(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: effectiveColor,
+            Expanded(
+              child: Text(
+                label,
+                style: GoogleFonts.tajawal(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: effectiveColor,
+                ),
               ),
             ),
           ],

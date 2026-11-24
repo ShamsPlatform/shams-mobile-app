@@ -91,111 +91,163 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final ext = theme.extension<ShamsExtendedColors>()!;
+
     return Scaffold(
-        backgroundColor: Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
+        backgroundColor: ext.backgroundLight,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
           iconTheme: IconThemeData(
-            color: Theme.of(context).colorScheme.onSurface,
+            color: colorScheme.onSurface,
           ),
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
-              Text(l10n.joinShamsCommunity, style: GoogleFonts.tajawal(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
+              Text(
+                l10n.joinShamsCommunity,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.tajawal(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
+              ),
               const SizedBox(height: 8),
-              Text(l10n.signUpSubtitle, style: GoogleFonts.tajawal(fontSize: 14, color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint)),
+              Text(
+                l10n.signUpSubtitle,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.tajawal(
+                  fontSize: 14,
+                  color: ext.textHint,
+                ),
+              ),
               const SizedBox(height: 32),
               // ── بطاقة الإدخال ──
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.03),
-                    blurRadius: 20,
-                  ),
-                ],
-              ),
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 20,
+                    ),
+                  ],
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _inputLabel(l10n.emailFull),
-                    CustomTextField(hintText: 'example@mail.com', prefixIcon: Icons.email_outlined, controller: _emailController, errorText: _emailError),
+                    CustomTextField(
+                      hintText: 'example@mail.com',
+                      prefixIcon: Icons.email_outlined,
+                      controller: _emailController,
+                      errorText: _emailError,
+                    ),
                     const SizedBox(height: 16),
                     _inputLabel(l10n.password),
-                    CustomTextField(hintText: '••••••••', prefixIcon: Icons.lock_outline, isPassword: true, controller: _passController, errorText: _passError),
+                    CustomTextField(
+                      hintText: '••••••••',
+                      prefixIcon: Icons.lock_outline,
+                      isPassword: true,
+                      controller: _passController,
+                      errorText: _passError,
+                    ),
                     const SizedBox(height: 16),
                     _inputLabel(l10n.confirmPassword),
-                    CustomTextField(hintText: '••••••••', prefixIcon: Icons.lock_outline, isPassword: true, controller: _confirmPassController, errorText: _confirmPassError),
+                    CustomTextField(
+                      hintText: '••••••••',
+                      prefixIcon: Icons.lock_outline,
+                      isPassword: true,
+                      controller: _confirmPassController,
+                      errorText: _confirmPassError,
+                    ),
                     const SizedBox(height: 32),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: CustomSolidButton(title: l10n.next, onPressed: _handleNext),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 50),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: CustomSolidButton(
+                          title: l10n.next,
+                          onPressed: _isLoading ? null : _handleNext,
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Divider(
-                            color: Theme.of(context)
-                                .extension<ShamsExtendedColors>()!
-                                .borderLight,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            l10n.orSignUpWith,
-                            style: GoogleFonts.tajawal(
-                              color: Theme.of(context)
-                                  .extension<ShamsExtendedColors>()!
-                                  .textHint,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Divider(
-                            color: Theme.of(context)
-                                .extension<ShamsExtendedColors>()!
-                                .borderLight,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: _isLoading
-                          ? Center(
-                              child: CircularProgressIndicator(
-                                color: Theme.of(context).colorScheme.primary,
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: Divider(
+                                color: ext.borderLight,
                               ),
-                            )
-                          : CustomOutlinedButton(
-                              title: 'Google',
-                              icon: const Icon(Icons.g_mobiledata_rounded),
-                              onPressed: _handleGoogleSignUp,
                             ),
+                            ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: constraints.maxWidth * 0.72,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                child: Text(
+                                  l10n.orSignUpWith,
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.tajawal(
+                                    color: ext.textHint,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Divider(
+                                color: ext.borderLight,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 50),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: _isLoading
+                            ? Center(
+                                child: CircularProgressIndicator(
+                                  color: colorScheme.primary,
+                                ),
+                              )
+                            : CustomOutlinedButton(
+                                title: 'Google',
+                                icon: const Icon(Icons.g_mobiledata_rounded, size: 28),
+                                foregroundColor: colorScheme.onSurface,
+                                borderColor: ext.borderLight,
+                                onPressed: _handleGoogleSignUp,
+                              ),
+                      ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Text(
                     l10n.alreadyHaveAccount,
                     style: GoogleFonts.tajawal(
-                      color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
+                      color: ext.textHint,
                     ),
                   ),
                   TextButton(
@@ -206,8 +258,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     child: Text(
                       l10n.signin,
                       style: GoogleFonts.tajawal(
-                        color: Theme.of(context).colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),

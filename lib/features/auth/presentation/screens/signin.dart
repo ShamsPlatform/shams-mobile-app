@@ -22,6 +22,7 @@ class _SignInScreenState extends State<SignInScreen> {
   final _passController = TextEditingController();
   String? _emailError, _passError;
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
 
   @override
   void dispose() {
@@ -72,7 +73,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Future<void> _handleGoogleLogin() async {
     final l10n = AppLocalizations.of(context)!;
-    setState(() => _isLoading = true);
+    setState(() => _isGoogleLoading = true);
     try {
       final authProvider = context.read<AuthProvider>();
       final ok = await authProvider.signInWithGoogle();
@@ -92,7 +93,7 @@ class _SignInScreenState extends State<SignInScreen> {
       }
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() => _isGoogleLoading = false);
       }
     }
   }
@@ -100,38 +101,73 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final ext = theme.extension<ShamsExtendedColors>()!;
+
     return Scaffold(
-        backgroundColor: Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
+        backgroundColor: ext.backgroundLight,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
           iconTheme: IconThemeData(
-            color: Theme.of(context).colorScheme.onSurface,
+            color: colorScheme.onSurface,
           ),
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
-              Text(l10n.welcomeBackExclaim, style: GoogleFonts.tajawal(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
+              Text(
+                l10n.welcomeBackExclaim,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.tajawal(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
+              ),
               const SizedBox(height: 8),
-              Text(l10n.signInSubtitle, style: GoogleFonts.tajawal(fontSize: 14, color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint)),
+              Text(
+                l10n.signInSubtitle,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.tajawal(
+                  fontSize: 14,
+                  color: ext.textHint,
+                ),
+              ),
               const SizedBox(height: 32),
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 20)],
-              ),
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 20,
+                    ),
+                  ],
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _inputLabel(l10n.emailOrPhone),
-                    CustomTextField(hintText: 'example@mail.com', prefixIcon: Icons.email_outlined, controller: _emailController, errorText: _emailError),
+                    CustomTextField(
+                      hintText: 'example@mail.com',
+                      prefixIcon: Icons.email_outlined,
+                      controller: _emailController,
+                      errorText: _emailError,
+                    ),
                     const SizedBox(height: 20),
                     _inputLabel(l10n.password),
-                    CustomTextField(hintText: '••••••••', prefixIcon: Icons.lock_outline, isPassword: true, controller: _passController, errorText: _passError),
+                    CustomTextField(
+                      hintText: '••••••••',
+                      prefixIcon: Icons.lock_outline,
+                      isPassword: true,
+                      controller: _passController,
+                      errorText: _passError,
+                    ),
                     Align(
                       alignment: AlignmentDirectional.centerEnd,
                       child: TextButton(
@@ -139,37 +175,98 @@ class _SignInScreenState extends State<SignInScreen> {
                         child: Text(
                           l10n.forgotPassword,
                           style: GoogleFonts.tajawal(
-                            color: Theme.of(context).colorScheme.primary,
+                            color: colorScheme.primary,
                             fontSize: 12,
                           ),
                         ),
                       ),
                     ),
                     const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: _isLoading
-                          ? Center(
-                              child: CircularProgressIndicator(
-                                color: Theme.of(context).colorScheme.primary,
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 50),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: _isLoading
+                            ? Center(
+                                child: CircularProgressIndicator(
+                                  color: colorScheme.primary,
+                                ),
+                              )
+                            : CustomSolidButton(
+                                title: l10n.signin,
+                                onPressed: (_isLoading || _isGoogleLoading) ? null : _handleLogin,
                               ),
-                            )
-                          : CustomSolidButton(title: l10n.signin, onPressed: _handleLogin),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: Divider(
+                                color: ext.borderLight,
+                              ),
+                            ),
+                            ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: constraints.maxWidth * 0.72,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                child: Text(
+                                  l10n.orSignUpWith,
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.tajawal(
+                                    color: ext.textHint,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Divider(
+                                color: ext.borderLight,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 50),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: _isGoogleLoading
+                            ? Center(
+                                child: CircularProgressIndicator(
+                                  color: colorScheme.primary,
+                                ),
+                              )
+                            : CustomOutlinedButton(
+                                title: l10n.signInWithGoogle,
+                                icon: const Icon(Icons.g_mobiledata_rounded, size: 28),
+                                foregroundColor: colorScheme.onSurface,
+                                borderColor: ext.borderLight,
+                                onPressed: (_isLoading || _isGoogleLoading) ? null : _handleGoogleLogin,
+                              ),
+                      ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
-              CustomOutlinedButton(title: l10n.signInWithGoogle, icon: const Icon(Icons.g_mobiledata, size: 30), onPressed: _handleGoogleLogin),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Text(
                     l10n.dontHaveAccount,
                     style: GoogleFonts.tajawal(
-                      color: Theme.of(context).extension<ShamsExtendedColors>()!.textHint,
+                      color: ext.textHint,
                     ),
                   ),
                   TextButton(
@@ -180,8 +277,8 @@ class _SignInScreenState extends State<SignInScreen> {
                     child: Text(
                       l10n.joinUsNow,
                       style: GoogleFonts.tajawal(
-                        color: Theme.of(context).colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),

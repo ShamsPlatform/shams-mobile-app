@@ -9,12 +9,14 @@ class AboutShamsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: colorScheme.surface,
 
       // ── AppBar ──────────────────────────────────────────────────────────
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -22,14 +24,14 @@ class AboutShamsScreen extends StatelessWidget {
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_rounded,
-            color: Theme.of(context).colorScheme.onSurface,
+            color: colorScheme.onSurface,
             size: 26,
           ),
           onPressed: () => Navigator.pop(context),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
-          child: Container(color: Colors.grey.withValues(alpha: 0.1), height: 1.0),
+          child: Container(color: ext.dividerLight, height: 1.0),
         ),
       ),
 
@@ -49,7 +51,7 @@ class AboutShamsScreen extends StatelessWidget {
               style: GoogleFonts.tajawal(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 28),
@@ -57,7 +59,7 @@ class AboutShamsScreen extends StatelessWidget {
             // ── من نحن؟ ──────────────────────────────────────────────────
             _buildSectionHeader(context, l10n.whoWeAre),
             const SizedBox(height: 10),
-            _buildBodyText(l10n.aboutDescription),
+            _buildBodyText(context, l10n.aboutDescription),
             const SizedBox(height: 28),
 
             // ── رؤيتنا ───────────────────────────────────────────────────
@@ -82,7 +84,7 @@ class AboutShamsScreen extends StatelessWidget {
               l10n.versionLabel,
               style: GoogleFonts.tajawal(
                 fontSize: 12,
-                color: Colors.grey.shade400,
+                color: ext.textHint,
               ),
             ),
             const SizedBox(height: 8),
@@ -91,7 +93,7 @@ class AboutShamsScreen extends StatelessWidget {
               l10n.copyrightLabel,
               style: GoogleFonts.tajawal(
                 fontSize: 11,
-                color: Colors.grey.shade400,
+                color: ext.textHint,
               ),
             ),
             const SizedBox(height: 20),
@@ -138,12 +140,14 @@ class AboutShamsScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        Text(
-          title,
-          style: GoogleFonts.tajawal(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface,
+        Flexible(
+          child: Text(
+            title,
+            style: GoogleFonts.tajawal(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
         ),
       ],
@@ -154,14 +158,14 @@ class AboutShamsScreen extends StatelessWidget {
   // نص توضيحي
   // ─────────────────────────────────────────────────────────────────────────────
 
-  Widget _buildBodyText(String text) {
+  Widget _buildBodyText(BuildContext context, String text) {
     return Text(
       text,
       textAlign: TextAlign.center,
       style: GoogleFonts.tajawal(
         fontSize: 14,
         height: 1.8,
-        color: Colors.grey.shade600,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
     );
   }
@@ -171,9 +175,10 @@ class AboutShamsScreen extends StatelessWidget {
   // ─────────────────────────────────────────────────────────────────────────────
 
   Widget _buildVisionCard(BuildContext context, AppLocalizations l10n) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
-      color: Theme.of(context).colorScheme.secondaryContainer,
+      color: colorScheme.secondaryContainer,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -183,12 +188,12 @@ class AboutShamsScreen extends StatelessWidget {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2),
+                color: colorScheme.secondary.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.remove_red_eye_outlined,
-                color: Theme.of(context).colorScheme.secondary,
+                color: colorScheme.onSecondaryContainer,
                 size: 26,
               ),
             ),
@@ -198,7 +203,7 @@ class AboutShamsScreen extends StatelessWidget {
               style: GoogleFonts.tajawal(
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
+                color: colorScheme.onSecondaryContainer,
               ),
             ),
             const SizedBox(height: 8),
@@ -208,7 +213,7 @@ class AboutShamsScreen extends StatelessWidget {
               style: GoogleFonts.tajawal(
                 fontSize: 13,
                 height: 1.7,
-                color: Colors.grey.shade700,
+                color: colorScheme.onSecondaryContainer,
               ),
             ),
           ],
@@ -232,28 +237,43 @@ class AboutShamsScreen extends StatelessWidget {
       {'icon': Icons.speed_rounded, 'label': l10n.featureFastPerformance},
     ];
 
-    return GridView.builder(
-      // منع GridView من التمرير داخل SingleChildScrollView
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 0.95,
-      ),
-      itemCount: features.length,
-      itemBuilder: (context, index) {
-        return _buildFeatureItem(
-          context: context,
-          icon: features[index]['icon'] as IconData,
-          label: features[index]['label'] as String,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final textScale =
+            MediaQuery.textScalerOf(context).scale(1.0).clamp(1.0, 2.0);
+        final crossAxisCount =
+            (constraints.maxWidth < 290 && textScale > 1.25) ? 2 : 3;
+        final mainAxisExtent = 54 + 8 + (12 * 1.3 * 2 * textScale) + 20;
+
+        return GridView.builder(
+          // منع GridView من التمرير داخل SingleChildScrollView
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 12,
+            mainAxisExtent: mainAxisExtent,
+          ),
+          itemCount: features.length,
+          itemBuilder: (context, index) {
+            return _buildFeatureItem(
+              context: context,
+              icon: features[index]['icon'] as IconData,
+              label: features[index]['label'] as String,
+            );
+          },
         );
       },
     );
   }
 
-  Widget _buildFeatureItem({required BuildContext context, required IconData icon, required String label}) {
+  Widget _buildFeatureItem({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -261,19 +281,24 @@ class AboutShamsScreen extends StatelessWidget {
           width: 54,
           height: 54,
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.12),
+            color: colorScheme.primary.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: Theme.of(context).colorScheme.secondary, size: 26),
+          child: Icon(icon, color: colorScheme.primary, size: 26),
         ),
         const SizedBox(height: 8),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: GoogleFonts.tajawal(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.onSurface,
+        Flexible(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.tajawal(
+              fontSize: 12,
+              height: 1.25,
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
+            ),
           ),
         ),
       ],

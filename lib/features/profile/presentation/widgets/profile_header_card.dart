@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shams_mobile_app/core/domain/entities/app_user.dart';
 import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 
 /// Top profile card displaying avatar, edit button, display name, handle,
@@ -40,17 +41,20 @@ class ProfileHeaderCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
     final l10n = AppLocalizations.of(context)!;
+    final topInset = MediaQuery.paddingOf(context).top;
+    final phone = currentUser.phone?.trim() ?? '';
+    final bio = currentUser.bio?.trim() ?? '';
+    final location = currentUser.location?.trim() ?? '';
 
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: ext.backgroundLight,
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(40),
-          bottomRight: Radius.circular(40),
+        borderRadius: const BorderRadius.vertical(
+          bottom: Radius.circular(40),
         ),
       ),
-      padding: const EdgeInsets.fromLTRB(25, 55, 25, 45),
+      padding: EdgeInsetsDirectional.fromSTEB(25, topInset + 20, 25, 36),
       child: Column(
         children: [
           Row(
@@ -72,39 +76,47 @@ class ProfileHeaderCard extends StatelessWidget {
                   ),
                 ),
               ),
-              GestureDetector(
-                onTap: onEditProfileTap,
-                child: Container(
-                  margin: const EdgeInsets.only(top: 8),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
+              Padding(
+                padding: const EdgeInsetsDirectional.only(top: 8),
+                child: Material(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: onEditProfileTap,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: colorScheme.secondary.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.edit_outlined,
-                        size: 14,
-                        color: colorScheme.secondary,
+                    child: Container(
+                      padding: const EdgeInsetsDirectional.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        l10n.editProfile,
-                        style: GoogleFonts.tajawal(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.secondary,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: colorScheme.primary,
+                          width: 1.2,
                         ),
                       ),
-                    ],
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.edit_outlined,
+                            size: 14,
+                            color: colorScheme.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            l10n.editProfile,
+                            style: GoogleFonts.tajawal(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -119,14 +131,16 @@ class ProfileHeaderCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text(
-                      currentUser.name == 'جاري التحميل...'
-                          ? l10n.loadingLabel
-                          : currentUser.name,
-                      style: GoogleFonts.tajawal(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onSurface,
+                    Flexible(
+                      child: Text(
+                        currentUser.name == 'جاري التحميل...'
+                            ? l10n.loadingLabel
+                            : currentUser.name,
+                        style: GoogleFonts.tajawal(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                        ),
                       ),
                     ),
                   ],
@@ -135,63 +149,82 @@ class ProfileHeaderCard extends StatelessWidget {
                   '@${currentUser.email.split('@').first}',
                   style: GoogleFonts.tajawal(
                     fontSize: 14,
-                    color: ext.textHint,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
-                if (currentUser.phone != null &&
-                    currentUser.phone!.isNotEmpty) ...[
-                  const SizedBox(height: 4),
+                if (phone.isNotEmpty) ...[
+                  const SizedBox(height: 6),
                   Row(
                     children: [
                       Icon(
                         Icons.phone_outlined,
                         size: 14,
-                        color: colorScheme.secondary,
+                        color: colorScheme.primary,
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        currentUser.phone!,
+                        phone,
+                        textDirection: TextDirection.ltr,
                         style: GoogleFonts.tajawal(
                           fontSize: 12,
-                          color: ext.textHint,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
                   ),
                 ],
-                const SizedBox(height: 6),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    if (currentUser.bio != null &&
-                        currentUser.bio!.isNotEmpty) ...[
-                      Icon(
-                        Icons.info_outline_rounded,
-                        size: 14,
-                        color: colorScheme.secondary,
+                if (bio.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(top: 2),
+                        child: Icon(
+                          Icons.info_outline_rounded,
+                          size: 14,
+                          color: colorScheme.primary,
+                        ),
                       ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          currentUser.bio!,
+                          bio,
                           style: GoogleFonts.tajawal(
                             fontSize: 12,
-                            color: ext.textHint,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ] else ...[
+                    ],
+                  ),
+                ],
+                if (location.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
                       Icon(
                         Icons.location_on_rounded,
                         size: 14,
-                        color: colorScheme.secondary,
+                        color: colorScheme.primary,
                       ),
                       const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          l10n.localizeCity(location),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.tajawal(
+                            fontSize: 12,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
                     ],
-                  ],
-                ),
+                  ),
+                ],
               ],
             ),
           ),

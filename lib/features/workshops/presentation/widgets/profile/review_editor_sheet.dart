@@ -4,6 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
+import 'package:shams_mobile_app/core/widgets/outlined_button.dart';
+import 'package:shams_mobile_app/core/widgets/primary_button.dart';
+import 'package:shams_mobile_app/core/widgets/shams_modals.dart';
 import 'package:shams_mobile_app/features/workshops/domain/entities/review.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/workshop_reviews_provider.dart';
 
@@ -17,7 +20,7 @@ Future<bool?> showReviewEditorSheet({
   required String workshopName,
   Review? initialReview,
 }) {
-  return showModalBottomSheet<bool>(
+  return showShamsModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -127,7 +130,7 @@ class _ReviewEditorSheetState extends State<_ReviewEditorSheet> {
     return Consumer<WorkshopReviewsProvider>(
       builder: (context, provider, _) {
         return Container(
-          padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
+          padding: EdgeInsetsDirectional.fromSTEB(20, 12, 20, 20 + bottomInset),
           decoration: BoxDecoration(
             color: colorScheme.surface,
             borderRadius:
@@ -189,21 +192,32 @@ class _ReviewEditorSheetState extends State<_ReviewEditorSheet> {
                           children: List.generate(5, (index) {
                             final starValue = index + 1;
                             final isSelected = starValue <= _selectedRating;
-                            return IconButton(
-                              tooltip: l10n.ratingOutOfFive(starValue),
-                              onPressed: provider.isSubmitting
-                                  ? null
-                                  : () => setState(() {
-                                        _selectedRating = starValue;
-                                      }),
-                              icon: Icon(
-                                isSelected
-                                    ? Icons.star_rounded
-                                    : Icons.star_outline_rounded,
-                                size: 36,
-                                color: isSelected
-                                    ? ShamsColors.solarYellow
-                                    : ext?.textHint ?? ShamsColors.textHint,
+                            return Flexible(
+                              child: IconButton(
+                                tooltip: l10n.ratingOutOfFive(starValue),
+                                constraints: const BoxConstraints(
+                                  minWidth: 44,
+                                  minHeight: 44,
+                                ),
+                                padding: const EdgeInsets.all(4),
+                                style: IconButton.styleFrom(
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                onPressed: provider.isSubmitting
+                                    ? null
+                                    : () => setState(() {
+                                          _selectedRating = starValue;
+                                        }),
+                                icon: Icon(
+                                  isSelected
+                                      ? Icons.star_rounded
+                                      : Icons.star_outline_rounded,
+                                  size: 34,
+                                  color: isSelected
+                                      ? ShamsColors.solarYellow
+                                      : ext?.textHint ?? ShamsColors.textHint,
+                                ),
                               ),
                             );
                           }),
@@ -268,56 +282,33 @@ class _ReviewEditorSheetState extends State<_ReviewEditorSheet> {
                     ),
                   ],
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: 48,
-                          child: FilledButton(
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: CustomOutlinedButton(
+                            title: l10n.cancel,
+                            onPressed: provider.isSubmitting
+                                ? null
+                                : () {
+                                    provider.clearError();
+                                    Navigator.of(context).pop(false);
+                                  },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: CustomSolidButton(
+                            title: _isEditing
+                                ? l10n.saveEdits
+                                : l10n.publishReview,
+                            isLoading: provider.isSubmitting,
                             onPressed: provider.isSubmitting ? null : _submit,
-                            style: FilledButton.styleFrom(
-                              backgroundColor: ShamsColors.primaryBlue,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                            ),
-                            child: provider.isSubmitting
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : Text(
-                                    _isEditing
-                                        ? l10n.saveEdits
-                                        : l10n.publishReview,
-                                    style: GoogleFonts.tajawal(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      TextButton(
-                        onPressed: provider.isSubmitting
-                            ? null
-                            : () {
-                                provider.clearError();
-                                Navigator.of(context).pop(false);
-                              },
-                        child: Text(
-                          l10n.cancel,
-                          style: GoogleFonts.tajawal(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),

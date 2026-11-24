@@ -126,8 +126,13 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
         profileProvider.updateWorkshopStatus(true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.workshopAddedSuccess, style: GoogleFonts.tajawal()),
-            backgroundColor: Colors.green,
+            content: Text(
+              l10n.workshopAddedSuccess,
+              style: GoogleFonts.tajawal(
+                color: Theme.of(context).colorScheme.onTertiary,
+              ),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.tertiary,
           ),
         );
         Navigator.pop(context);
@@ -175,7 +180,9 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(1),
             child: Container(
-              color: Colors.grey.withValues(alpha: 0.1),
+              color: Theme.of(context)
+                  .extension<ShamsExtendedColors>()!
+                  .dividerLight,
               height: 1,
             ),
           ),
@@ -262,7 +269,9 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
               // 6. Unlimited extra images
               Row(
                 children: [
-                  _buildFieldLabel(l10n.workshopImages),
+                  Flexible(
+                    child: _buildFieldLabel(l10n.workshopImages),
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     '(${_images.length})',
@@ -307,6 +316,8 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
   // ─── Media Header: cover image + centred profile avatar ─────────────────────
 
   Widget _buildMediaHeader(AppLocalizations l10n) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
     return SizedBox(
       height: 210,
       child: Stack(
@@ -322,12 +333,12 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
               child: Container(
                 height: 165,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
+                  color: ext.backgroundLight,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: _coverImage != null
-                        ? Theme.of(context).colorScheme.secondary
-                        : Colors.grey.shade300,
+                        ? colorScheme.secondary
+                        : ext.borderLight,
                     width: 1.5,
                   ),
                 ),
@@ -349,10 +360,7 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
                         children: [
                           Icon(
                             Icons.add_photo_alternate_outlined,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .secondary
-                                .withValues(alpha: 0.7),
+                            color: colorScheme.primary.withValues(alpha: 0.75),
                             size: 34,
                           ),
                           const SizedBox(height: 8),
@@ -360,7 +368,7 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
                             l10n.tapToAddCover,
                             style: GoogleFonts.tajawal(
                               fontSize: 13,
-                              color: Colors.grey.shade500,
+                              color: ext.textHint,
                             ),
                           ),
                         ],
@@ -382,8 +390,8 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
                   height: 90,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Theme.of(context).colorScheme.surface,
-                    border: Border.all(color: Theme.of(context).colorScheme.surface, width: 3),
+                    color: colorScheme.surface,
+                    border: Border.all(color: colorScheme.surface, width: 3),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.12),
@@ -395,13 +403,13 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
                     child: _profileImage != null
                         ? Image.file(_profileImage!, fit: BoxFit.cover)
                         : Container(
-                            color: Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
+                            color: ext.backgroundLight,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(
                                   Icons.camera_alt_outlined,
-                                  color: Theme.of(context).colorScheme.secondary,
+                                  color: colorScheme.primary,
                                   size: 22,
                                 ),
                                 const SizedBox(height: 2),
@@ -409,7 +417,7 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
                                   l10n.photo,
                                   style: GoogleFonts.tajawal(
                                     fontSize: 10,
-                                    color: Theme.of(context).colorScheme.secondary,
+                                    color: colorScheme.primary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -468,85 +476,122 @@ class _AddWorkshopScreenState extends State<AddWorkshopScreen> {
     List<TextInputFormatter>? inputFormatters,
     int maxLines = 1,
   }) {
-    return TextField(
+    final colorScheme = Theme.of(context).colorScheme;
+    final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
+    final field = TextField(
       controller: controller,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
       maxLines: maxLines,
       style: GoogleFonts.tajawal(
         fontSize: 14,
-        color: Theme.of(context).colorScheme.onSurface,
+        color: colorScheme.onSurface,
       ),
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: GoogleFonts.tajawal(
           fontSize: 13,
-          color: Colors.grey.shade400,
+          color: ext.textHint,
         ),
         prefixIcon: prefixIcon != null
-            ? Icon(prefixIcon, color: Colors.grey.shade400, size: 20)
+            ? Icon(prefixIcon, color: ext.textHint, size: 20)
             : null,
-        contentPadding: const EdgeInsets.symmetric(
+        contentPadding: const EdgeInsetsDirectional.symmetric(
           horizontal: 16,
           vertical: 14,
         ),
         filled: true,
-        fillColor: Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
+        fillColor: ext.backgroundLight,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey.shade200),
+          borderSide: BorderSide(color: ext.borderLight),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey.shade200),
+          borderSide: BorderSide(color: ext.borderLight),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.secondary,
+            color: colorScheme.primary,
             width: 1.5,
           ),
         ),
       ),
     );
+
+    if (maxLines == 1) {
+      return ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 52),
+        child: field,
+      );
+    }
+    return field;
   }
 
   Widget _buildCityDropdown(AppLocalizations l10n) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).extension<ShamsExtendedColors>()!.backgroundLight,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedCity,
-          isExpanded: true,
-          hint: Text(
-            l10n.selectGovernorate,
-            style: GoogleFonts.tajawal(
-              fontSize: 13,
-              color: Colors.grey.shade400,
+    final colorScheme = Theme.of(context).colorScheme;
+    final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 52),
+      child: DropdownButtonFormField<String>(
+        initialValue: _selectedCity,
+        isExpanded: true,
+        isDense: true,
+        hint: Text(
+          l10n.selectGovernorate,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: GoogleFonts.tajawal(
+            fontSize: 13,
+            color: ext.textHint,
+          ),
+        ),
+        icon: Icon(
+          Icons.keyboard_arrow_down_rounded,
+          color: colorScheme.onSurfaceVariant,
+        ),
+        decoration: InputDecoration(
+          isDense: true,
+          filled: true,
+          fillColor: ext.backgroundLight,
+          contentPadding: const EdgeInsetsDirectional.symmetric(
+            horizontal: 14,
+            vertical: 14,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: ext.borderLight),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: ext.borderLight),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(
+              color: colorScheme.primary,
+              width: 1.5,
             ),
           ),
-          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
-          items: _cities
-              .map(
-                (city) => DropdownMenuItem<String>(
-                  value: city,
-                  child: Text(
-                    l10n.localizeCity(city),
-                    style: GoogleFonts.tajawal(
-                      fontSize: 14,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+        ),
+        items: _cities
+            .map(
+              (city) => DropdownMenuItem<String>(
+                value: city,
+                child: Text(
+                  l10n.localizeCity(city),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.tajawal(
+                    fontSize: 14,
+                    color: colorScheme.onSurface,
                   ),
                 ),
-              )
-              .toList(),
-          onChanged: (v) => setState(() => _selectedCity = v),
-        ),
+              ),
+            )
+            .toList(),
+        onChanged: (v) => setState(() => _selectedCity = v),
       ),
     );
   }

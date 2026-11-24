@@ -9,6 +9,7 @@ import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/presentation/view_status.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
 import 'package:shams_mobile_app/core/widgets/inline_search_bar.dart';
+import 'package:shams_mobile_app/core/widgets/shams_modals.dart';
 import 'package:shams_mobile_app/features/chat/domain/entities/chat.dart';
 import 'package:shams_mobile_app/features/chat/presentation/providers/chat_list_provider.dart';
 import 'package:shams_mobile_app/features/chat/presentation/providers/conversation_provider.dart';
@@ -415,9 +416,10 @@ class _ChatConversationViewState extends State<_ChatConversationView> {
   /// Confirmation dialog before wiping all messages.
   void _showClearChatDialog() {
     final l10n = AppLocalizations.of(context)!;
-    showDialog<void>(
+    showShamsDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
+        scrollable: true,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           l10n.clearChat,

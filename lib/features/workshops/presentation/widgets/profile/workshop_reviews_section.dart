@@ -5,6 +5,7 @@ import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
 import 'package:shams_mobile_app/core/l10n/l10n_mappers.dart';
 import 'package:shams_mobile_app/core/presentation/view_status.dart';
 import 'package:shams_mobile_app/core/theme/shams_colors.dart';
+import 'package:shams_mobile_app/core/widgets/shams_modals.dart';
 import 'package:shams_mobile_app/features/workshops/domain/entities/review.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/providers/workshop_reviews_provider.dart';
 import 'package:shams_mobile_app/features/workshops/presentation/widgets/profile/review_editor_sheet.dart';
@@ -50,9 +51,10 @@ class WorkshopReviewsSection extends StatelessWidget {
     Review review,
   ) async {
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showShamsDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        scrollable: true,
         title: Text(
           l10n.deleteReviewTitle,
           style: GoogleFonts.tajawal(fontWeight: FontWeight.bold),
@@ -130,53 +132,60 @@ class WorkshopReviewsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 4,
             children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    Text(
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
                       l10n.reviewsAndOpinions,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.tajawal(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: colorScheme.onSurface,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: ShamsColors.solarYellow.withValues(alpha: 0.16),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.star_rounded,
-                            size: 14,
-                            color: ShamsColors.solarYellow,
-                          ),
-                          const SizedBox(width: 3),
-                          Text(
-                            reviews.isEmpty
-                                ? l10n.newLabel
-                                : '${provider.averageRating.toStringAsFixed(1)} (${provider.reviewCount})',
-                            style: GoogleFonts.tajawal(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: colorScheme.onSurface,
-                            ),
-                          ),
-                        ],
-                      ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
                     ),
-                  ],
-                ),
+                    decoration: BoxDecoration(
+                      color: ShamsColors.solarYellow.withValues(alpha: 0.16),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.star_rounded,
+                          size: 14,
+                          color: ShamsColors.solarYellow,
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          reviews.isEmpty
+                              ? l10n.newLabel
+                              : '${provider.averageRating.toStringAsFixed(1)} (${provider.reviewCount})',
+                          style: GoogleFonts.tajawal(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               if (canReview)
                 TextButton.icon(
@@ -400,11 +409,15 @@ class _ReviewTile extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 6),
-                      Text(
-                        _formatDate(review.createdAt),
-                        style: GoogleFonts.tajawal(
-                          fontSize: 11,
-                          color: ext?.textHint ?? ShamsColors.textHint,
+                      Flexible(
+                        child: Text(
+                          _formatDate(review.createdAt),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.tajawal(
+                            fontSize: 11,
+                            color: ext?.textHint ?? ShamsColors.textHint,
+                          ),
                         ),
                       ),
                     ],

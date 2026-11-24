@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shams_mobile_app/core/l10n/generated/app_localizations.dart';
+import 'package:shams_mobile_app/core/theme/shams_colors.dart';
+import 'package:shams_mobile_app/core/widgets/shams_modals.dart';
 
 class PrivacySecurityScreen extends StatelessWidget {
   const PrivacySecurityScreen({super.key});
@@ -9,6 +11,7 @@ class PrivacySecurityScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
+    final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -28,7 +31,7 @@ class PrivacySecurityScreen extends StatelessWidget {
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
-          child: Container(color: Colors.grey.withValues(alpha: 0.1), height: 1.0),
+          child: Container(color: ext.dividerLight, height: 1.0),
         ),
         title: Text(
           l10n.privacySecurity,
@@ -45,7 +48,7 @@ class PrivacySecurityScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         children: [
           // ── مقدمة ───────────────────────────────────────────────────────
-          _buildIntroText(l10n.privacyIntro),
+          _buildIntroText(context, l10n.privacyIntro),
           const SizedBox(height: 28),
 
           // ── تشفير البيانات ──────────────────────────────────────────────
@@ -96,13 +99,13 @@ class PrivacySecurityScreen extends StatelessWidget {
   // المقدمة النصية
   // ─────────────────────────────────────────────────────────────────────────────
 
-  Widget _buildIntroText(String intro) {
+  Widget _buildIntroText(BuildContext context, String intro) {
     return Text(
       intro,
       style: GoogleFonts.tajawal(
         fontSize: 14,
         height: 1.7,
-        color: Colors.grey.shade600,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
     );
   }
@@ -117,6 +120,9 @@ class PrivacySecurityScreen extends StatelessWidget {
     required String title,
     required String body,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -127,25 +133,24 @@ class PrivacySecurityScreen extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .secondary
-                    .withValues(alpha: 0.15),
+                color: colorScheme.primary.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
                 size: 18,
-                color: Theme.of(context).colorScheme.secondary,
+                color: colorScheme.primary,
               ),
             ),
             const SizedBox(width: 10),
-            Text(
-              title,
-              style: GoogleFonts.tajawal(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
+            Expanded(
+              child: Text(
+                title,
+                style: GoogleFonts.tajawal(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
               ),
             ),
           ],
@@ -157,12 +162,12 @@ class PrivacySecurityScreen extends StatelessWidget {
           style: GoogleFonts.tajawal(
             fontSize: 13,
             height: 1.7,
-            color: Colors.grey.shade600,
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 12),
         // خط فاصل خفيف
-        Divider(color: Colors.grey.withValues(alpha: 0.15), thickness: 1),
+        Divider(color: ext.dividerLight, thickness: 1),
       ],
     );
   }
@@ -172,21 +177,171 @@ class PrivacySecurityScreen extends StatelessWidget {
   // ─────────────────────────────────────────────────────────────────────────────
 
   Widget _buildFullPolicyButton(BuildContext context, String label) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Center(
-      child: GestureDetector(
-        onTap: () {
-          // TODO: افتح صفحة سياسة الخصوصية الكاملة
-        },
-        child: Text(
+      child: OutlinedButton.icon(
+        onPressed: () => _showFullPolicyModal(context),
+        icon: const Icon(Icons.open_in_new_rounded, size: 18),
+        label: Text(
           label,
           style: GoogleFonts.tajawal(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.secondary,
-            decoration: TextDecoration.underline,
-            decorationColor: Theme.of(context).colorScheme.secondary,
           ),
         ),
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(0, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          foregroundColor: colorScheme.primary,
+          side: BorderSide(color: colorScheme.primary, width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showFullPolicyModal(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
+
+    showShamsModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(24, 14, 24, 24),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Center(child: ShamsSheetHandle()),
+                    const SizedBox(height: 16),
+                    Text(
+                      l10n.fullPrivacyPolicy,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.tajawal(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      l10n.privacyIntro,
+                      style: GoogleFonts.tajawal(
+                        fontSize: 13.5,
+                        height: 1.7,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildPolicySummaryItem(
+                      sheetContext,
+                      title: l10n.dataEncryption,
+                      body: l10n.dataEncryptionBody,
+                    ),
+                    _buildPolicySummaryItem(
+                      sheetContext,
+                      title: l10n.accountSecurity,
+                      body: l10n.accountSecurityBody,
+                    ),
+                    _buildPolicySummaryItem(
+                      sheetContext,
+                      title: l10n.informationSharing,
+                      body: l10n.informationSharingBody,
+                    ),
+                    _buildPolicySummaryItem(
+                      sheetContext,
+                      title: l10n.locationAccess,
+                      body: l10n.locationAccessBody,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.copyrightLabel,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.tajawal(
+                        fontSize: 12,
+                        color: ext.textHint,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    OutlinedButton(
+                      onPressed: () => Navigator.pop(sheetContext),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 48),
+                        foregroundColor: colorScheme.primary,
+                        side: BorderSide(color: colorScheme.primary, width: 1.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        l10n.close,
+                        style: GoogleFonts.tajawal(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPolicySummaryItem(
+    BuildContext context, {
+    required String title,
+    required String body,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: ext.backgroundLight,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: ext.borderLight),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: GoogleFonts.tajawal(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            body,
+            style: GoogleFonts.tajawal(
+              fontSize: 12.5,
+              height: 1.6,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
       ),
     );
   }

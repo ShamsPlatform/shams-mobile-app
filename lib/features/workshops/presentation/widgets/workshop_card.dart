@@ -18,6 +18,7 @@ class WorkshopCard extends StatefulWidget {
   final ValueChanged<bool>? onFollowToggle;
   final VoidCallback? onEnterTap;
   final VoidCallback? onTap;
+  final String? heroTag;
 
   const WorkshopCard({
     super.key,
@@ -33,6 +34,7 @@ class WorkshopCard extends StatefulWidget {
     this.onFollowToggle,
     this.onEnterTap,
     this.onTap,
+    this.heroTag,
   }) : assert(rating >= 0.0 && rating <= 5.0, 'rating must be between 0 and 5');
 
   @override
@@ -130,12 +132,15 @@ class _WorkshopCardState extends State<WorkshopCard>
     return Container(
       color: ext.avatarFallbackBg,
       child: Center(
-        child: Text(
-          name.isNotEmpty ? name[0].toUpperCase() : '?',
-          style: GoogleFonts.tajawal(
-            fontWeight: FontWeight.w700,
-            color: colorScheme.primary,
-            fontSize: 16,
+        child: Material(
+          type: MaterialType.transparency,
+          child: Text(
+            name.isNotEmpty ? name[0].toUpperCase() : '?',
+            style: GoogleFonts.tajawal(
+              fontWeight: FontWeight.w700,
+              color: colorScheme.primary,
+              fontSize: 16,
+            ),
           ),
         ),
       ),
@@ -145,6 +150,7 @@ class _WorkshopCardState extends State<WorkshopCard>
   Future<void> _handleFollowTap() async {
     await _followAnimController.reverse();
     await _followAnimController.forward();
+    if (!mounted) return;
     setState(() => _isFollowing = !_isFollowing);
     widget.onFollowToggle?.call(_isFollowing);
   }
@@ -153,14 +159,21 @@ class _WorkshopCardState extends State<WorkshopCard>
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final ext = Theme.of(context).extension<ShamsExtendedColors>()!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: widget.onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        margin: const EdgeInsetsDirectional.symmetric(
+          horizontal: 16,
+          vertical: 8,
+        ),
         decoration: BoxDecoration(
           color: ext.cardSurface,
           borderRadius: BorderRadius.circular(16),
+          border: isDark
+              ? Border.all(color: ext.borderLight, width: 0.8)
+              : null,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.05),
@@ -182,6 +195,27 @@ class _WorkshopCardState extends State<WorkshopCard>
   }
 
   Widget _buildImagesSection(ShamsExtendedColors ext, ColorScheme colorScheme) {
+    final avatar = Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: ext.cardSurface,
+        border: Border.all(color: ext.cardSurface, width: 3),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipOval(
+        child: _buildProfileImage(
+            widget.imagePath, widget.username, ext, colorScheme),
+      ),
+    );
+
     return SizedBox(
       height: 140,
       child: Stack(
@@ -204,26 +238,15 @@ class _WorkshopCardState extends State<WorkshopCard>
           PositionedDirectional(
             bottom: 0,
             start: 16,
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: ext.cardSurface,
-                border: Border.all(color: ext.cardSurface, width: 3),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: ClipOval(
-                child: _buildProfileImage(
-                    widget.imagePath, widget.username, ext, colorScheme),
-              ),
-            ),
+            child: widget.heroTag != null && widget.heroTag!.isNotEmpty
+                ? Hero(
+                    tag: widget.heroTag!,
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: avatar,
+                    ),
+                  )
+                : avatar,
           ),
         ],
       ),
@@ -231,39 +254,54 @@ class _WorkshopCardState extends State<WorkshopCard>
   }
 
   Widget _buildInfoSection(ColorScheme colorScheme, ShamsExtendedColors ext) {
+    final l10n = AppLocalizations.of(context)!;
+    final trimmedHandle = widget.userHandle.trim();
+    final formattedHandle = trimmedHandle.isEmpty
+        ? ''
+        : (trimmedHandle.startsWith('@') ? trimmedHandle : '@$trimmedHandle');
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             widget.username,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.tajawal(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: colorScheme.onSurface,
             ),
           ),
-          Text(
-            widget.userHandle,
-            style: GoogleFonts.tajawal(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: colorScheme.onSurfaceVariant,
+          if (formattedHandle.isNotEmpty)
+            Text(
+              formattedHandle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.tajawal(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
-          ),
           const SizedBox(height: 12),
           Row(
             children: [
               Icon(Icons.location_on_outlined,
                   size: 16, color: colorScheme.onSurfaceVariant),
               const SizedBox(width: 4),
-              Text(
-                AppLocalizations.of(context)!.localizeCity(widget.cityName),
-                style: GoogleFonts.tajawal(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: colorScheme.onSurfaceVariant,
+              Flexible(
+                child: Text(
+                  l10n.localizeCity(widget.cityName),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.tajawal(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -273,38 +311,38 @@ class _WorkshopCardState extends State<WorkshopCard>
               Text(
                 (widget.reviewCount ?? (widget.rating > 0 ? 1 : 0)) > 0
                     ? '${widget.rating.toStringAsFixed(1)}/5'
-                    : AppLocalizations.of(context)!.newLabel,
+                    : l10n.newLabel,
                 style: GoogleFonts.tajawal(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: colorScheme.secondary,
+                  color: colorScheme.onSurface,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: ScaleTransition(
                   scale: _followScaleAnim,
                   child: _ActionBtn(
-                    label: _isFollowing
-                        ? AppLocalizations.of(context)!.unfollow
-                        : AppLocalizations.of(context)!.follow,
-                    isPrimary: !_isFollowing,
+                    label: _isFollowing ? l10n.following : l10n.follow,
+                    leadingIcon: _isFollowing ? Icons.check_rounded : null,
+                    isFilledPrimary: false,
+                    isSubduedChip: _isFollowing,
                     onTap: _handleFollowTap,
                     colorScheme: colorScheme,
                     ext: ext,
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: _ActionBtn(
-                  label: AppLocalizations.of(context)!.enterWorkshop,
-                  isPrimary: true,
+                  label: l10n.enterWorkshop,
+                  isFilledPrimary: true,
+                  isSubduedChip: false,
                   onTap: widget.onEnterTap ?? () {},
                   colorScheme: colorScheme,
                   ext: ext,
@@ -324,14 +362,18 @@ class _WorkshopCardState extends State<WorkshopCard>
 
 class _ActionBtn extends StatelessWidget {
   final String label;
-  final bool isPrimary;
+  final IconData? leadingIcon;
+  final bool isFilledPrimary;
+  final bool isSubduedChip;
   final VoidCallback onTap;
   final ColorScheme colorScheme;
   final ShamsExtendedColors ext;
 
   const _ActionBtn({
     required this.label,
-    required this.isPrimary,
+    this.leadingIcon,
+    required this.isFilledPrimary,
+    required this.isSubduedChip,
     required this.onTap,
     required this.colorScheme,
     required this.ext,
@@ -339,28 +381,77 @@ class _ActionBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          color: isPrimary ? colorScheme.secondary : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isPrimary ? colorScheme.secondary : colorScheme.outline,
-            width: 1.5,
-          ),
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.tajawal(
-            fontSize: 13.5,
-            fontWeight: FontWeight.w700,
-            color: isPrimary
-                ? colorScheme.onSecondary
-                : colorScheme.onSurfaceVariant,
+    final Color bgColor;
+    final Color borderColor;
+    final double borderWidth;
+    final Color fgColor;
+
+    if (isFilledPrimary) {
+      bgColor = colorScheme.secondary;
+      borderColor = colorScheme.secondary;
+      borderWidth = 1.5;
+      fgColor = colorScheme.onSecondary;
+    } else if (isSubduedChip) {
+      bgColor = ext.chipBackground;
+      borderColor = ext.borderLight;
+      borderWidth = 1.2;
+      fgColor = colorScheme.onSurfaceVariant;
+    } else {
+      bgColor = Colors.transparent;
+      borderColor = colorScheme.primary;
+      borderWidth = 1.5;
+      fgColor = colorScheme.primary;
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 40),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutCubic,
+            alignment: AlignmentDirectional.center,
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: 10,
+              vertical: 8,
+            ),
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: borderColor,
+                width: borderWidth,
+              ),
+            ),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 180),
+              child: Row(
+                key: ValueKey('$label-${leadingIcon != null}'),
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (leadingIcon != null) ...[
+                    Icon(leadingIcon, size: 16, color: fgColor),
+                    const SizedBox(width: 6),
+                  ],
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.tajawal(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w700,
+                        color: fgColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
